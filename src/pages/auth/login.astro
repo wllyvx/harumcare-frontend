@@ -1,0 +1,30 @@
+---
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import LoginForm from "../../components/auth/LoginForm.astro";
+---
+
+<AuthLayout>
+  <section class="login-section h-screen bg-white mx-auto">
+    <div class="flex flex-col h-full md:flex-row">
+      <div class="hidden lg:flex flex-col justify-center items-center w-full rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-amber-600 text-center px-4 py-8">
+        <div class="text-white w-full flex flex-col gap-8 max-w-md">
+          <div class="border-b border-white/30 pb-4">
+            <h1 class="text-4xl font-bold">Hadirkan Kebaikan di Hati Anda</h1>
+          </div>
+          <p class="text-xl italic">
+            Satu langkah lagi untuk melanjutkan kebaikan.
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-8 justify-center w-full items-center bg-white text-center px-4 py-8">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-4xl font-bold text-gray-800">Selamat Datang</h2>
+          <p class="text-gray-600">Lanjutkan perjalanan Anda untuk melakukan perubahan positif di masyarakat.</p>
+        </div>
+        <LoginForm />
+      </div>
+    </div>
+    
+  </section>
+</AuthLayout>
+

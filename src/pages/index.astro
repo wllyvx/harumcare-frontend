@@ -1,12 +1,47 @@
 ---
-import Welcome from "../components/Welcome.astro";
-import Layout from "../layouts/Layout.astro";
-import "../styles/global.css";
+import PrimaryLayout from "../layouts/PrimaryLayout.astro";
+import LatestCampaign from "../components/campaign/LatestCampaign.astro";
+import Hero from "../components/home/Hero.astro";
+import MenuIcons from "../components/home/MenuIcons.astro";
+import LatestNews from "../components/news/LatestNews.astro";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const API_URL = import.meta.env.PUBLIC_API_URL;
+
+// fetch campaigns
+async function fetchCampaigns() {
+  try {
+    const response = await fetch(`${API_URL}/campaigns`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch campaigns');
+    }
+    const data = await response.json();
+    
+    return {
+      campaigns: data.campaigns || [],
+      totalPages: data.totalPages || 1,
+      currentPage: data.currentPage || 1,
+      total: data.total || 0
+    };
+    
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    return {
+      campaigns: [],
+      totalPages: 1,
+      currentPage: 1,
+      total: 0
+    };
+  }
+}
+
+const campaignData = await fetchCampaigns();
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<PrimaryLayout>
+  <Hero campaigns={campaignData.campaigns?.slice(0,3)} />
+  <MenuIcons />
+  <LatestNews />
+  <LatestCampaign
+    campaigns={campaignData.campaigns}
+  />
+</PrimaryLayout>

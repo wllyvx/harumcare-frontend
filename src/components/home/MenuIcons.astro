@@ -1,0 +1,54 @@
+---
+type MenuItem = {
+  href: string;
+  label: string;
+  iconHtml: string; // SVG atau HTML apapun yang ingin dirender
+  highlight?: boolean; // Tandai sebagai item rekomendasi/hot
+};
+
+const iconGrid = `<img class="w-20 h-20 md:w-28 md:h-28 object-contain" src="/images/UI/icons/house.png" alt="Icon Donasi">`;
+const iconNews = `<img class="w-20 h-20 md:w-28 md:h-28 object-contain" src="/images/UI/icons/document.png" alt="Icon Berita">`;
+const iconDonate = `<img class="w-20 h-20 md:w-28 md:h-28 object-contain" src="/images/UI/icons/love.png" alt="Icon Beranda">`;
+
+const menus: MenuItem[] = [
+  { href: '/campaign', label: 'Mulai Berdonasi', iconHtml: iconDonate, highlight: true },
+  { href: '/news', label: 'Baca Berita', iconHtml: iconNews },
+  { href: '/home', label: 'Beranda', iconHtml: iconGrid },
+  // Tambahkan item baru cukup menambahkan objek di sini
+];
+
+const totalSlots = 10;
+const placeholderCount = Math.max(0, totalSlots - menus.length);
+---
+<section class="w-full bg-white">
+  <div class="max-w-6xl mx-auto px-4 py-6 md:py-8">
+    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 md:gap-4">
+      {menus.map((menu) => (
+        <a href={menu.href} class="group flex flex-col justify-center items-center gap-2" aria-label={menu.label}>
+          <div class={`relative h-12 w-12 md:h-14 md:w-14 rounded-lg text-white flex items-center justify-center transition-colors overflow-visible
+            ${menu.highlight ? 'bg-amber-500 ring-2 ring-amber-300 shadow-lg shadow-amber-200/60 group-hover:bg-amber-600' : 'bg-blue-600/30 group-hover:bg-blue-700'}`}>
+            {menu.highlight && (
+              <span class="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-white text-amber-600 border border-amber-200">
+                🙏
+              </span>
+            )}
+            <div class="absolute -right-2 md:-right-3" set:html={menu.iconHtml}></div>
+          </div>
+          <div class="flex flex-col items-center min-h-8">
+            <span class="text-xs text-center font-medium md:text-sm">{menu.label}</span>
+          </div>
+        </a>
+      ))}
+
+      {/* Placeholder ikon menu */}
+      {Array.from({ length: placeholderCount }).map((_, index) => (
+        <div class="flex flex-col items-center gap-2" aria-label={`Menu placeholder ${index + 1}`}>
+          <div class="h-12 w-12 md:h-14 md:w-14 rounded-full bg-gray-200 border border-gray-300"></div>
+          <span class="h-3 w-10 md:w-12 bg-gray-200 rounded"></span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+

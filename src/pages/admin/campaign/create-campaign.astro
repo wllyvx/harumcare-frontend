@@ -1,0 +1,352 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro"
+---
+
+<AdminLayout title="Create Campaign">
+  <section id="create-section" class="create-campaign-section max-w-7xl flex items-center justify-center mx-auto px-4 py-16" style="display: none;">
+    <div class="container bg-white shadow-2xl shadow-blue-500/50 max-w-2xl mx-auto px-8 md:px-0 py-11 rounded-2xl">
+      <h2 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-8 text-center">Buat Campaign Baru</h2>
+      <form id="create-campaign-form" class="max-w-md mx-auto" enctype="multipart/form-data">
+        <div class="mb-6">
+          <label for="title-input" class="block text-gray-600 mb-2"></label>
+          <input
+            placeholder="Judul Campaign"
+            type="text"
+            name="title"
+            required
+            id="title-input"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+        </div>
+        <div class="mb-6">
+          <label for="description-input" class="block text-gray-600 mb-2"></label>
+          <textarea
+            placeholder="Deskripsi Campaign"
+            name="description"
+            id="description-input"
+            rows="4"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          ></textarea>
+        </div>
+        <div class="mb-6">
+          <label for="image-input" class="block text-gray-600 mb-2">Campaign Image</label>
+          <div class="space-y-4">
+            <input
+              type="file"
+              name="image"
+              id="image-input"
+              accept="image/*"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <div id="image-preview" class="hidden">
+              <img id="preview-img" src="" alt="Preview" class="w-full max-w-xs mx-auto rounded-lg shadow-md" />
+              <p class="text-sm text-gray-500 text-center mt-2">Image Preview</p>
+            </div>
+          </div>
+        </div>
+        <div class="mb-6">
+          <label for="targetAmount-input" class="block text-gray-600 mb-2"></label>
+          <input
+            placeholder="Target Donasi"
+            type="number"
+            name="targetAmount"
+            required
+            id="targetAmount-input"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+        </div>
+        <div class="mb-6">
+          <label for="startDate-input" class="block text-gray-600 mb-2">Start Date</label>
+          <input
+            type="date"
+            name="startDate"
+            required
+            id="startDate-input"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+        </div>
+        <div class="mb-6">
+          <label for="endDate-input" class="block text-gray-600 mb-2">End Date</label>
+          <input
+            type="date"
+            name="endDate"
+            required
+            id="endDate-input"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+        </div>
+        <div class="mb-6">
+          <label for="organizationName-input" class="block text-gray-600 mb-2"></label>
+          <input
+            placeholder="Nama Organisasi"
+            type="text"
+            name="organizationName"
+            id="organizationName-input"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
+        </div>
+        <div class="mb-6">
+          <label for="organizationLogo-input" class="block text-gray-600 mb-2">Logo Organisasi</label>
+          <div class="space-y-4">
+            <input
+              type="file"
+              name="organizationLogo"
+              id="organizationLogo-input"
+              accept="image/*"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+            />
+            <div id="logo-preview" class="hidden">
+              <img id="preview-logo" src="" alt="Logo Preview" class="w-24 h-24 mx-auto rounded-lg shadow-md object-cover" />
+              <p class="text-sm text-gray-500 text-center mt-2">Logo Preview</p>
+            </div>
+          </div>
+        </div>
+        <div class="mb-8">
+          <label for="category-input" class="block text-gray-600 mb-2">Kategori</label>
+          <select
+            name="category"
+            id="category-input"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">Pilih Kategori</option>
+            <option value="kesehatan">Kesehatan</option>
+            <option value="pendidikan">Pendidikan</option>
+            <option value="lingkungan">Lingkungan</option>
+            <option value="bencana">Bencana Alam</option>
+            <option value="kemiskinan">Kemiskinan</option>
+            <option value="anak">Anak-anak</option>
+            <option value="lansia">Lansia</option>
+            <option value="difabel">Difabel</option>
+            <option value="hewan">Hewan</option>
+            <option value="new">+ Tambah Kategori Baru</option>
+          </select>
+          <div id="new-category-input" class="mt-4 hidden">
+            <input
+              type="text"
+              id="custom-category"
+              placeholder="Masukkan nama kategori baru"
+              class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full bg-blue-600 text-white p-3 rounded-full font-medium hover:bg-blue-700 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          <span id="submit-text">Buat Campaign</span>
+          <span id="loading-text" class="hidden">Membuat...</span>
+        </button>
+      </form>
+    </div>
+  </section>
+</AdminLayout>
+
+<script>
+  const API_URL = import.meta.env.PUBLIC_API_URL;
+  // Fungsi untuk upload gambar ke server
+  async function uploadImage(file) {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const result = await response.json();
+      return result.imageUrl; // Asumsi server mengembalikan { imageUrl: "path/to/image" }
+    } catch (error) {
+      console.error('Error uploading image:', error.message);
+      return null;
+    }
+  }
+
+  // Fungsi create campaign (dapat diakses di klien)
+  async function createCampaign(data) {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/campaigns`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create campaign');
+      }
+      const newCampaign = await response.json();
+      return newCampaign;
+    } catch (error) {
+      console.error('Error creating campaign:', error.message);
+      return null;
+    }
+  }
+
+  // Fungsi untuk preview gambar
+  function setupImagePreview(inputId, previewId, imgId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    const img = document.getElementById(imgId);
+    
+    if (input && preview && img) {
+      input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            img.src = e.target.result;
+            preview.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.classList.add('hidden');
+        }
+      });
+    }
+  }
+
+  // Setup category input handling
+  function setupCategoryInput() {
+    const categorySelect = document.getElementById('category-input');
+    const newCategoryDiv = document.getElementById('new-category-input');
+    const customCategoryInput = document.getElementById('custom-category');
+
+    if (categorySelect && newCategoryDiv && customCategoryInput) {
+      categorySelect.addEventListener('change', function() {
+        if (this.value === 'new') {
+          newCategoryDiv.classList.remove('hidden');
+          customCategoryInput.setAttribute('required', 'required');
+        } else {
+          newCategoryDiv.classList.add('hidden');
+          customCategoryInput.removeAttribute('required');
+        }
+      });
+    }
+  }
+
+  // Periksa role dan tampilkan form hanya untuk admin
+  window.addEventListener('load', () => {
+    const createSection = document.querySelector('#create-section');
+    const userRole = localStorage.getItem('role');
+    console.log('Checking role - userRole:', userRole);
+
+    if (createSection) {
+      if (userRole === 'admin') {
+        createSection.style.display = 'block';
+      } else {
+        console.log('User is not admin, redirecting to /');
+        window.location.href = '/';
+      }
+    } else {
+      console.error('Create section not found in DOM');
+    }
+
+    // Setup image previews
+    setupImagePreview('image-input', 'image-preview', 'preview-img');
+    setupImagePreview('organizationLogo-input', 'logo-preview', 'preview-logo');
+    // Setup category input
+    setupCategoryInput();
+
+    const createForm = document.querySelector('#create-campaign-form');
+    if (createForm) {
+      console.log('Create campaign form found, adding event listener...');
+      createForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        console.log('Create campaign form submitted');
+        
+        const submitBtn = document.getElementById('submit-btn');
+        const submitText = document.getElementById('submit-text');
+        const loadingText = document.getElementById('loading-text');
+        
+        // Disable button dan tampilkan loading
+        submitBtn.disabled = true;
+        submitText.classList.add('hidden');
+        loadingText.classList.remove('hidden');
+        
+        try {
+          // Upload gambar campaign
+          const imageFile = document.querySelector('#image-input').files[0];
+          let imageUrl = '';
+          if (imageFile) {
+            console.log('Uploading campaign image...');
+            imageUrl = await uploadImage(imageFile);
+            if (!imageUrl) {
+              throw new Error('Failed to upload campaign image');
+            }
+          }
+          
+          // Upload logo organisasi
+          const logoFile = document.querySelector('#organizationLogo-input').files[0];
+          let organizationLogo = '';
+          if (logoFile) {
+            console.log('Uploading organization logo...');
+            organizationLogo = await uploadImage(logoFile);
+            if (!organizationLogo) {
+              throw new Error('Failed to upload organization logo');
+            }
+          }
+
+          // Handle custom category
+          const categorySelect = document.getElementById('category-input');
+          const customCategoryInput = document.getElementById('custom-category');
+          let category = categorySelect.value;
+          
+          if (category === 'new' && customCategoryInput) {
+            category = customCategoryInput.value.trim().toLowerCase();
+            if (!category) {
+              throw new Error('Nama kategori baru harus diisi');
+            }
+          }
+          
+          const formData = {
+            title: document.querySelector('#title-input').value,
+            description: document.querySelector('#description-input').value,
+            imageUrl: imageUrl,
+            targetAmount: Number(document.querySelector('#targetAmount-input').value),
+            currentAmount: 0,
+            startDate: document.querySelector('#startDate-input').value,
+            endDate: document.querySelector('#endDate-input').value,
+            donorCount: 0,
+            organizationName: document.querySelector('#organizationName-input').value,
+            organizationLogo: organizationLogo,
+            category: category,
+          };
+          
+          console.log('Sending create campaign request with:', formData);
+          const newCampaign = await createCampaign(formData);
+          console.log('Create campaign response:', newCampaign);
+          
+          if (newCampaign) {
+            alert('Campaign created successfully!');
+            window.location.href = '/admin/campaign'; // redirect ke halaman campaign admin setelah berhasil
+            console.log('Campaign created, redirecting to home');
+          } else {
+            throw new Error('Failed to create campaign');
+          }
+        } catch (error) {
+          console.error('Error:', error.message);
+          alert(`Error: ${error.message}`);
+        } finally {
+          // Reset button
+          submitBtn.disabled = false;
+          submitText.classList.remove('hidden');
+          loadingText.classList.add('hidden');
+        }
+      });
+    } else {
+      console.error('Create campaign form not found in DOM');
+    }
+  });
+</script>

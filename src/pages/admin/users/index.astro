@@ -1,0 +1,515 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Kelola User">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <button id="openModalBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded-md">
+                + Tambah User
+            </button>
+        </div>
+
+        <div id="error-container" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong class="font-bold">Error!</strong>
+            <span id="error-message" class="block sm:inline"></span>
+        </div>
+
+        <div id="loading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+            <p class="mt-2 text-gray-600">Memuat data...</p>
+        </div>
+
+        <!-- Modal Tambah User -->
+        <div id="addUserModal" class="fixed inset-0 bg-blue-900/70 hidden z-50 justify-center items-center">
+            <div class="flex items-center justify-center p-4 mx-auto h-full max-h-screen">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Tambah User Baru</h3>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-6">
+                        <form id="addUserForm" class="space-y-4">
+                            <div>
+                                <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                <input type="text" id="nama" name="nama" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                                <input type="text" id="username" name="username" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="email" name="email" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="nomorHp" class="block text-sm font-medium text-gray-700 mb-2">Nomor HP</label>
+                                <input type="tel" id="nomorHp" name="nomorHp" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="password" name="password" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                                <select id="role" name="role" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="p-6 border-t border-gray-200">
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="closeModalBtn"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Batal
+                            </button>
+                            <button type="submit" form="addUserForm"
+                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                Tambah User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Edit User -->
+        <div id="editUserModal" class="fixed inset-0 bg-blue-900/70 hidden z-50 justify-center items-center">
+            <div class="flex items-center justify-center p-4 mx-auto h-full max-h-screen">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Edit User</h3>
+                    </div>
+                    <div class="overflow-y-auto flex-1 p-6">
+                        <form id="editUserForm" class="space-y-4">
+                            <input type="hidden" id="edit-user-id" name="userId">
+                            <div>
+                                <label for="edit-nama" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                                <input type="text" id="edit-nama" name="nama" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit-username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                                <input type="text" id="edit-username" name="username" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <input type="email" id="edit-email" name="email" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit-nomorHp" class="block text-sm font-medium text-gray-700 mb-2">Nomor HP</label>
+                                <input type="tel" id="edit-nomorHp" name="nomorHp" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit-password" class="block text-sm font-medium text-gray-700 mb-2">Password Baru (Kosongkan jika tidak ingin mengubah)</label>
+                                <input type="password" id="edit-password" name="password"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit-role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                                <select id="edit-role" name="role" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="p-6 border-t border-gray-200">
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="closeEditModalBtn"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Batal
+                            </button>
+                            <button type="submit" form="editUserForm"
+                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Konfirmasi Hapus -->
+        <div id="deleteConfirmModal" class="fixed inset-0 bg-blue-900/70 hidden z-50 justify-center items-center">
+            <div class="flex items-center justify-center p-4 mx-auto h-full max-h-screen">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Hapus</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-gray-600">
+                            Apakah Anda yakin ingin menghapus user <span id="deleteUserName" class="font-semibold"></span>?
+                        </p>
+                        <input type="hidden" id="deleteUserId">
+                    </div>
+                    <div class="p-6 border-t border-gray-200">
+                        <div class="flex justify-end space-x-3">
+                            <button id="cancelDeleteBtn"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                                Batal
+                            </button>
+                            <button id="confirmDeleteBtn"
+                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="user-table" class="hidden">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. HP</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="no-data" class="hidden text-center py-8 text-gray-600">
+            Tidak ada data user yang ditemukan.
+        </div>
+    </div>
+</AdminLayout>
+
+<script>
+    interface User {
+        _id: string;
+        nama: string;
+        username: string;
+        email: string;
+        nomorHp: string;
+        role: 'admin' | 'user';
+        alamat?: string;
+        createdAt: string;
+        updatedAt: string;
+    }
+
+    interface NewUser {
+        nama: string;
+        username: string;
+        email: string;
+        password: string;
+        nomorHp: string;
+        role: 'admin' | 'user';
+    }
+
+    const token = localStorage.getItem('token');
+    const errorContainer = document.getElementById('error-container')!;
+    const errorMessage = document.getElementById('error-message')!;
+    const loading = document.getElementById('loading')!;
+    const userTable = document.getElementById('user-table')!;
+    const userTableBody = document.getElementById('user-table-body')!;
+    const noData = document.getElementById('no-data')!;
+    const modal = document.getElementById('addUserModal')!;
+    const openModalBtn = document.getElementById('openModalBtn')!;
+    const closeModalBtn = document.getElementById('closeModalBtn')!;
+    const addUserForm = document.getElementById('addUserForm') as HTMLFormElement;
+
+    const editModal = document.getElementById('editUserModal')!;
+    const closeEditModalBtn = document.getElementById('closeEditModalBtn')!;
+    const editUserForm = document.getElementById('editUserForm') as HTMLFormElement;
+
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal')!;
+    const deleteUserName = document.getElementById('deleteUserName')!;
+    const deleteUserId = document.getElementById('deleteUserId') as HTMLInputElement;
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn')!;
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn')!;
+
+const API_URL = import.meta.env.PUBLIC_API_URL;
+
+
+    // Modal functions
+    openModalBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        addUserForm.reset();
+    });
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+            addUserForm.reset();
+        }
+    });
+
+    // Edit user functions
+    function openEditModal(user: User) {
+        const userIdInput = document.getElementById('edit-user-id') as HTMLInputElement;
+        const namaInput = document.getElementById('edit-nama') as HTMLInputElement;
+        const usernameInput = document.getElementById('edit-username') as HTMLInputElement;
+        const emailInput = document.getElementById('edit-email') as HTMLInputElement;
+        const nomorHpInput = document.getElementById('edit-nomorHp') as HTMLInputElement;
+        const roleInput = document.getElementById('edit-role') as HTMLSelectElement;
+        
+        userIdInput.value = user._id;
+        namaInput.value = user.nama;
+        usernameInput.value = user.username;
+        emailInput.value = user.email;
+        nomorHpInput.value = user.nomorHp;
+        roleInput.value = user.role;
+
+        editModal.classList.remove('hidden');
+        editModal.classList.add('flex');
+    }
+
+    closeEditModalBtn.addEventListener('click', () => {
+        editModal.classList.remove('flex');
+        editModal.classList.add('hidden');
+        editUserForm.reset();
+    });
+
+    editModal.addEventListener('click', (e) => {
+        if (e.target === editModal) {
+            editModal.classList.remove('flex');
+            editModal.classList.add('hidden');
+            editUserForm.reset();
+        }
+    });
+
+    // Add new user function
+    async function addUser(userData: NewUser) {
+        try {
+            const response = await fetch(`${API_URL}/auth/register-admin`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Gagal menambahkan user');
+            }
+
+            await fetchUsers(); // Refresh table
+            modal.classList.add('hidden');
+            addUserForm.reset();
+            alert('User berhasil ditambahkan!');
+        } catch (error) {
+            console.error('Error adding user:', error);
+            alert(error instanceof Error ? error.message : 'Gagal menambahkan user');
+        }
+    }
+
+    // Handle form submission
+    addUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(addUserForm);
+        const userData: NewUser = {
+            nama: formData.get('nama') as string,
+            username: formData.get('username') as string,
+            email: formData.get('email') as string,
+            password: formData.get('password') as string,
+            nomorHp: formData.get('nomorHp') as string,
+            role: formData.get('role') as 'admin' | 'user'
+        };
+        await addUser(userData);
+    });
+
+    async function updateUser(userId: string, userData: Partial<User>) {
+        try {
+            const response = await fetch(`${API_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Gagal mengupdate user');
+            }
+
+            await fetchUsers(); // Refresh table
+            editModal.classList.remove('flex');
+            editModal.classList.add('hidden');
+            editUserForm.reset();
+            alert('User berhasil diupdate!');
+        } catch (error) {
+            console.error('Error updating user:', error);
+            alert(error instanceof Error ? error.message : 'Gagal mengupdate user');
+        }
+    }
+
+    editUserForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(editUserForm);
+        const userId = formData.get('userId') as string;
+        
+        const userData: any = {
+            nama: formData.get('nama'),
+            username: formData.get('username'),
+            email: formData.get('email'),
+            nomorHp: formData.get('nomorHp'),
+            role: formData.get('role')
+        };
+
+        // Hanya tambahkan password jika diisi
+        const password = formData.get('password');
+        if (password) {
+            userData.password = password;
+        }
+
+        await updateUser(userId, userData);
+    });
+
+    // Fungsi untuk membuka modal konfirmasi hapus
+    function openDeleteModal(user: User) {
+        deleteUserName.textContent = user.nama;
+        deleteUserId.value = user._id;
+        deleteConfirmModal.classList.remove('hidden');
+        deleteConfirmModal.classList.add('flex');
+    }
+
+    // Event listeners untuk modal hapus
+    cancelDeleteBtn.addEventListener('click', () => {
+        deleteConfirmModal.classList.remove('flex');
+        deleteConfirmModal.classList.add('hidden');
+    });
+
+    deleteConfirmModal.addEventListener('click', (e) => {
+        if (e.target === deleteConfirmModal) {
+            deleteConfirmModal.classList.remove('flex');
+            deleteConfirmModal.classList.add('hidden');
+        }
+    });
+
+    // Fungsi untuk menghapus user
+    async function deleteUser(userId: string) {
+        try {
+            const response = await fetch(`${API_URL}/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Gagal menghapus user');
+            }
+
+            await fetchUsers(); // Refresh table
+            deleteConfirmModal.classList.remove('flex');
+            deleteConfirmModal.classList.add('hidden');
+            alert('User berhasil dihapus!');
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert(error instanceof Error ? error.message : 'Gagal menghapus user');
+        }
+    }
+
+    // Event listener untuk tombol konfirmasi hapus
+    confirmDeleteBtn.addEventListener('click', async () => {
+        const userId = deleteUserId.value;
+        if (userId) {
+            await deleteUser(userId);
+        }
+    });
+
+    async function fetchUsers() {
+        try {
+            const response = await fetch(`${API_URL}/users`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const users = await response.json() as User[];
+
+            if (users.length === 0) {
+                loading.classList.add('hidden');
+                noData.classList.remove('hidden');
+                return;
+            }
+
+            const userRows = users.map((user: User) => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.nama}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.username}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.nomorHp}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">
+                            ${user.role}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button data-user='${JSON.stringify(user)}' class="edit-btn text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
+                        <button data-user='${JSON.stringify(user)}' class="delete-btn text-red-600 hover:text-red-900">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            userTableBody.innerHTML = userRows;
+            loading.classList.add('hidden');
+            userTable.classList.remove('hidden');
+
+            // Event listeners untuk tombol edit
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const userData = JSON.parse((e.currentTarget as HTMLElement).dataset.user || '{}');
+                    openEditModal(userData);
+                });
+            });
+
+            // Event listeners untuk tombol hapus
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const userData = JSON.parse((e.currentTarget as HTMLElement).dataset.user || '{}');
+                    openDeleteModal(userData);
+                });
+            });
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            errorMessage.textContent = error instanceof Error ? error.message : 'An unknown error occurred';
+            errorContainer.classList.remove('hidden');
+            loading.classList.add('hidden');
+        }
+    }
+
+    // Fetch users when the page loads
+    fetchUsers();
+</script>

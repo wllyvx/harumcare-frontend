@@ -1,0 +1,1142 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Kelola Donasi">
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div
+            class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Donasi Selesai</p>
+          <p class="text-2xl font-semibold text-gray-900" id="completedCount">
+            0
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div
+            class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Pending</p>
+          <p class="text-2xl font-semibold text-gray-900" id="pendingCount">
+            0
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div
+            class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Gagal</p>
+          <p class="text-2xl font-semibold text-gray-900" id="failedCount">0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div
+            class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 1118 0z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Total Dana</p>
+          <p class="text-2xl font-semibold text-gray-900" id="totalAmount">
+            Rp 0
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Filters and Search -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Cari Donasi</label
+        >
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Cari berdasarkan ID transaksi atau nama donatur..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Status Pembayaran</label
+        >
+        <select
+          id="statusFilter"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Semua Status</option>
+          <option value="completed">Selesai</option>
+          <option value="pending">Pending</option>
+          <option value="failed">Gagal</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Metode Pembayaran</label
+        >
+        <select
+          id="paymentMethodFilter"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Semua Metode</option>
+          <option value="bank_transfer">Transfer Bank</option>
+          <option value="e_wallet">E-Wallet</option>
+        </select>
+      </div>
+      <div class="flex items-end">
+        <button
+          id="resetFilters"
+          class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+        >
+          Reset Filter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div
+    id="loadingState"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center"
+  >
+    <div
+      class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
+    >
+    </div>
+    <p class="text-gray-600">Memuat data donasi...</p>
+  </div>
+
+  <!-- Error State -->
+  <div
+    id="errorState"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hidden"
+  >
+    <div class="text-red-500 mb-4">
+      <svg
+        class="h-12 w-12 mx-auto"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Gagal Memuat Data</h3>
+    <p class="text-gray-600 mb-4">
+      Terjadi kesalahan saat mengambil data donasi.
+    </p>
+    <button
+      id="retryButton"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+    >
+      Coba Lagi
+    </button>
+  </div>
+
+  <!-- Auth Error State -->
+  <div
+    id="authErrorState"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hidden"
+  >
+    <div class="text-red-500 mb-4">
+      <svg
+        class="h-12 w-12 mx-auto"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+        ></path>
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Akses Ditolak</h3>
+    <p class="text-gray-600 mb-4">
+      Anda tidak memiliki akses atau sesi telah berakhir.
+    </p>
+    <button
+      onclick="window.location.href='/auth/login'"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+    >
+      Login Kembali
+    </button>
+  </div>
+
+  <!-- Tombol Tambah Donasi -->
+  <div class="mb-4">
+    <button 
+      id="addDonationButton"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 md:px-8 py-2 md:py-2 rounded-md"
+    >
+      + Tambah Donasi
+    </button>
+  </div>
+
+  <!-- Modal Tambah Donasi -->
+  <div id="addDonationModal" class="fixed inset-0 bg-blue-900/70 hidden z-50 justify-center items-center">
+    <div class="flex items-center justify-center p-4 mx-auto h-full max-h-screen">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Tambah Donasi Baru</h3>
+        </div>
+        <div class="overflow-y-auto flex-1 p-6">
+          <form id="addDonationForm" class="space-y-4">
+            <!-- Campaign Selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Campaign
+              </label>
+              <select
+                id="campaignSelect"
+                name="campaignId"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Pilih Campaign</option>
+              </select>
+            </div>
+
+            <!-- Nama Donatur -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Nama Donatur
+              </label>
+              <input
+                type="text"
+                name="donorName"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Masukkan nama donatur"
+              />
+            </div>
+
+            <!-- Jumlah Donasi -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Jumlah Donasi
+              </label>
+              <input
+                type="number"
+                name="amount"
+                required
+                min="1000"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Minimal Rp 1.000"
+              />
+            </div>
+
+            <!-- Metode Pembayaran -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Metode Pembayaran
+              </label>
+              <select
+                name="paymentMethod"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Pilih metode pembayaran</option>
+                <option value="bank_transfer">Transfer Bank</option>
+                <option value="e_wallet">E-Wallet</option>
+                <option value="credit_card">Kartu Kredit</option>
+              </select>
+            </div>
+
+            <!-- Status Pembayaran -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Status Pembayaran
+              </label>
+              <select
+                name="paymentStatus"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="pending">Pending</option>
+                <option value="completed">Selesai</option>
+                <option value="failed">Gagal</option>
+              </select>
+            </div>
+
+            <!-- Pesan -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Pesan (Opsional)
+              </label>
+              <textarea
+                name="message"
+                rows="3"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Masukkan pesan donatur"
+              ></textarea>
+            </div>
+
+            <!-- Donasi Anonim -->
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                name="isAnonymous"
+                id="isAnonymous"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label for="isAnonymous" class="ml-2 block text-sm text-gray-700">
+                Donasi sebagai Anonim
+              </label>
+            </div>
+          </form>
+        </div>
+        <div class="p-6 border-t border-gray-200">
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              id="cancelAddDonationButton"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              form="addDonationForm"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              Tambah Donasi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donation Table -->
+  <div
+    id="donationTable"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 hidden"
+  >
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">Daftar Donasi</h3>
+      <p class="text-sm text-gray-600 mt-1">
+        Total: <span id="totalDonationsTable">0</span> donasi
+      </p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >ID Transaksi</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Campaign</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Donatur</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Jumlah</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Metode</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Status</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Bukti Transfer</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Tanggal</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Aksi</th
+            >
+          </tr>
+        </thead>
+        <tbody id="donationTableBody" class="bg-white divide-y divide-gray-200">
+          <!-- Donation rows will be inserted here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-6 py-4 border-t border-gray-200">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+          Menampilkan <span id="showingFrom">1</span> - <span id="showingTo"
+            >10</span
+          > dari <span id="totalItems">0</span> donasi
+        </div>
+        <div class="flex space-x-2">
+          <button
+            id="prevPage"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled
+          >
+            Sebelumnya
+          </button>
+          <div id="pageNumbers" class="flex space-x-1">
+            <!-- Page numbers will be inserted here -->
+          </div>
+          <button
+            id="nextPage"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Selanjutnya
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  // Authentication check
+  function checkAuth() {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token || role !== "admin") {
+      showAuthError();
+      return false;
+    }
+    return true;
+  }
+
+  // Donation data and state
+  let donations = [];
+  let campaigns = [];
+  let filteredDonations = [];
+  let currentPage = 1;
+  const itemsPerPage = 10;
+
+  // DOM elements
+  const loadingState = document.getElementById("loadingState");
+  const errorState = document.getElementById("errorState");
+  const authErrorState = document.getElementById("authErrorState");
+  const donationTable = document.getElementById("donationTable");
+  const donationTableBody = document.getElementById("donationTableBody");
+  const searchInput = document.getElementById("searchInput");
+  const statusFilter = document.getElementById("statusFilter");
+  const paymentMethodFilter = document.getElementById("paymentMethodFilter");
+  const resetFilters = document.getElementById("resetFilters");
+  const retryButton = document.getElementById("retryButton");
+
+  const API_URL = import.meta.env.PUBLIC_API_URL;
+
+  // Utility functions
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  }
+
+  function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function getPaymentMethodLabel(method) {
+    const methods = {
+      bank_transfer: "Transfer Bank",
+      e_wallet: "E-Wallet",
+      credit_card: "Kartu Kredit",
+    };
+    return methods[method] || method;
+  }
+
+  function getStatusConfig(status) {
+    const configs = {
+      completed: { label: "Selesai", class: "bg-green-100 text-green-800" },
+      pending: { label: "Pending", class: "bg-yellow-100 text-yellow-800" },
+      failed: { label: "Gagal", class: "bg-red-100 text-red-800" },
+    };
+    return (
+      configs[status] || { label: status, class: "bg-gray-100 text-gray-800" }
+    );
+  }
+
+  // Create authenticated fetch function
+  function createAuthenticatedFetch() {
+    const token = localStorage.getItem("token");
+
+    return (url, options = {}) => {
+      const headers = {
+        "Content-Type": "application/json",
+        ...options.headers,
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      return fetch(url, {
+        ...options,
+        headers,
+      });
+    };
+  }
+
+  // Main fetch function with authentication
+  async function fetchData() {
+    try {
+      // Check authentication first
+      if (!checkAuth()) {
+        return;
+      }
+
+      showLoading();
+
+      const authenticatedFetch = createAuthenticatedFetch();
+
+      // Fetch donations and campaigns simultaneously
+      const [donationsResponse, campaignsResponse] = await Promise.all([
+        authenticatedFetch(`${API_URL}/donations`),
+        authenticatedFetch(`${API_URL}/campaigns`),
+      ]);
+
+      // Handle authentication errors
+      if (
+        donationsResponse.status === 401 ||
+        campaignsResponse.status === 401
+      ) {
+        console.error("Authentication failed");
+        showAuthError();
+        return;
+      }
+
+      if (!donationsResponse.ok || !campaignsResponse.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const donationsData = await donationsResponse.json();
+      const campaignsData = await campaignsResponse.json();
+
+      // Process donations data - campaignId is already populated
+      donations = (donationsData.donations || []).map((donation) => {
+        // Handle null/undefined campaignId
+        if (!donation.campaignId) {
+          console.warn(`Donation ${donation._id} has no campaignId`);
+          return {
+            ...donation,
+            campaignId: null,
+            campaignTitle: "Campaign tidak ditemukan",
+            campaignImage: "/images/empty-image-placeholder.webp",
+          };
+        }
+
+        return {
+          ...donation,
+          // Extract campaign info from populated campaignId with null safety
+          campaignId: donation.campaignId._id || donation.campaignId,
+          campaignTitle: donation.campaignId.title || "Campaign tidak ditemukan",
+          campaignImage: donation.campaignId.imageUrl || "/images/empty-image-placeholder.webp",
+        };
+      });
+
+      campaigns = campaignsData.campaigns || [];
+      filteredDonations = [...donations];
+
+      console.log("Fetched donations:", donations);
+
+      // Update summary cards
+      updateSummaryCards();
+
+      showTable();
+      renderTable();
+      updatePagination();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      showError();
+    }
+  }
+
+  // Update summary cards
+  function updateSummaryCards() {
+    const completed = donations.filter((d) => d.paymentStatus === "completed");
+    const pending = donations.filter((d) => d.paymentStatus === "pending");
+    const failed = donations.filter((d) => d.paymentStatus === "failed");
+
+    const totalAmount = completed.reduce((sum, d) => sum + d.amount, 0);
+
+    document.getElementById("completedCount").textContent = completed.length;
+    document.getElementById("pendingCount").textContent = pending.length;
+    document.getElementById("failedCount").textContent = failed.length;
+    document.getElementById("totalAmount").textContent =
+    formatCurrency(totalAmount);
+    
+  }
+
+  // State management
+  function showLoading() {
+    loadingState?.classList.remove("hidden");
+    errorState?.classList.add("hidden");
+    authErrorState?.classList.add("hidden");
+    donationTable?.classList.add("hidden");
+  }
+
+  function showError() {
+    loadingState?.classList.add("hidden");
+    errorState?.classList.remove("hidden");
+    authErrorState?.classList.add("hidden");
+    donationTable?.classList.add("hidden");
+  }
+
+  function showAuthError() {
+    loadingState?.classList.add("hidden");
+    errorState?.classList.add("hidden");
+    authErrorState?.classList.remove("hidden");
+    donationTable?.classList.add("hidden");
+  }
+
+  function showTable() {
+    loadingState?.classList.add("hidden");
+    errorState?.classList.add("hidden");
+    authErrorState?.classList.add("hidden");
+    donationTable?.classList.remove("hidden");
+  }
+
+  // Table rendering
+  function renderTable() {
+    if (!donationTableBody) return;
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedDonations = filteredDonations.slice(startIndex, endIndex);
+
+    donationTableBody.innerHTML = "";
+
+    if (paginatedDonations.length === 0) {
+      donationTableBody.innerHTML = `
+      <tr>
+        <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+          Tidak ada donasi yang ditemukan
+        </td>
+      </tr>
+    `;
+      return;
+    }
+
+    paginatedDonations.forEach((donation) => {
+      const statusConfig = getStatusConfig(donation.paymentStatus);
+
+      const row = document.createElement("tr");
+      row.className = "hover:bg-gray-50";
+
+      row.innerHTML = `
+      <td class="px-6 py-4">
+        <div class="text-sm font-mono text-gray-900">
+          ${donation.transactionId}
+        </div>
+      </td>
+      <td class="px-6 py-4">
+        <div class="flex items-center">
+          <img
+            src="${donation.campaignImage || "/images/empty-image-placeholder.webp"}"
+            alt="${donation.campaignTitle || "Campaign"}"
+            class="h-10 w-10 rounded-lg object-cover mr-3"
+          />
+          <div class="text-sm font-medium text-gray-900 max-w-xs truncate">
+            ${donation.campaignTitle || "Campaign tidak ditemukan"}
+          </div>
+        </div>
+      </td>
+      <td class="px-6 py-4">
+        <div class="text-sm text-gray-900">
+          ${donation.donorName}
+          ${donation.isAnonymous ? '<span class="text-xs text-gray-500 block">(Anonim)</span>' : ""}
+        </div>
+      </td>
+      <td class="px-6 py-4">
+        <div class="text-sm font-medium text-gray-900">
+          ${formatCurrency(donation.amount)}
+        </div>
+      </td>
+      <td class="px-6 py-4">
+        <div class="text-sm text-gray-900">
+          ${getPaymentMethodLabel(donation.paymentMethod)}
+        </div>
+      </td>
+      <td class="px-6 py-4">
+        <span class="px-2 py-1 text-xs font-medium rounded-full ${statusConfig.class}">
+          ${statusConfig.label}
+        </span>
+      </td>
+      <td class="px-6 py-4">
+        ${
+          donation.proofOfTransfer
+            ? `<a href="${donation.proofOfTransfer}" target="_blank" class="text-blue-600 hover:underline text-sm">Lihat Bukti</a>`
+            : `<img src="/images/UI/no-proof-placeholder.webp" alt="No Proof" class="h-10 w-10 rounded-lg object-cover" />`
+        }
+      </td>
+      <td class="px-6 py-4 text-sm text-gray-500">
+        <div>Dibuat: ${formatDate(donation.createdAt)}</div>
+        ${donation.completedAt ? `<div>Selesai: ${formatDate(donation.completedAt)}</div>` : ""}
+      </td>
+      <td class="px-6 py-4">
+        <div class="flex space-x-2">
+          <button
+            onclick="viewDonation('${donation._id}')"
+            class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            Detail
+          </button>
+          <div class="relative">
+            <button
+              onclick="toggleStatusDropdown('${donation._id}')"
+              class="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
+            >
+              Update Status
+              <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div id="dropdown-${donation._id}" class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-10 hidden">
+              <button
+                onclick="updateStatus('${donation._id}', 'completed')"
+                class="block w-full px-4 py-2 text-sm text-left text-green-600 hover:bg-green-50 rounded-t-md"
+              >
+                ✓ Selesai
+              </button>
+              <button
+                onclick="updateStatus('${donation._id}', 'pending')"
+                class="block w-full px-4 py-2 text-sm text-left text-yellow-600 hover:bg-yellow-50"
+              >
+                ⟳ Pending
+              </button>
+              <button
+                onclick="updateStatus('${donation._id}', 'failed')"
+                class="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 rounded-b-md"
+              >
+                ✗ Gagal
+              </button>
+            </div>
+          </div>
+          <button
+            onclick="deleteDonation('${donation._id}')"
+            class="text-red-600 hover:text-red-800 text-sm font-medium"
+          >
+            Hapus
+          </button>
+        </div>
+      </td>
+    `;
+
+      donationTableBody.appendChild(row);
+    });
+
+    // Update total donations counter
+    const totalDonationsTable = document.getElementById("totalDonationsTable");
+    if (totalDonationsTable) {
+      totalDonationsTable.textContent = filteredDonations.length;
+    }
+  }
+
+  // Pagination
+  function updatePagination() {
+    const totalPages = Math.ceil(filteredDonations.length / itemsPerPage);
+    const startItem = (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(
+      currentPage * itemsPerPage,
+      filteredDonations.length
+    );
+
+    // Update pagination info
+    const showingFrom = document.getElementById("showingFrom");
+    const showingTo = document.getElementById("showingTo");
+    const totalItems = document.getElementById("totalItems");
+
+    if (showingFrom) showingFrom.textContent = startItem;
+    if (showingTo) showingTo.textContent = endItem;
+    if (totalItems) totalItems.textContent = filteredDonations.length;
+
+    // Update prev/next buttons
+    const prevButton = document.getElementById("prevPage");
+    const nextButton = document.getElementById("nextPage");
+
+    if (prevButton) {
+      prevButton.disabled = currentPage === 1;
+    }
+
+    if (nextButton) {
+      nextButton.disabled = currentPage === totalPages;
+    }
+  }
+
+  // Filtering
+  function applyFilters() {
+    const searchTerm = searchInput?.value.toLowerCase() || "";
+    const statusValue = statusFilter?.value || "";
+    const paymentMethodValue = paymentMethodFilter?.value || "";
+
+    filteredDonations = donations.filter((donation) => {
+      const matchesSearch =
+        donation.transactionId.toLowerCase().includes(searchTerm) ||
+        donation.donorName.toLowerCase().includes(searchTerm);
+
+      const matchesStatus =
+        !statusValue || donation.paymentStatus === statusValue;
+      const matchesPaymentMethod =
+        !paymentMethodValue || donation.paymentMethod === paymentMethodValue;
+
+      return matchesSearch && matchesStatus && matchesPaymentMethod;
+    });
+
+    currentPage = 1;
+    renderTable();
+    updatePagination();
+  }
+
+  // Setup event listeners when DOM is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    // Initial authentication check and data fetch
+    if (checkAuth()) {
+      fetchData();
+    }
+
+    // Make functions globally available for table actions
+    window.viewDonation = viewDonation;
+    window.updateStatus = updateStatus;
+    window.toggleStatusDropdown = toggleStatusDropdown;
+    window.deleteDonation = deleteDonation;
+
+    // Setup modal handlers
+    const addDonationButton = document.getElementById("addDonationButton");
+    const addDonationModal = document.getElementById("addDonationModal");
+    
+    if (addDonationButton) {
+      addDonationButton.addEventListener("click", () => {
+        if (addDonationModal) {
+          addDonationModal.classList.remove("hidden");
+          addDonationModal.classList.add("flex");
+          populateCampaignSelect();
+        }
+      });
+    }
+
+    // Close modal when clicking outside
+    if (addDonationModal) {
+      addDonationModal.addEventListener("click", (event) => {
+        if (event.target === addDonationModal) {
+          addDonationModal.classList.remove("flex");
+          addDonationModal.classList.add("hidden");
+        }
+      });
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      if (
+        !target.closest('[id^="dropdown-"]') &&
+        !target.closest('button[onclick^="toggleStatusDropdown"]')
+      ) {
+        document.querySelectorAll('[id^="dropdown-"]').forEach((dropdown) => {
+          dropdown.classList.add("hidden");
+        });
+      }
+    });
+
+    // Search and filter listeners
+    if (searchInput) searchInput.addEventListener("input", applyFilters);
+    if (statusFilter) statusFilter.addEventListener("change", applyFilters);
+    if (paymentMethodFilter) paymentMethodFilter.addEventListener("change", applyFilters);
+
+    // Reset filters
+    if (resetFilters) {
+      resetFilters.addEventListener("click", () => {
+        if (searchInput instanceof HTMLInputElement) searchInput.value = "";
+        if (statusFilter instanceof HTMLSelectElement) statusFilter.value = "";
+        if (paymentMethodFilter instanceof HTMLSelectElement) paymentMethodFilter.value = "";
+        applyFilters();
+      });
+    }
+
+    // Retry button
+    if (retryButton) retryButton.addEventListener("click", fetchData);
+
+    // Pagination
+    const prevPageButton = document.getElementById("prevPage");
+    const nextPageButton = document.getElementById("nextPage");
+
+    if (prevPageButton) {
+      prevPageButton.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable();
+          updatePagination();
+        }
+      });
+    }
+
+    if (nextPageButton) {
+      nextPageButton.addEventListener("click", () => {
+        const totalPages = Math.ceil(filteredDonations.length / itemsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable();
+          updatePagination();
+        }
+      });
+    }
+
+    // Setup form submission
+    const addDonationForm = document.getElementById("addDonationForm");
+    if (addDonationForm instanceof HTMLFormElement) {
+      addDonationForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        try {
+          const formData = new FormData(addDonationForm);
+          const data = {
+            campaignId: formData.get("campaignId"),
+            donorName: formData.get("donorName"),
+            amount: Number(formData.get("amount")),
+            paymentMethod: formData.get("paymentMethod"),
+            paymentStatus: formData.get("paymentStatus"),
+            message: formData.get("message"),
+            isAnonymous: formData.get("isAnonymous") === "on"
+          };
+
+          const authenticatedFetch = createAuthenticatedFetch();
+          const response = await authenticatedFetch(`${API_URL}/donations/admin`, {
+            method: "POST",
+            body: JSON.stringify(data)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Gagal menambah donasi");
+          }
+
+          await response.json();
+          alert("Donasi berhasil ditambahkan!");
+          if (addDonationModal) {
+            addDonationModal.classList.add("hidden");
+          }
+          fetchData(); // Refresh data
+        } catch (error) {
+          console.error("Error adding donation:", error);
+          alert(error instanceof Error ? error.message : "Terjadi kesalahan saat menambah donasi");
+        }
+      });
+    }
+
+    // Setup cancel button
+    const cancelButton = document.getElementById("cancelAddDonationButton");
+    if (cancelButton && addDonationModal) {
+      cancelButton.addEventListener("click", () => {
+        addDonationModal.classList.add("hidden");
+      });
+    }
+  });
+
+  // Populate campaign select
+  async function populateCampaignSelect() {
+    try {
+      const select = document.getElementById("campaignSelect");
+      if (!select) return;
+
+      // Clear existing options except the first one
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+
+      // Add campaign options
+      campaigns.forEach(campaign => {
+        const option = document.createElement("option");
+        option.value = campaign._id;
+        option.textContent = campaign.title;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error("Error populating campaign select:", error);
+    }
+  }
+
+  // Action handlers for table
+  function viewDonation(id) {
+    // TODO: Implement view donation detail
+    console.log("View donation:", id);
+    alert("Detail donasi akan segera tersedia");
+  }
+
+  async function updateStatus(donationId, newStatus) {
+    if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`)) {
+      return;
+    }
+
+    try {
+      const authenticatedFetch = createAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${API_URL}/donations/${donationId}/status`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ paymentStatus: newStatus }),
+        }
+      );
+
+      if (response.status === 401) {
+        showAuthError();
+        return;
+      }
+
+      if (response.ok) {
+        alert("Status donasi berhasil diupdate");
+        fetchData(); // Refresh data
+      } else {
+        alert("Gagal mengupdate status donasi");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Terjadi kesalahan saat mengupdate status");
+    }
+  }
+
+  async function deleteDonation(donationId) {
+    if (!confirm("Apakah Anda yakin ingin menghapus donasi ini?")) {
+      return;
+    }
+
+    try {
+      const authenticatedFetch = createAuthenticatedFetch();
+      const response = await authenticatedFetch(
+        `${API_URL}/donations/${donationId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.status === 401) {
+        showAuthError();
+        return;
+      }
+
+      if (response.ok) {
+        alert("Donasi berhasil dihapus");
+        fetchData(); // Refresh data
+      } else {
+        alert("Gagal menghapus donasi");
+      }
+    } catch (error) {
+      console.error("Error deleting donation:", error);
+      alert("Terjadi kesalahan saat menghapus donasi");
+    }
+  }
+
+  function toggleStatusDropdown(donationId) {
+    // Close all other dropdowns first
+    document.querySelectorAll('[id^="dropdown-"]').forEach((dropdown) => {
+      if (dropdown.id !== `dropdown-${donationId}`) {
+        dropdown.classList.add("hidden");
+      }
+    });
+
+    // Toggle the clicked dropdown
+    const dropdown = document.getElementById(`dropdown-${donationId}`);
+    if (dropdown) {
+      dropdown.classList.toggle("hidden");
+    }
+  }
+</script>

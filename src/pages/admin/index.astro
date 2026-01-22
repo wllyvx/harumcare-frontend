@@ -1,0 +1,215 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+
+// Type definitions
+interface User {
+  nama: string;
+  email: string;
+  role: string;
+}
+
+interface CampaignStats {
+  totalCampaigns: number;
+  totalDonations: number;
+}
+
+interface Donation {
+  _id: string;
+  amount: number;
+  paymentStatus: 'completed' | 'pending' | 'failed';
+  createdAt: string;
+  completedAt?: string;
+}
+
+interface DonationStats {
+  completedCount: number;
+  pendingCount: number;
+  failedCount: number;
+  totalAmount: number;
+}
+
+// Fetch dashboard data
+const API_URL = import.meta.env.PUBLIC_API_URL;
+
+const fetchDashboardData = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    const [usersRes, campaignsRes, donationsRes] = await Promise.all([
+      fetch(`${API_URL}/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch(`${API_URL}/campaigns/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch(`${API_URL}/donations`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+    ]);
+
+    const [users, campaignStats, donationsData] = await Promise.all([
+      usersRes.json(),
+      campaignsRes.json(),
+      donationsRes.json()
+    ]);
+
+    // Calculate donation stats
+    const donations: Donation[] = donationsData.donations || [];
+    const completed = donations.filter((d: Donation) => d.paymentStatus === 'completed');
+    const totalAmount = completed.reduce((sum: number, d: Donation) => sum + d.amount, 0);
+
+    return {
+      totalUsers: users.length,
+      totalCampaigns: campaignStats.totalCampaigns,
+      totalDonations: totalAmount
+    };
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    return null;
+  }
+};
+
+let dashboardData = null;
+---
+
+<AdminLayout title="Dashboard">
+  <!-- Welcome Section -->
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-gray-900 mb-2">Selamat Datang, Admin!</h2>
+    <p class="text-gray-600">Kelola platform donasi Harum Care Indonesia dari dashboard ini.</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Total Users -->
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Users</p>
+          <p class="text-2xl font-semibold text-gray-900" id="totalUsers">-</p>
+          <a href="/admin/users" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            Lihat semua users →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Campaigns -->
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Campaigns</p>
+          <p class="text-2xl font-semibold text-gray-900" id="totalCampaigns">-</p>
+          <a href="/admin/campaign" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            Lihat semua campaign →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Donations -->
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-600">Total Donasi</p>
+          <p class="text-2xl font-semibold text-gray-900" id="totalDonations">-</p>
+          <a href="/admin/donation" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            Lihat semua donasi →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  interface Donation {
+    _id: string;
+    amount: number;
+    paymentStatus: 'completed' | 'pending' | 'failed';
+    createdAt: string;
+    completedAt?: string;
+  }
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const updateDashboard = async () => {
+    try {
+      const API_URL = import.meta.env.PUBLIC_API_URL;
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        window.location.href = '/auth/login';
+        return;
+      }
+
+      const [usersRes, campaignsRes, donationsRes] = await Promise.all([
+        fetch(`${API_URL}/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/campaigns/stats`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_URL}/donations`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      const [users, campaignStats, donationsData] = await Promise.all([
+        usersRes.json(),
+        campaignsRes.json(),
+        donationsRes.json()
+      ]);
+
+      // Calculate total amount from completed donations
+      const donations: Donation[] = donationsData.donations || [];
+      const completed = donations.filter((d: Donation) => d.paymentStatus === 'completed');
+      const totalAmount = completed.reduce((sum: number, d: Donation) => sum + d.amount, 0);
+
+      // Update stats
+      const totalUsersElement = document.getElementById('totalUsers');
+      const totalCampaignsElement = document.getElementById('totalCampaigns');
+      const totalDonationsElement = document.getElementById('totalDonations');
+      
+      if (totalUsersElement && totalCampaignsElement && totalDonationsElement) {
+        totalUsersElement.textContent = users.length.toString();
+        totalCampaignsElement.textContent = campaignStats.totalCampaigns.toString();
+        totalDonationsElement.textContent = formatCurrency(totalAmount);
+      }
+    } catch (error) {
+      console.error('Error updating dashboard:', error);
+    }
+  };
+
+  // Update dashboard when page loads
+  document.addEventListener('DOMContentLoaded', updateDashboard);
+</script>

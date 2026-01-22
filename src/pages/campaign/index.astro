@@ -1,0 +1,102 @@
+---
+import type { ObjectId } from 'mongoose';
+import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
+import AllCampaign from "../../components/campaign/AllCampaign.astro";
+
+const API_URL = import.meta.env.PUBLIC_API_URL;
+
+interface Campaign {
+  _id: ObjectId;
+  title: string;
+  description: string;
+  imageUrl: string;
+  targetAmount: number;
+  currentAmount: number;
+  endDate: string;
+  donorCount: number;
+  organizationName: string;
+  organizationLogo: string;
+  category: string;
+}
+
+interface CampaignResponse {
+  campaigns: Campaign[];
+  totalPages: number;
+  currentPage: number;
+  total: number;
+}
+
+// Ambil parameter dari URL
+const { searchParams } = Astro.url;
+const page = Number(searchParams.get('page')) || 1;
+const search = searchParams.get('search') || '';
+const category = searchParams.get('category') || '';
+
+// Fungsi fetch campaigns dengan pagination dan filter
+async function fetchCampaigns(page = 1, limit = 12, search = '', category = ''): Promise<CampaignResponse> {
+  try {
+    // Buat query string untuk filter
+    const params = new URLSearchParams();
+    
+    // Tambahkan parameter wajib
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    // Tambahkan parameter filter jika ada
+    if (search && search.trim() !== '') {
+      params.append('search', search.trim());
+    }
+    if (category && category.trim() !== '') {
+      params.append('category', category.trim());
+    }
+
+    // Buat URL dengan query string
+    const url = `${API_URL}/campaigns?${params.toString()}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch campaigns');
+    }
+    const data = await response.json();
+    
+    return {
+      campaigns: data.campaigns || [],
+      totalPages: data.totalPages || 1,
+      currentPage: data.currentPage || 1,
+      total: data.total || 0
+    };
+    
+  } catch (error) {
+    console.error('Error fetching campaigns:', error);
+    return {
+      campaigns: [],
+      totalPages: 1,
+      currentPage: 1,
+      total: 0
+    };
+  }
+}
+
+// Fetch data dengan parameter yang ada
+const campaignData = await fetchCampaigns(page, 12, search, category);
+
+// Dapatkan daftar kategori unik dari data campaign
+const categories = [...new Set(campaignData.campaigns.map(campaign => campaign.category))].filter(Boolean).sort();
+---
+
+<PrimaryLayout>
+  <AllCampaign
+    campaigns={campaignData.campaigns}
+    totalPages={campaignData.totalPages}
+    currentPage={campaignData.currentPage}
+    categories={categories}
+    activeCategory={category}
+    searchQuery={search}
+  />
+</PrimaryLayout>
+
+<style>
+  .campaign-section {
+    background-color: #f9fafb;
+  }
+</style>
