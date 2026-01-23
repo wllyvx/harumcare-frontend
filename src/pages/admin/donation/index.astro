@@ -505,10 +505,32 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     return true;
   }
 
+  interface Campaign {
+    id: string;
+    title: string;
+    imageUrl: string;
+  }
+
+  interface Donation {
+    id: string;
+    transactionId: string;
+    donorName: string;
+    amount: number;
+    paymentMethod: "bank_transfer" | "e_wallet" | "credit_card";
+    paymentStatus: "pending" | "completed" | "failed";
+    isAnonymous: boolean;
+    proofOfTransfer: string;
+    createdAt: string;
+    completedAt?: string;
+    campaignId: any; // Can be ID or populated object
+    campaignTitle?: string;
+    campaignImage?: string;
+  }
+
   // Donation data and state
-  let donations = [];
-  let campaigns = [];
-  let filteredDonations = [];
+  let donations: Donation[] = [];
+  let campaigns: Campaign[] = [];
+  let filteredDonations: Donation[] = [];
   let currentPage = 1;
   const itemsPerPage = 10;
 
@@ -527,7 +549,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   const API_URL = import.meta.env.PUBLIC_API_URL;
 
   // Utility functions
-  function formatCurrency(amount) {
+  function formatCurrency(amount: number): string {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
@@ -535,7 +557,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     }).format(amount);
   }
 
-  function formatDate(dateString) {
+  function formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString("id-ID", {
       year: "numeric",
       month: "short",
@@ -545,8 +567,8 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     });
   }
 
-  function getPaymentMethodLabel(method) {
-    const methods = {
+  function getPaymentMethodLabel(method: string): string {
+    const methods: Record<string, string> = {
       bank_transfer: "Transfer Bank",
       e_wallet: "E-Wallet",
       credit_card: "Kartu Kredit",
@@ -554,8 +576,8 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     return methods[method] || method;
   }
 
-  function getStatusConfig(status) {
-    const configs = {
+  function getStatusConfig(status: string) {
+    const configs: Record<string, { label: string; class: string }> = {
       completed: { label: "Selesai", class: "bg-green-100 text-green-800" },
       pending: { label: "Pending", class: "bg-yellow-100 text-yellow-800" },
       failed: { label: "Gagal", class: "bg-red-100 text-red-800" },
@@ -569,8 +591,8 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   function createAuthenticatedFetch() {
     const token = localStorage.getItem("token");
 
-    return (url, options = {}) => {
-      const headers = {
+    return (url: string, options: any = {}) => {
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
         ...options.headers,
       };
@@ -622,7 +644,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       const campaignsData = await campaignsResponse.json();
 
       // Process donations data - campaignId is already populated
-      donations = (donationsData.donations || []).map((donation) => {
+      donations = (donationsData.donations || []).map((donation: any) => {
         // Handle null/undefined campaignId
         if (!donation.campaignId) {
           console.warn(`Donation ${donation.id} has no campaignId`);
@@ -671,11 +693,16 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 
     const totalAmount = completed.reduce((sum, d) => sum + d.amount, 0);
 
-    document.getElementById("completedCount").textContent = completed.length;
-    document.getElementById("pendingCount").textContent = pending.length;
-    document.getElementById("failedCount").textContent = failed.length;
-    document.getElementById("totalAmount").textContent =
-      formatCurrency(totalAmount);
+    const completedCount = document.getElementById("completedCount");
+    const pendingCount = document.getElementById("pendingCount");
+    const failedCount = document.getElementById("failedCount");
+    const totalAmountEl = document.getElementById("totalAmount");
+
+    if (completedCount)
+      completedCount.textContent = completed.length.toString();
+    if (pendingCount) pendingCount.textContent = pending.length.toString();
+    if (failedCount) failedCount.textContent = failed.length.toString();
+    if (totalAmountEl) totalAmountEl.textContent = formatCurrency(totalAmount);
   }
 
   // State management
@@ -839,7 +866,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     // Update total donations counter
     const totalDonationsTable = document.getElementById("totalDonationsTable");
     if (totalDonationsTable) {
-      totalDonationsTable.textContent = filteredDonations.length;
+      totalDonationsTable.textContent = filteredDonations.length.toString();
     }
   }
 
@@ -857,13 +884,14 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     const showingTo = document.getElementById("showingTo");
     const totalItems = document.getElementById("totalItems");
 
-    if (showingFrom) showingFrom.textContent = startItem;
-    if (showingTo) showingTo.textContent = endItem;
-    if (totalItems) totalItems.textContent = filteredDonations.length;
+    if (showingFrom) showingFrom.textContent = startItem.toString();
+    if (showingTo) showingTo.textContent = endItem.toString();
+    if (totalItems)
+      totalItems.textContent = filteredDonations.length.toString();
 
     // Update prev/next buttons
-    const prevButton = document.getElementById("prevPage");
-    const nextButton = document.getElementById("nextPage");
+    const prevButton = document.getElementById("prevPage") as HTMLButtonElement;
+    const nextButton = document.getElementById("nextPage") as HTMLButtonElement;
 
     if (prevButton) {
       prevButton.disabled = currentPage === 1;
@@ -876,9 +904,11 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 
   // Filtering
   function applyFilters() {
-    const searchTerm = searchInput?.value.toLowerCase() || "";
-    const statusValue = statusFilter?.value || "";
-    const paymentMethodValue = paymentMethodFilter?.value || "";
+    const searchTerm =
+      (searchInput as HTMLInputElement)?.value.toLowerCase() || "";
+    const statusValue = (statusFilter as HTMLSelectElement)?.value || "";
+    const paymentMethodValue =
+      (paymentMethodFilter as HTMLSelectElement)?.value || "";
 
     filteredDonations = donations.filter((donation) => {
       const matchesSearch =
@@ -927,12 +957,15 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 
     // Close modal when clicking outside
     if (addDonationModal) {
-      addDonationModal.addEventListener("click", (event) => {
-        if (event.target === addDonationModal) {
-          addDonationModal.classList.remove("flex");
-          addDonationModal.classList.add("hidden");
-        }
-      });
+      addDonationModal.addEventListener(
+        "click",
+        (event: MouseEvent | TouchEvent | any) => {
+          if (event.target === addDonationModal) {
+            addDonationModal.classList.remove("flex");
+            addDonationModal.classList.add("hidden");
+          }
+        },
+      );
     }
 
     // Close dropdowns when clicking outside
@@ -960,7 +993,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         if (searchInput instanceof HTMLInputElement) searchInput.value = "";
         if (statusFilter instanceof HTMLSelectElement) statusFilter.value = "";
         if (paymentMethodFilter instanceof HTMLSelectElement)
-          paymentMethodFilter.value = "";
+          (paymentMethodFilter as HTMLSelectElement).value = "";
         applyFilters();
       });
     }
@@ -996,7 +1029,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     // Setup form submission
     const addDonationForm = document.getElementById("addDonationForm");
     if (addDonationForm instanceof HTMLFormElement) {
-      addDonationForm.addEventListener("submit", async (e) => {
+      addDonationForm.addEventListener("submit", async (e: Event) => {
         e.preventDefault();
 
         try {
@@ -1058,12 +1091,13 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       if (!select) return;
 
       // Clear existing options except the first one
-      while (select.options.length > 1) {
-        select.remove(1);
+      const campaignSelect = select as HTMLSelectElement;
+      while (campaignSelect.options.length > 1) {
+        campaignSelect.remove(1);
       }
 
       // Add campaign options
-      campaigns.forEach((campaign) => {
+      campaigns.forEach((campaign: Campaign) => {
         const option = document.createElement("option");
         option.value = campaign.id;
         option.textContent = campaign.title;
@@ -1075,13 +1109,13 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   }
 
   // Action handlers for table
-  function viewDonation(id) {
+  function viewDonation(id: string) {
     // TODO: Implement view donation detail
     console.log("View donation:", id);
     alert("Detail donasi akan segera tersedia");
   }
 
-  async function updateStatus(donationId, newStatus) {
+  async function updateStatus(donationId: string, newStatus: string) {
     if (
       !confirm(`Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`)
     ) {
@@ -1115,7 +1149,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     }
   }
 
-  async function deleteDonation(donationId) {
+  async function deleteDonation(donationId: string) {
     if (!confirm("Apakah Anda yakin ingin menghapus donasi ini?")) {
       return;
     }
@@ -1146,7 +1180,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     }
   }
 
-  function toggleStatusDropdown(donationId) {
+  function toggleStatusDropdown(donationId: string) {
     // Close all other dropdowns first
     document.querySelectorAll('[id^="dropdown-"]').forEach((dropdown) => {
       if (dropdown.id !== `dropdown-${donationId}`) {
@@ -1158,6 +1192,16 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     const dropdown = document.getElementById(`dropdown-${donationId}`);
     if (dropdown) {
       dropdown.classList.toggle("hidden");
+    }
+  }
+
+  // Declare global functions
+  declare global {
+    interface Window {
+      viewDonation: (id: string) => void;
+      updateStatus: (donationId: string, newStatus: string) => Promise<void>;
+      toggleStatusDropdown: (donationId: string) => void;
+      deleteDonation: (donationId: string) => Promise<void>;
     }
   }
 </script>
