@@ -1,5 +1,7 @@
 ---
-import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
+import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
+
+export const prerender = false;
 
 // Blog interface
 interface Blog {
@@ -34,15 +36,15 @@ if (slug) {
   try {
     const API_URL = import.meta.env.PUBLIC_API_URL;
     const response = await fetch(`${API_URL}/blog/${slug}`);
-    
+
     if (response.ok) {
       blog = await response.json();
     } else {
-      error = 'Blog tidak ditemukan';
+      error = "Blog tidak ditemukan";
     }
   } catch (err) {
-    console.error('Error fetching blog:', err);
-    error = 'Terjadi kesalahan saat memuat blog';
+    console.error("Error fetching blog:", err);
+    error = "Terjadi kesalahan saat memuat blog";
   }
 }
 
@@ -54,21 +56,21 @@ if (!slug || error || !blog) {
 // Format date
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  return date.toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
 // Get category label
 const getCategoryLabel = (category: string) => {
   const categories = {
-    'umum': 'Umum',
-    'kegiatan': 'Kegiatan',
-    'pengumuman': 'Pengumuman'
+    umum: "Umum",
+    kegiatan: "Kegiatan",
+    pengumuman: "Pengumuman",
   };
   return categories[category as keyof typeof categories] || category;
 };
@@ -91,36 +93,56 @@ const getCategoryLabel = (category: string) => {
       <!-- Article Header -->
       <header class="mb-8">
         <div class="mb-4">
-          <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span
+            class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+          >
             {getCategoryLabel(blog.category)}
           </span>
         </div>
-        
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+
+        <h1
+          class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+        >
           {blog.title}
         </h1>
-        
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-gray-600">
+
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-gray-600"
+        >
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
-              <img 
-                src="/images/icons/user-default.svg" 
-                alt="Author" 
+              <img
+                src="/images/icons/user-default.svg"
+                alt="Author"
                 class="w-6 h-6 rounded-full"
               />
-              <span>{blog.author?.nama || 'Anonymous'}</span>
+              <span>{blog.author?.nama || "Anonymous"}</span>
             </div>
             <span>•</span>
             <time datetime={blog.createdAt}>
               {formatDate(blog.createdAt)}
             </time>
           </div>
-          
+
           <div class="flex items-center gap-4">
             <span class="flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                ></path>
               </svg>
               {blog.viewCount} dilihat
             </span>
@@ -129,16 +151,18 @@ const getCategoryLabel = (category: string) => {
       </header>
 
       <!-- Featured Image -->
-      {blog.image && (
-        <div class="mb-8">
-          <img 
-            src={blog.image} 
-            alt={blog.title}
-            class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-            onerror="console.error('Failed to load image:', this.src)"
-          />
-        </div>
-      )}
+      {
+        blog.image && (
+          <div class="mb-8">
+            <img
+              src={blog.image}
+              alt={blog.title}
+              class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+              onerror="console.error('Failed to load image:', this.src)"
+            />
+          </div>
+        )
+      }
 
       <!-- Article Content -->
       <div class="prose prose-lg max-w-none">
@@ -159,18 +183,29 @@ const getCategoryLabel = (category: string) => {
 
       <!-- Article Footer -->
       <footer class="mt-8 pt-8 border-t border-gray-200">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-gray-600">
+        <div
+          class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-gray-600"
+        >
           <div>
             <p>Terakhir diperbarui: {formatDate(blog.updatedAt)}</p>
           </div>
-          
+
           <div class="flex gap-4">
-            <a 
-              href="/blog" 
+            <a
+              href="/blog"
               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
               Kembali ke Blog
             </a>
@@ -185,31 +220,43 @@ const getCategoryLabel = (category: string) => {
   .prose {
     color: inherit;
   }
-  
+
   .prose p {
     margin-bottom: 1.5rem;
   }
-  
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
     color: #1f2937;
     font-weight: 600;
     margin-top: 2rem;
     margin-bottom: 1rem;
   }
-  
-  .prose h1 { font-size: 2rem; }
-  .prose h2 { font-size: 1.5rem; }
-  .prose h3 { font-size: 1.25rem; }
-  
-  .prose ul, .prose ol {
+
+  .prose h1 {
+    font-size: 2rem;
+  }
+  .prose h2 {
+    font-size: 1.5rem;
+  }
+  .prose h3 {
+    font-size: 1.25rem;
+  }
+
+  .prose ul,
+  .prose ol {
     margin-bottom: 1.5rem;
     padding-left: 1.5rem;
   }
-  
+
   .prose li {
     margin-bottom: 0.5rem;
   }
-  
+
   .prose blockquote {
     border-left: 4px solid #3b82f6;
     padding-left: 1rem;
@@ -217,12 +264,12 @@ const getCategoryLabel = (category: string) => {
     font-style: italic;
     color: #6b7280;
   }
-  
+
   .prose a {
     color: #3b82f6;
     text-decoration: underline;
   }
-  
+
   .prose a:hover {
     color: #2563eb;
   }
@@ -233,28 +280,34 @@ const getCategoryLabel = (category: string) => {
   async function loadRelatedCampaign() {
     try {
       const API_URL = import.meta.env.PUBLIC_API_URL;
-      const blogSlug = window.location.pathname.split('/').pop();
-      
+      const blogSlug = window.location.pathname.split("/").pop();
+
       const response = await fetch(`${API_URL}/blog/${blogSlug}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch blog data');
+        throw new Error("Failed to fetch blog data");
       }
-      
+
       const blogData = await response.json();
-      const campaignInfo = document.getElementById('campaign-info');
-      
+      const campaignInfo = document.getElementById("campaign-info");
+
       if (campaignInfo && blogData.relatedCampaign) {
         const campaign = blogData.relatedCampaign;
         const endDate = new Date(campaign.endDate);
         const today = new Date();
-        const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 3600 * 24)));
-        const percentageFunded = Math.min(Math.round((campaign.currentAmount / campaign.targetAmount) * 100), 100);
-        
+        const daysLeft = Math.max(
+          0,
+          Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 3600 * 24)),
+        );
+        const percentageFunded = Math.min(
+          Math.round((campaign.currentAmount / campaign.targetAmount) * 100),
+          100,
+        );
+
         campaignInfo.innerHTML = `
           <div class="flex flex-col md:flex-row gap-6">
             <div class="md:w-1/3">
               <img 
-                src="${campaign.imageUrl || '/images/empty-image-placeholder.webp'}" 
+                src="${campaign.imageUrl || "/images/empty-image-placeholder.webp"}" 
                 alt="${campaign.title}"
                 class="w-full h-48 object-cover rounded-lg"
               />
@@ -266,7 +319,7 @@ const getCategoryLabel = (category: string) => {
                 </a>
               </h4>
               <p class="text-gray-600 mb-4">
-                ${campaign.description ? campaign.description.substring(0, 150) + '...' : 'Tidak ada deskripsi'}
+                ${campaign.description ? campaign.description.substring(0, 150) + "..." : "Tidak ada deskripsi"}
               </p>
               
               <div class="space-y-3">
@@ -282,8 +335,8 @@ const getCategoryLabel = (category: string) => {
                     ></div>
                   </div>
                   <div class="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Rp ${campaign.currentAmount?.toLocaleString('id-ID') || 0}</span>
-                    <span>Rp ${campaign.targetAmount?.toLocaleString('id-ID') || 0}</span>
+                    <span>Rp ${campaign.currentAmount?.toLocaleString("id-ID") || 0}</span>
+                    <span>Rp ${campaign.targetAmount?.toLocaleString("id-ID") || 0}</span>
                   </div>
                 </div>
                 
@@ -309,17 +362,19 @@ const getCategoryLabel = (category: string) => {
           </div>
         `;
       } else if (campaignInfo) {
-        campaignInfo.innerHTML = '<p class="text-gray-500 text-center py-4">Blog ini tidak terkait dengan kampanye tertentu.</p>';
+        campaignInfo.innerHTML =
+          '<p class="text-gray-500 text-center py-4">Blog ini tidak terkait dengan kampanye tertentu.</p>';
       }
     } catch (error) {
-      console.error('Error loading related campaign:', error);
-      const campaignInfo = document.getElementById('campaign-info');
+      console.error("Error loading related campaign:", error);
+      const campaignInfo = document.getElementById("campaign-info");
       if (campaignInfo) {
-        campaignInfo.innerHTML = '<p class="text-gray-500 text-center py-4">Gagal memuat informasi kampanye terkait.</p>';
+        campaignInfo.innerHTML =
+          '<p class="text-gray-500 text-center py-4">Gagal memuat informasi kampanye terkait.</p>';
       }
     }
   }
 
   // Load related campaign when page loads
-  window.addEventListener('load', loadRelatedCampaign);
+  window.addEventListener("load", loadRelatedCampaign);
 </script>
