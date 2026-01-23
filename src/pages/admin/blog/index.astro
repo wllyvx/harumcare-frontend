@@ -1,5 +1,5 @@
 ---
-import AdminLayout from "../../../layouts/AdminLayout.astro"
+import AdminLayout from "../../../layouts/AdminLayout.astro";
 ---
 
 <AdminLayout title="Kelola Blog">
@@ -8,7 +8,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
       <div class="mt-4 sm:mt-0">
         <a href="/admin/blog/create-blog">
-          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200">
+          <button
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+          >
             + Tambah Blog
           </button>
         </a>
@@ -20,7 +22,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Cari Blog</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Cari Blog</label
+        >
         <input
           type="text"
           id="searchInput"
@@ -29,7 +33,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Kategori</label
+        >
         <select
           id="categoryFilter"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -41,7 +47,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
         </select>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2"
+          >Status</label
+        >
         <select
           id="statusFilter"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -63,20 +71,40 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   </div>
 
   <!-- Loading State -->
-  <div id="loadingState" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  <div
+    id="loadingState"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center"
+  >
+    <div
+      class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
+    >
+    </div>
     <p class="text-gray-600">Memuat data blog...</p>
   </div>
 
   <!-- Error State -->
-  <div id="errorState" class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hidden">
+  <div
+    id="errorState"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center hidden"
+  >
     <div class="text-red-500 mb-4">
-      <svg class="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+      <svg
+        class="h-12 w-12 mx-auto"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
       </svg>
     </div>
     <h3 class="text-lg font-medium text-gray-900 mb-2">Gagal Memuat Data</h3>
-    <p class="text-gray-600 mb-4">Terjadi kesalahan saat mengambil data blog.</p>
+    <p class="text-gray-600 mb-4">
+      Terjadi kesalahan saat mengambil data blog.
+    </p>
     <button
       id="retryButton"
       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
@@ -86,23 +114,49 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   </div>
 
   <!-- Blog Table -->
-  <div id="blogTable" class="bg-white rounded-lg shadow-sm border border-gray-200 hidden">
+  <div
+    id="blogTable"
+    class="bg-white rounded-lg shadow-sm border border-gray-200 hidden"
+  >
     <div class="px-6 py-4 border-b border-gray-200">
       <h3 class="text-lg font-semibold text-gray-900">Daftar Blog</h3>
-      <p class="text-sm text-gray-600 mt-1">Total: <span id="totalBlogs">0</span> blog</p>
+      <p class="text-sm text-gray-600 mt-1">
+        Total: <span id="totalBlogs">0</span> blog
+      </p>
     </div>
-    
+
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blog</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penulis</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Blog</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Penulis</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Kategori</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Status</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Views</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Tanggal</th
+            >
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >Aksi</th
+            >
           </tr>
         </thead>
         <tbody id="blogTableBody" class="bg-white divide-y divide-gray-200">
@@ -110,12 +164,14 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
         </tbody>
       </table>
     </div>
-    
+
     <!-- Pagination -->
     <div class="px-6 py-4 border-t border-gray-200">
       <div class="flex items-center justify-between">
         <div class="text-sm text-gray-700">
-          Menampilkan <span id="showingFrom">1</span> - <span id="showingTo">10</span> dari <span id="totalItems">0</span> blog
+          Menampilkan <span id="showingFrom">1</span> - <span id="showingTo"
+            >10</span
+          > dari <span id="totalItems">0</span> blog
         </div>
         <div class="flex space-x-2">
           <button
@@ -140,19 +196,40 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   </div>
 
   <!-- Create/Edit Modal -->
-  <div id="blogModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+  <div
+    id="blogModal"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full"
+  >
+    <div
+      class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white"
+    >
       <div class="flex justify-between items-center mb-4">
-        <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">Tambah Blog</h3>
-        <button onclick="closeBlogModal()" class="text-gray-400 hover:text-gray-500">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <h3 id="modalTitle" class="text-lg font-semibold text-gray-900">
+          Tambah Blog
+        </h3>
+        <button
+          onclick="closeBlogModal()"
+          class="text-gray-400 hover:text-gray-500"
+        >
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
       <form id="blogForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Judul Blog</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Judul Blog</label
+          >
           <input
             type="text"
             id="blogTitle"
@@ -162,18 +239,21 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Konten</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Konten</label
+          >
           <textarea
             id="blogContent"
             name="content"
             rows="6"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            required
-          ></textarea>
+            required></textarea>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Kategori</label
+            >
             <select
               id="blogCategory"
               name="category"
@@ -187,7 +267,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Status</label
+            >
             <select
               id="blogStatus"
               name="status"
@@ -200,7 +282,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Gambar Blog</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1"
+            >Gambar Blog</label
+          >
           <input
             type="file"
             id="blogImage"
@@ -208,7 +292,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
             accept="image/*"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
-          <p class="text-sm text-gray-500 mt-1">Biarkan kosong jika tidak ingin mengubah gambar</p>
+          <p class="text-sm text-gray-500 mt-1">
+            Biarkan kosong jika tidak ingin mengubah gambar
+          </p>
         </div>
         <div class="flex justify-end space-x-3 mt-6">
           <button
@@ -230,18 +316,38 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+  <div
+    id="deleteModal"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full"
+  >
+    <div
+      class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+    >
       <div class="mt-3 text-center">
-        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-          <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        <div
+          class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100"
+        >
+          <svg
+            class="h-6 w-6 text-red-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            ></path>
           </svg>
         </div>
-        <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Hapus Blog</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">
+          Hapus Blog
+        </h3>
         <div class="mt-2 px-7 py-3">
           <p class="text-sm text-gray-500">
-            Apakah Anda yakin ingin menghapus blog ini? Tindakan ini tidak dapat dibatalkan.
+            Apakah Anda yakin ingin menghapus blog ini? Tindakan ini tidak dapat
+            dibatalkan.
           </p>
         </div>
         <div class="items-center px-4 py-3">
@@ -266,7 +372,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
 <script>
   // Blog data and state
   interface Blog {
-    _id: string;
+    id: string;
     title: string;
     content: string;
     image: string;
@@ -274,7 +380,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
     status: string;
     viewCount: number;
     author: {
-      _id: string;
+      id: string;
       nama: string;
       username: string;
     };
@@ -292,45 +398,51 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   const API_URL = import.meta.env.PUBLIC_API_URL;
 
   // DOM elements
-  const loadingState = document.getElementById('loadingState');
-  const errorState = document.getElementById('errorState');
-  const blogTable = document.getElementById('blogTable');
-  const blogTableBody = document.getElementById('blogTableBody');
-  const searchInput = document.getElementById('searchInput') as HTMLInputElement;
-  const categoryFilter = document.getElementById('categoryFilter') as HTMLSelectElement;
-  const statusFilter = document.getElementById('statusFilter') as HTMLSelectElement;
-  const resetFilters = document.getElementById('resetFilters');
-  const retryButton = document.getElementById('retryButton');
-  const createBlogBtn = document.getElementById('createBlogBtn');
+  const loadingState = document.getElementById("loadingState");
+  const errorState = document.getElementById("errorState");
+  const blogTable = document.getElementById("blogTable");
+  const blogTableBody = document.getElementById("blogTableBody");
+  const searchInput = document.getElementById(
+    "searchInput",
+  ) as HTMLInputElement;
+  const categoryFilter = document.getElementById(
+    "categoryFilter",
+  ) as HTMLSelectElement;
+  const statusFilter = document.getElementById(
+    "statusFilter",
+  ) as HTMLSelectElement;
+  const resetFilters = document.getElementById("resetFilters");
+  const retryButton = document.getElementById("retryButton");
+  const createBlogBtn = document.getElementById("createBlogBtn");
 
   // Utility functions
   function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   }
 
   // State management
   function showLoading() {
-    loadingState?.classList.remove('hidden');
-    errorState?.classList.add('hidden');
-    blogTable?.classList.add('hidden');
+    loadingState?.classList.remove("hidden");
+    errorState?.classList.add("hidden");
+    blogTable?.classList.add("hidden");
   }
 
   function showError() {
-    loadingState?.classList.add('hidden');
-    errorState?.classList.remove('hidden');
-    blogTable?.classList.add('hidden');
+    loadingState?.classList.add("hidden");
+    errorState?.classList.remove("hidden");
+    blogTable?.classList.add("hidden");
   }
 
   function showTable() {
-    loadingState?.classList.add('hidden');
-    errorState?.classList.add('hidden');
-    blogTable?.classList.remove('hidden');
+    loadingState?.classList.add("hidden");
+    errorState?.classList.add("hidden");
+    blogTable?.classList.remove("hidden");
   }
 
   // API calls
@@ -339,21 +451,20 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
       showLoading();
       // Fetch all blogs (both draft and published) for admin
       const response = await fetch(`${API_URL}/blog?status=all`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       blogs = data.blogs || [];
       filteredBlogs = [...blogs];
-      
+
       showTable();
       renderTable();
       updatePagination();
-      
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      console.error("Error fetching blogs:", error);
       showError();
     }
   }
@@ -361,13 +472,13 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
   // Table rendering
   function renderTable() {
     if (!blogTableBody) return;
-    
+
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedBlogs = filteredBlogs.slice(startIndex, endIndex);
-    
-    blogTableBody.innerHTML = '';
-    
+
+    blogTableBody.innerHTML = "";
+
     if (paginatedBlogs.length === 0) {
       blogTableBody.innerHTML = `
         <tr>
@@ -378,16 +489,16 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
       `;
       return;
     }
-    
-    paginatedBlogs.forEach(item => {
-      const row = document.createElement('tr');
-      row.className = 'hover:bg-gray-50';
-      
+
+    paginatedBlogs.forEach((item) => {
+      const row = document.createElement("tr");
+      row.className = "hover:bg-gray-50";
+
       row.innerHTML = `
         <td class="px-6 py-4">
           <div class="flex items-center">
             <img
-              src="${item.image || '/images/empty-image-placeholder.webp'}"
+              src="${item.image || "/images/empty-image-placeholder.webp"}"
               alt="${item.title}"
               class="h-12 w-12 rounded-lg object-cover mr-4"
             />
@@ -407,18 +518,22 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
         </td>
         <td class="px-6 py-4">
           <span class="px-2 py-1 text-xs font-medium rounded-full capitalize ${
-            item.category === 'pengumuman' ? 'bg-purple-100 text-purple-800' :
-            item.category === 'kegiatan' ? 'bg-green-100 text-green-800' :
-            'bg-blue-100 text-blue-800'
+            item.category === "pengumuman"
+              ? "bg-purple-100 text-purple-800"
+              : item.category === "kegiatan"
+                ? "bg-green-100 text-green-800"
+                : "bg-blue-100 text-blue-800"
           }">
             ${item.category}
           </span>
         </td>
         <td class="px-6 py-4">
           <span class="px-2 py-1 text-xs font-medium rounded-full ${
-            item.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+            item.status === "published"
+              ? "bg-green-100 text-green-800"
+              : "bg-yellow-100 text-yellow-800"
           }">
-            ${item.status === 'published' ? 'Published' : 'Draft'}
+            ${item.status === "published" ? "Published" : "Draft"}
           </span>
         </td>
         <td class="px-6 py-4">
@@ -431,13 +546,13 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
         <td class="px-6 py-4">
           <div class="flex space-x-2">
             <button
-              onclick="editBlog('${item._id}')"
+              onclick="editBlog('${item.id}')"
               class="text-green-600 hover:text-green-800 text-sm font-medium"
             >
               Edit
             </button>
             <button
-              onclick="deleteBlog('${item._id}')"
+              onclick="deleteBlog('${item.id}')"
               class="text-red-600 hover:text-red-800 text-sm font-medium"
             >
               Hapus
@@ -445,12 +560,12 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
           </div>
         </td>
       `;
-      
+
       blogTableBody.appendChild(row);
     });
-    
+
     // Update total blogs counter
-    const totalBlogsElement = document.getElementById('totalBlogs');
+    const totalBlogsElement = document.getElementById("totalBlogs");
     if (totalBlogsElement) {
       totalBlogsElement.textContent = filteredBlogs.length.toString();
     }
@@ -461,24 +576,24 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
     const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, filteredBlogs.length);
-    
+
     // Update pagination info
-    const showingFrom = document.getElementById('showingFrom');
-    const showingTo = document.getElementById('showingTo');
-    const totalItems = document.getElementById('totalItems');
-    
+    const showingFrom = document.getElementById("showingFrom");
+    const showingTo = document.getElementById("showingTo");
+    const totalItems = document.getElementById("totalItems");
+
     if (showingFrom) showingFrom.textContent = startItem.toString();
     if (showingTo) showingTo.textContent = endItem.toString();
     if (totalItems) totalItems.textContent = filteredBlogs.length.toString();
-    
+
     // Update prev/next buttons
-    const prevButton = document.getElementById('prevPage') as HTMLButtonElement;
-    const nextButton = document.getElementById('nextPage') as HTMLButtonElement;
-    
+    const prevButton = document.getElementById("prevPage") as HTMLButtonElement;
+    const nextButton = document.getElementById("nextPage") as HTMLButtonElement;
+
     if (prevButton) {
       prevButton.disabled = currentPage === 1;
     }
-    
+
     if (nextButton) {
       nextButton.disabled = currentPage === totalPages;
     }
@@ -486,20 +601,21 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
 
   // Filtering
   function applyFilters() {
-    const searchTerm = searchInput?.value.toLowerCase() || '';
-    const categoryValue = categoryFilter?.value || '';
-    const statusValue = statusFilter?.value || '';
-    
-    filteredBlogs = blogs.filter(item => {
-      const matchesSearch = item.title.toLowerCase().includes(searchTerm) ||
-                          item.content.toLowerCase().includes(searchTerm);
-      
+    const searchTerm = searchInput?.value.toLowerCase() || "";
+    const categoryValue = categoryFilter?.value || "";
+    const statusValue = statusFilter?.value || "";
+
+    filteredBlogs = blogs.filter((item) => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.content.toLowerCase().includes(searchTerm);
+
       const matchesCategory = !categoryValue || item.category === categoryValue;
       const matchesStatus = !statusValue || item.status === statusValue;
-      
+
       return matchesSearch && matchesCategory && matchesStatus;
     });
-    
+
     currentPage = 1;
     renderTable();
     updatePagination();
@@ -507,44 +623,49 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
 
   // Modal functions
   function openBlogModal(id: string | null = null) {
-    const modal = document.getElementById('blogModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const form = document.getElementById('blogForm') as HTMLFormElement;
-    
+    const modal = document.getElementById("blogModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const form = document.getElementById("blogForm") as HTMLFormElement;
+
     isEditing = !!id;
     selectedBlogId = id;
-    
+
     if (modalTitle) {
-      modalTitle.textContent = isEditing ? 'Edit Blog' : 'Tambah Blog';
+      modalTitle.textContent = isEditing ? "Edit Blog" : "Tambah Blog";
     }
-    
+
     if (form) {
       form.reset();
-      
+
       if (isEditing && id) {
-        const blogItem = blogs.find(item => item._id === id);
+        const blogItem = blogs.find((item) => item.id === id);
         if (blogItem) {
-          (document.getElementById('blogTitle') as HTMLInputElement).value = blogItem.title;
-          (document.getElementById('blogContent') as HTMLTextAreaElement).value = blogItem.content;
-          (document.getElementById('blogCategory') as HTMLSelectElement).value = blogItem.category;
-          (document.getElementById('blogStatus') as HTMLSelectElement).value = blogItem.status;
+          (document.getElementById("blogTitle") as HTMLInputElement).value =
+            blogItem.title;
+          (
+            document.getElementById("blogContent") as HTMLTextAreaElement
+          ).value = blogItem.content;
+          (document.getElementById("blogCategory") as HTMLSelectElement).value =
+            blogItem.category;
+          (document.getElementById("blogStatus") as HTMLSelectElement).value =
+            blogItem.status;
         }
       }
     }
-    
-    if (modal) modal.classList.remove('hidden');
+
+    if (modal) modal.classList.remove("hidden");
   }
 
   function closeBlogModal() {
-    const modal = document.getElementById('blogModal');
-    if (modal) modal.classList.add('hidden');
+    const modal = document.getElementById("blogModal");
+    if (modal) modal.classList.add("hidden");
     isEditing = false;
     selectedBlogId = null;
   }
 
   function closeDeleteModal() {
-    const modal = document.getElementById('deleteModal');
-    if (modal) modal.classList.add('hidden');
+    const modal = document.getElementById("deleteModal");
+    if (modal) modal.classList.add("hidden");
     selectedBlogId = null;
   }
 
@@ -553,69 +674,72 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
-    
+
     try {
       // Handle image upload if present
-      const imageFile = (document.getElementById('blogImage') as HTMLInputElement)?.files?.[0];
+      const imageFile = (
+        document.getElementById("blogImage") as HTMLInputElement
+      )?.files?.[0];
       let imageUrl = null;
-      
+
       if (imageFile) {
         const imageFormData = new FormData();
-        imageFormData.append('image', imageFile);
-        
+        imageFormData.append("image", imageFile);
+
         const uploadResponse = await fetch(`${API_URL}/upload`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: imageFormData
+          body: imageFormData,
         });
-        
-        if (!uploadResponse.ok) throw new Error('Failed to upload image');
+
+        if (!uploadResponse.ok) throw new Error("Failed to upload image");
         const uploadResult = await uploadResponse.json();
-        console.log('Upload result:', uploadResult);
+        console.log("Upload result:", uploadResult);
         imageUrl = uploadResult.imageUrl;
-        console.log('Image URL to save:', imageUrl);
+        console.log("Image URL to save:", imageUrl);
       }
-      
+
       // Prepare blog data
       const blogData = {
-        title: formData.get('title'),
-        content: formData.get('content'),
-        category: formData.get('category'),
-        status: formData.get('status'),
-        ...(imageUrl && { image: imageUrl })
+        title: formData.get("title"),
+        content: formData.get("content"),
+        category: formData.get("category"),
+        status: formData.get("status"),
+        ...(imageUrl && { image: imageUrl }),
       };
-      
-      const url = isEditing ? 
-        `${API_URL}/blog/${selectedBlogId}` :
-        `${API_URL}/blog`;
-      
+
+      const url = isEditing
+        ? `${API_URL}/blog/${selectedBlogId}`
+        : `${API_URL}/blog`;
+
       const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
+        method: isEditing ? "PUT" : "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify(blogData)
+        body: JSON.stringify(blogData),
       });
-      
-      if (!response.ok) throw new Error('Failed to save blog');
-      
+
+      if (!response.ok) throw new Error("Failed to save blog");
+
       closeBlogModal();
       fetchBlogs();
-      alert(isEditing ? 'Blog berhasil diperbarui' : 'Blog berhasil ditambahkan');
-      
+      alert(
+        isEditing ? "Blog berhasil diperbarui" : "Blog berhasil ditambahkan",
+      );
     } catch (error) {
-      console.error('Error saving blog:', error);
-      alert('Gagal menyimpan blog');
+      console.error("Error saving blog:", error);
+      alert("Gagal menyimpan blog");
     }
   }
 
   async function deleteBlog(id: string) {
     selectedBlogId = id;
-    const modal = document.getElementById('deleteModal');
-    if (modal) modal.classList.remove('hidden');
+    const modal = document.getElementById("deleteModal");
+    if (modal) modal.classList.remove("hidden");
   }
 
   async function confirmDeleteBlog() {
@@ -623,60 +747,60 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
 
     try {
       const response = await fetch(`${API_URL}/blog/${selectedBlogId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
 
-      if (!response.ok) throw new Error('Failed to delete blog');
+      if (!response.ok) throw new Error("Failed to delete blog");
 
       closeDeleteModal();
       fetchBlogs();
-      alert('Blog berhasil dihapus');
+      alert("Blog berhasil dihapus");
     } catch (error) {
-      console.error('Error deleting blog:', error);
-      alert('Gagal menghapus blog');
+      console.error("Error deleting blog:", error);
+      alert("Gagal menghapus blog");
     }
   }
 
   // Event listeners
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", () => {
     // Initial fetch
     fetchBlogs();
-    
+
     // Form submission
-    const blogForm = document.getElementById('blogForm');
+    const blogForm = document.getElementById("blogForm");
     if (blogForm) {
-      blogForm.addEventListener('submit', handleBlogSubmit);
+      blogForm.addEventListener("submit", handleBlogSubmit);
     }
-    
+
     // Search and filter listeners
-    searchInput?.addEventListener('input', applyFilters);
-    categoryFilter?.addEventListener('change', applyFilters);
-    statusFilter?.addEventListener('change', applyFilters);
-    
+    searchInput?.addEventListener("input", applyFilters);
+    categoryFilter?.addEventListener("change", applyFilters);
+    statusFilter?.addEventListener("change", applyFilters);
+
     // Reset filters
-    resetFilters?.addEventListener('click', () => {
-      if (searchInput) searchInput.value = '';
-      if (categoryFilter) categoryFilter.value = '';
-      if (statusFilter) statusFilter.value = '';
+    resetFilters?.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      if (categoryFilter) categoryFilter.value = "";
+      if (statusFilter) statusFilter.value = "";
       applyFilters();
     });
-    
+
     // Retry button
-    retryButton?.addEventListener('click', fetchBlogs);
-    
+    retryButton?.addEventListener("click", fetchBlogs);
+
     // Pagination
-    document.getElementById('prevPage')?.addEventListener('click', () => {
+    document.getElementById("prevPage")?.addEventListener("click", () => {
       if (currentPage > 1) {
         currentPage--;
         renderTable();
         updatePagination();
       }
     });
-    
-    document.getElementById('nextPage')?.addEventListener('click', () => {
+
+    document.getElementById("nextPage")?.addEventListener("click", () => {
       const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
       if (currentPage < totalPages) {
         currentPage++;
@@ -686,7 +810,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro"
     });
 
     // Delete confirmation
-    document.getElementById('confirmDelete')?.addEventListener('click', confirmDeleteBlog);
+    document
+      .getElementById("confirmDelete")
+      ?.addEventListener("click", confirmDeleteBlog);
   });
 
   // Make functions globally available

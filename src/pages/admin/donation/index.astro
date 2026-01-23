@@ -120,7 +120,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       </div>
     </div>
   </div>
-  
+
   <!-- Filters and Search -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -250,7 +250,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 
   <!-- Tombol Tambah Donasi -->
   <div class="mb-4">
-    <button 
+    <button
       id="addDonationButton"
       class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 md:px-8 py-2 md:py-2 rounded-md"
     >
@@ -259,11 +259,20 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   </div>
 
   <!-- Modal Tambah Donasi -->
-  <div id="addDonationModal" class="fixed inset-0 bg-blue-900/70 hidden z-50 justify-center items-center">
-    <div class="flex items-center justify-center p-4 mx-auto h-full max-h-screen">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+  <div
+    id="addDonationModal"
+    class="fixed inset-0 bg-blue-900/70 hidden z-50 justify-center items-center"
+  >
+    <div
+      class="flex items-center justify-center p-4 mx-auto h-full max-h-screen"
+    >
+      <div
+        class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+      >
         <div class="p-6 border-b border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900">Tambah Donasi Baru</h3>
+          <h3 class="text-lg font-semibold text-gray-900">
+            Tambah Donasi Baru
+          </h3>
         </div>
         <div class="overflow-y-auto flex-1 p-6">
           <form id="addDonationForm" class="space-y-4">
@@ -353,8 +362,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
                 name="message"
                 rows="3"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Masukkan pesan donatur"
-              ></textarea>
+                placeholder="Masukkan pesan donatur"></textarea>
             </div>
 
             <!-- Donasi Anonim -->
@@ -617,7 +625,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       donations = (donationsData.donations || []).map((donation) => {
         // Handle null/undefined campaignId
         if (!donation.campaignId) {
-          console.warn(`Donation ${donation._id} has no campaignId`);
+          console.warn(`Donation ${donation.id} has no campaignId`);
           return {
             ...donation,
             campaignId: null,
@@ -629,9 +637,12 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         return {
           ...donation,
           // Extract campaign info from populated campaignId with null safety
-          campaignId: donation.campaignId._id || donation.campaignId,
-          campaignTitle: donation.campaignId.title || "Campaign tidak ditemukan",
-          campaignImage: donation.campaignId.imageUrl || "/images/empty-image-placeholder.webp",
+          campaignId: donation.campaignId.id || donation.campaignId,
+          campaignTitle:
+            donation.campaignId.title || "Campaign tidak ditemukan",
+          campaignImage:
+            donation.campaignId.imageUrl ||
+            "/images/empty-image-placeholder.webp",
         };
       });
 
@@ -664,8 +675,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     document.getElementById("pendingCount").textContent = pending.length;
     document.getElementById("failedCount").textContent = failed.length;
     document.getElementById("totalAmount").textContent =
-    formatCurrency(totalAmount);
-    
+      formatCurrency(totalAmount);
   }
 
   // State management
@@ -777,14 +787,14 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       <td class="px-6 py-4">
         <div class="flex space-x-2">
           <button
-            onclick="viewDonation('${donation._id}')"
+            onclick="viewDonation('${donation.id}')"
             class="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             Detail
           </button>
           <div class="relative">
             <button
-              onclick="toggleStatusDropdown('${donation._id}')"
+              onclick="toggleStatusDropdown('${donation.id}')"
               class="text-green-600 hover:text-green-800 text-sm font-medium flex items-center"
             >
               Update Status
@@ -792,21 +802,21 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
-            <div id="dropdown-${donation._id}" class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-10 hidden">
+            <div id="dropdown-${donation.id}" class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-10 hidden">
               <button
-                onclick="updateStatus('${donation._id}', 'completed')"
+                onclick="updateStatus('${donation.id}', 'completed')"
                 class="block w-full px-4 py-2 text-sm text-left text-green-600 hover:bg-green-50 rounded-t-md"
               >
                 ✓ Selesai
               </button>
               <button
-                onclick="updateStatus('${donation._id}', 'pending')"
+                onclick="updateStatus('${donation.id}', 'pending')"
                 class="block w-full px-4 py-2 text-sm text-left text-yellow-600 hover:bg-yellow-50"
               >
                 ⟳ Pending
               </button>
               <button
-                onclick="updateStatus('${donation._id}', 'failed')"
+                onclick="updateStatus('${donation.id}', 'failed')"
                 class="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-red-50 rounded-b-md"
               >
                 ✗ Gagal
@@ -814,7 +824,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
             </div>
           </div>
           <button
-            onclick="deleteDonation('${donation._id}')"
+            onclick="deleteDonation('${donation.id}')"
             class="text-red-600 hover:text-red-800 text-sm font-medium"
           >
             Hapus
@@ -839,7 +849,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(
       currentPage * itemsPerPage,
-      filteredDonations.length
+      filteredDonations.length,
     );
 
     // Update pagination info
@@ -904,7 +914,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     // Setup modal handlers
     const addDonationButton = document.getElementById("addDonationButton");
     const addDonationModal = document.getElementById("addDonationModal");
-    
+
     if (addDonationButton) {
       addDonationButton.addEventListener("click", () => {
         if (addDonationModal) {
@@ -941,14 +951,16 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     // Search and filter listeners
     if (searchInput) searchInput.addEventListener("input", applyFilters);
     if (statusFilter) statusFilter.addEventListener("change", applyFilters);
-    if (paymentMethodFilter) paymentMethodFilter.addEventListener("change", applyFilters);
+    if (paymentMethodFilter)
+      paymentMethodFilter.addEventListener("change", applyFilters);
 
     // Reset filters
     if (resetFilters) {
       resetFilters.addEventListener("click", () => {
         if (searchInput instanceof HTMLInputElement) searchInput.value = "";
         if (statusFilter instanceof HTMLSelectElement) statusFilter.value = "";
-        if (paymentMethodFilter instanceof HTMLSelectElement) paymentMethodFilter.value = "";
+        if (paymentMethodFilter instanceof HTMLSelectElement)
+          paymentMethodFilter.value = "";
         applyFilters();
       });
     }
@@ -996,14 +1008,17 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
             paymentMethod: formData.get("paymentMethod"),
             paymentStatus: formData.get("paymentStatus"),
             message: formData.get("message"),
-            isAnonymous: formData.get("isAnonymous") === "on"
+            isAnonymous: formData.get("isAnonymous") === "on",
           };
 
           const authenticatedFetch = createAuthenticatedFetch();
-          const response = await authenticatedFetch(`${API_URL}/donations/admin`, {
-            method: "POST",
-            body: JSON.stringify(data)
-          });
+          const response = await authenticatedFetch(
+            `${API_URL}/donations/admin`,
+            {
+              method: "POST",
+              body: JSON.stringify(data),
+            },
+          );
 
           if (!response.ok) {
             const errorData = await response.json();
@@ -1018,7 +1033,11 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
           fetchData(); // Refresh data
         } catch (error) {
           console.error("Error adding donation:", error);
-          alert(error instanceof Error ? error.message : "Terjadi kesalahan saat menambah donasi");
+          alert(
+            error instanceof Error
+              ? error.message
+              : "Terjadi kesalahan saat menambah donasi",
+          );
         }
       });
     }
@@ -1044,9 +1063,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       }
 
       // Add campaign options
-      campaigns.forEach(campaign => {
+      campaigns.forEach((campaign) => {
         const option = document.createElement("option");
-        option.value = campaign._id;
+        option.value = campaign.id;
         option.textContent = campaign.title;
         select.appendChild(option);
       });
@@ -1063,7 +1082,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   }
 
   async function updateStatus(donationId, newStatus) {
-    if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`)) {
+    if (
+      !confirm(`Apakah Anda yakin ingin mengubah status menjadi ${newStatus}?`)
+    ) {
       return;
     }
 
@@ -1074,7 +1095,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         {
           method: "PATCH",
           body: JSON.stringify({ paymentStatus: newStatus }),
-        }
+        },
       );
 
       if (response.status === 401) {
@@ -1105,7 +1126,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         `${API_URL}/donations/${donationId}`,
         {
           method: "DELETE",
-        }
+        },
       );
 
       if (response.status === 401) {
