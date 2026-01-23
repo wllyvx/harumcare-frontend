@@ -261,7 +261,7 @@ const getCategoryLabel = (category: string) => {
             </div>
             <div class="md:w-2/3">
               <h4 class="text-lg font-semibold text-gray-800 mb-2">
-                <a href="/campaign/${campaign._id}" class="hover:text-blue-600 transition-colors">
+                <a href={`/campaign/${campaign.id}`} class="hover:text-blue-600 transition-colors">
                   ${campaign.title}
                 </a>
               </h4>
@@ -299,7 +299,7 @@ const getCategoryLabel = (category: string) => {
                 </div>
                 
                 <a 
-                  href="/campaign/${campaign._id}" 
+                  href={`/campaign/${campaign.id}`} 
                   class="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors text-center w-full md:w-auto"
                 >
                   Lihat Kampanye

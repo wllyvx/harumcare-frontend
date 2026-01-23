@@ -1,9 +1,8 @@
 ---
-import type { ObjectId } from 'mongoose';
-import Card from '../common/Card.astro';
+import Card from "../common/Card.astro";
 
 interface Campaign {
-  _id: ObjectId;
+  id: number;
   title: string;
   description: string;
   imageUrl: string;
@@ -25,7 +24,14 @@ interface Props {
   searchQuery: string;
 }
 
-const { campaigns, totalPages, currentPage, categories, activeCategory, searchQuery } = Astro.props;
+const {
+  campaigns,
+  totalPages,
+  currentPage,
+  categories,
+  activeCategory,
+  searchQuery,
+} = Astro.props;
 
 // Hitung sisa hari untuk setiap campaign
 const today = new Date();
@@ -39,16 +45,16 @@ const campaignsWithDaysLeft = campaigns.map((campaign: Campaign) => {
 // Format kategori untuk tampilan
 function formatCategory(category: string): string {
   return category
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 // Fungsi untuk membuat URL dengan parameter yang ada
 function buildUrl(params: Record<string, string>): string {
   const urlParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
-    if (value && value.trim() !== '') {
+    if (value && value.trim() !== "") {
       urlParams.append(key, value.trim());
     }
   });
@@ -62,7 +68,8 @@ function buildUrl(params: Record<string, string>): string {
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-gray-800 mb-4">Semua Kampanye</h1>
       <p class="text-gray-600 max-w-2xl mx-auto">
-        Temukan dan dukung berbagai kampanye yang membutuhkan bantuan Anda. Setiap donasi membawa perubahan berarti bagi mereka yang membutuhkan.
+        Temukan dan dukung berbagai kampanye yang membutuhkan bantuan Anda.
+        Setiap donasi membawa perubahan berarti bagi mereka yang membutuhkan.
       </p>
     </div>
 
@@ -71,7 +78,11 @@ function buildUrl(params: Record<string, string>): string {
       <form id="filter-form" class="flex flex-col md:flex-row gap-4 items-end">
         <!-- Search Input -->
         <div class="flex-1">
-          <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Kampanye</label>
+          <label
+            for="search"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >Cari Kampanye</label
+          >
           <input
             type="text"
             id="search"
@@ -84,18 +95,23 @@ function buildUrl(params: Record<string, string>): string {
 
         <!-- Category Filter -->
         <div class="w-full md:w-48">
-          <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+          <label
+            for="category"
+            class="block text-sm font-medium text-gray-700 mb-1">Kategori</label
+          >
           <select
             id="category"
             name="category"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Semua Kategori</option>
-            {categories.map((cat) => (
-              <option value={cat} selected={cat === activeCategory}>
-                {formatCategory(cat)}
-              </option>
-            ))}
+            {
+              categories.map((cat) => (
+                <option value={cat} selected={cat === activeCategory}>
+                  {formatCategory(cat)}
+                </option>
+              ))
+            }
           </select>
         </div>
 
@@ -108,59 +124,75 @@ function buildUrl(params: Record<string, string>): string {
         </button>
 
         <!-- Reset Button -->
-        {(searchQuery || activeCategory) && (
-          <a
-            href="/campaign"
-            class="w-full md:w-auto px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200 text-center"
-          >
-            Reset Filter
-          </a>
-        )}
+        {
+          (searchQuery || activeCategory) && (
+            <a
+              href="/campaign"
+              class="w-full md:w-auto px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200 text-center"
+            >
+              Reset Filter
+            </a>
+          )
+        }
       </form>
     </div>
 
     <!-- Campaign Cards -->
-    {campaignsWithDaysLeft.length > 0 ? (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 place-content-center">
-        {campaignsWithDaysLeft.map((campaign) => (
-          <Card
-            _id={campaign._id}
-            title={campaign.title || 'Untitled'}
-            description={campaign.description || 'Tidak ada Deskripsi'}
-            imageUrl={campaign.imageUrl}
-            targetAmount={campaign.targetAmount}
-            currentAmount={campaign.currentAmount || 0}
-            daysLeft={campaign.daysLeft || 0}
-            donorCount={campaign.donorCount || 0}
-            organizationName={campaign.organizationName || 'Anonymous'}
-            organizationLogo={campaign.organizationLogo}
-            category={formatCategory(campaign.category) || 'Tidak Berkategori'}
-          />
-        ))}
-      </div>
-    ) : (
-      <div class="text-center py-12">
-        <p class="text-gray-500">Tidak ada kampanye yang tersedia saat ini.</p>
-      </div>
-    )}
+    {
+      campaignsWithDaysLeft.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 place-content-center">
+          {campaignsWithDaysLeft.map((campaign) => (
+            <Card
+              id={campaign.id}
+              title={campaign.title || "Untitled"}
+              description={campaign.description || "Tidak ada Deskripsi"}
+              imageUrl={campaign.imageUrl}
+              targetAmount={campaign.targetAmount}
+              currentAmount={campaign.currentAmount || 0}
+              daysLeft={campaign.daysLeft || 0}
+              donorCount={campaign.donorCount || 0}
+              organizationName={campaign.organizationName || "Anonymous"}
+              organizationLogo={campaign.organizationLogo}
+              category={
+                formatCategory(campaign.category) || "Tidak Berkategori"
+              }
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-gray-500">
+            Tidak ada kampanye yang tersedia saat ini.
+          </p>
+        </div>
+      )
+    }
 
     <!-- Pagination -->
-    {totalPages > 1 && (
-      <div class="flex justify-center mt-12 space-x-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-          <a
-            href={buildUrl({ page: pageNum.toString(), search: searchQuery, category: activeCategory })}
-            class={`px-4 py-2 rounded-lg ${
-              pageNum === currentPage
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {pageNum}
-          </a>
-        ))}
-      </div>
-    )}
+    {
+      totalPages > 1 && (
+        <div class="flex justify-center mt-12 space-x-2">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+            (pageNum) => (
+              <a
+                href={buildUrl({
+                  page: pageNum.toString(),
+                  search: searchQuery,
+                  category: activeCategory,
+                })}
+                class={`px-4 py-2 rounded-lg ${
+                  pageNum === currentPage
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {pageNum}
+              </a>
+            ),
+          )}
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -172,20 +204,20 @@ function buildUrl(params: Record<string, string>): string {
 
 <script>
   // Handle form submission
-  const form = document.getElementById('filter-form');
+  const form = document.getElementById("filter-form");
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
       const formData = new FormData(form as HTMLFormElement);
       const searchParams = new URLSearchParams();
-      
+
       // Tambahkan parameter yang ada
-      const search = formData.get('search')?.toString().trim();
-      const category = formData.get('category')?.toString().trim();
-      
-      if (search) searchParams.append('search', search);
-      if (category) searchParams.append('category', category);
-      
+      const search = formData.get("search")?.toString().trim();
+      const category = formData.get("category")?.toString().trim();
+
+      if (search) searchParams.append("search", search);
+      if (category) searchParams.append("category", category);
+
       // Redirect ke URL dengan filter
       window.location.href = `/campaign?${searchParams.toString()}`;
     });
