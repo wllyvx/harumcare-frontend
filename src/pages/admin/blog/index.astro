@@ -254,17 +254,30 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
             <label class="block text-sm font-medium text-gray-700 mb-1"
               >Kategori</label
             >
-            <select
-              id="blogCategory"
-              name="category"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            >
-              <option value="">Pilih Kategori</option>
-              <option value="umum">Umum</option>
-              <option value="kegiatan">Kegiatan</option>
-              <option value="pengumuman">Pengumuman</option>
-            </select>
+            <div class="space-y-2">
+              <select
+                id="blogCategory"
+                name="category"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="">Pilih Kategori</option>
+              </select>
+
+              <!-- Custom Category Input (hidden by default) -->
+              <div id="customCategoryInput" class="hidden">
+                <input
+                  type="text"
+                  id="customBlogCategory"
+                  name="customCategory"
+                  placeholder="Masukkan nama kategori baru..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p class="mt-1 text-xs text-gray-500">
+                  Kategori baru akan ditambahkan ke daftar kategori
+                </p>
+              </div>
+            </div>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1"
@@ -459,6 +472,50 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   }
 
   // API calls
+  async function loadCategories() {
+    try {
+      const response = await fetch(`${API_URL}/blog/categories`);
+      if (response.ok) {
+        const categories = await response.json();
+
+        // Populate blog category filter
+        if (categoryFilter) {
+          categoryFilter.innerHTML = '<option value="">Semua Kategori</option>';
+          categories.forEach((category: string) => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent =
+              category.charAt(0).toUpperCase() + category.slice(1);
+            categoryFilter.appendChild(option);
+          });
+        }
+
+        // Populate blog modal category select
+        const blogCategory = document.getElementById(
+          "blogCategory",
+        ) as HTMLSelectElement;
+        if (blogCategory) {
+          blogCategory.innerHTML = '<option value="">Pilih Kategori</option>';
+          categories.forEach((category: string) => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent =
+              category.charAt(0).toUpperCase() + category.slice(1);
+            blogCategory.appendChild(option);
+          });
+
+          // Add custom option
+          const customOption = document.createElement("option");
+          customOption.value = "custom";
+          customOption.textContent = "+ Tambah Kategori Baru";
+          blogCategory.appendChild(customOption);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  }
+
   async function loadCampaigns() {
     try {
       const response = await fetch(`${API_URL}/campaigns`);
@@ -677,7 +734,9 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       form.reset();
 
       if (isEditing && id) {
-        const blogItem = blogs.find((item) => item.id === id);
+        const blogItem = blogs.find(
+          (item) => item.id.toString() === id.toString(),
+        );
         if (blogItem) {
           (document.getElementById("blogTitle") as HTMLInputElement).value =
             blogItem.title;
@@ -691,6 +750,18 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
           (
             document.getElementById("blogCampaignId") as HTMLSelectElement
           ).value = blogItem.campaignId?.toString() || "";
+
+          // Hide custom category if it's editing existing category
+          const customCategoryInput = document.getElementById(
+            "customCategoryInput",
+          );
+          const customBlogCategory = document.getElementById(
+            "customBlogCategory",
+          ) as HTMLInputElement;
+          if (customCategoryInput && customBlogCategory) {
+            customCategoryInput.classList.add("hidden");
+            customBlogCategory.required = false;
+          }
         }
       }
     }
@@ -743,11 +814,22 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
         console.log("Image URL to save:", imageUrl);
       }
 
+      // Validate and handle category selection
+      let category = formData.get("category") as string;
+      if (category === "custom") {
+        const customCategory = formData.get("customCategory") as string;
+        if (!customCategory || customCategory.trim() === "") {
+          alert("Silakan masukkan nama kategori baru");
+          return;
+        }
+        category = customCategory.trim();
+      }
+
       // Prepare blog data
       const blogData = {
         title: formData.get("title"),
         content: formData.get("content"),
-        category: formData.get("category"),
+        category: category,
         status: formData.get("status"),
         campaignId: formData.get("campaignId") || null,
         ...(imageUrl && { image: imageUrl }),
@@ -811,7 +893,30 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
   document.addEventListener("DOMContentLoaded", () => {
     // Initial fetch
     fetchBlogs();
+    loadCategories();
     loadCampaigns();
+
+    // Custom Category handling
+    const blogCategory = document.getElementById(
+      "blogCategory",
+    ) as HTMLSelectElement;
+    const customCategoryInput = document.getElementById("customCategoryInput");
+    const customBlogCategory = document.getElementById(
+      "customBlogCategory",
+    ) as HTMLInputElement;
+
+    if (blogCategory && customCategoryInput && customBlogCategory) {
+      blogCategory.addEventListener("change", () => {
+        if (blogCategory.value === "custom") {
+          customCategoryInput.classList.remove("hidden");
+          customBlogCategory.required = true;
+          customBlogCategory.focus();
+        } else {
+          customCategoryInput.classList.add("hidden");
+          customBlogCategory.required = false;
+        }
+      });
+    }
 
     // Form submission
     const blogForm = document.getElementById("blogForm");
