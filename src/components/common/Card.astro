@@ -53,7 +53,7 @@ const trimmedDescription =
 
 <a href={`/campaign/${id}`} class="block h-full">
   <div
-    class="bg-white rounded-b-2xl overflow-hidden shadow-md group hover:shadow-lg transition-shadow duration-300 max-w-sm h-full flex flex-col cursor-pointer"
+    class="bg-white rounded-card overflow-hidden shadow-md group hover:shadow-xl transition-all duration-300 max-w-sm h-full flex flex-col cursor-pointer"
   >
     <!-- Badge kategori -->
     <div class="relative flex-shrink-0">
@@ -64,7 +64,7 @@ const trimmedDescription =
         loading="lazy"
       />
       <span
-        class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium"
+        class="absolute top-4 left-4 bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-medium"
       >
         {category}
       </span>
@@ -74,7 +74,7 @@ const trimmedDescription =
       <!-- Detail donasi -->
       <div class="mb-4 flex-grow">
         <h3
-          class="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-500 transition-colors duration-200 line-clamp-2"
+          class="font-bold text-xl mb-2 text-gray-800 group-hover:text-brand-600 transition-colors duration-200 line-clamp-2"
         >
           {title}
         </h3>
@@ -85,14 +85,14 @@ const trimmedDescription =
         <!-- Progress bar -->
         <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
           <div
-            class="bg-gradient-to-r from-blue-600 via-blue-700 to-amber-600 h-2.5 rounded-full"
+            class="bg-brand-600 h-2.5 rounded-full"
             style={`width: ${percentageFunded}%`}
           >
           </div>
         </div>
 
         <div class="flex justify-between text-sm mb-4">
-          <span class="font-semibold text-blue-600"
+          <span class="font-semibold text-brand-700"
             >{formatCurrency(currentAmount)}</span
           >
           <span class="text-gray-500">dari {formatCurrency(targetAmount)}</span>
@@ -132,7 +132,7 @@ const trimmedDescription =
       <!-- Tombol donasi -->
       <div class="flex-shrink-0">
         <div
-          class="w-full bg-black text-white p-3 rounded-lg font-medium group-hover:bg-blue-700 transition-colors duration-200 text-center"
+          class="w-full bg-brand-600 text-white p-3 rounded-button font-medium hover:bg-brand-700 transition-colors duration-200 text-center"
         >
           Donasi Sekarang
         </div>
