@@ -75,7 +75,7 @@ const menuItems = [
     <!-- Unauthorized Access Screen -->
     <div
       id="authError"
-      class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden"
+      class="fixed inset-0 bg-white z-50 items-center justify-center hidden"
     >
       <div class="text-center max-w-md mx-auto p-6">
         <div class="text-red-500 mb-4">
@@ -115,7 +115,7 @@ const menuItems = [
     </div>
 
     <!-- Main Admin Interface -->
-    <div id="adminInterface" class="flex h-screen hidden">
+    <div id="adminInterface" class="h-screen hidden">
       <!-- Sidebar -->
       <div
         class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0"
@@ -334,14 +334,23 @@ const menuItems = [
 
         showAuthError() {
           document.getElementById("authLoading")?.classList.add("hidden");
-          document.getElementById("authError")?.classList.remove("hidden");
+          const authError = document.getElementById("authError");
+          if (authError) {
+            authError.classList.remove("hidden");
+            authError.classList.add("flex");
+          }
           document.getElementById("adminInterface")?.classList.add("hidden");
+          document.getElementById("adminInterface")?.classList.remove("flex");
         }
 
         showAdminInterface() {
           document.getElementById("authLoading")?.classList.add("hidden");
           document.getElementById("authError")?.classList.add("hidden");
-          document.getElementById("adminInterface")?.classList.remove("hidden");
+          const adminInterface = document.getElementById("adminInterface");
+          if (adminInterface) {
+            adminInterface.classList.remove("hidden");
+            adminInterface.classList.add("flex");
+          }
 
           // Update admin name in header
           const adminNameEl = document.getElementById("adminName");
