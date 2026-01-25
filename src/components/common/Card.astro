@@ -56,7 +56,7 @@ const trimmedDescription =
     class="bg-white rounded-card overflow-hidden shadow-md group hover:shadow-xl transition-all duration-300 max-w-sm h-full flex flex-col cursor-pointer"
   >
     <!-- Badge kategori -->
-    <div class="relative flex-shrink-0">
+    <div class="relative shrink-0">
       <img
         src={imageUrl}
         alt={title}
@@ -70,9 +70,9 @@ const trimmedDescription =
       </span>
     </div>
 
-    <div class="p-5 flex flex-col flex-grow">
+    <div class="p-5 flex flex-col grow">
       <!-- Detail donasi -->
-      <div class="mb-4 flex-grow">
+      <div class="mb-4 grow">
         <h3
           class="font-bold text-xl mb-2 text-gray-800 group-hover:text-brand-600 transition-colors duration-200 line-clamp-2"
         >
@@ -100,7 +100,7 @@ const trimmedDescription =
       </div>
 
       <!-- Info tambahan -->
-      <div class="grid grid-cols-3 gap-2 mb-4 text-center flex-shrink-0">
+      <div class="grid grid-cols-3 gap-2 mb-4 text-center shrink-0">
         <div class="bg-gray-50 p-2 rounded">
           <p class="text-xs text-gray-500">Terkumpul</p>
           <p class="font-semibold text-gray-800">{percentageFunded}%</p>
@@ -116,7 +116,7 @@ const trimmedDescription =
       </div>
 
       <!-- Informasi penggalang dana -->
-      <div class="flex items-center mb-4 flex-shrink-0">
+      <div class="flex items-center mb-4 shrink-0">
         <img
           src={organizationLogo
             ? organizationLogo
@@ -130,7 +130,7 @@ const trimmedDescription =
       </div>
 
       <!-- Tombol donasi -->
-      <div class="flex-shrink-0">
+      <div class="shrink-0">
         <div
           class="w-full bg-brand-600 text-white p-3 rounded-button font-medium hover:bg-brand-700 transition-colors duration-200 text-center"
         >
