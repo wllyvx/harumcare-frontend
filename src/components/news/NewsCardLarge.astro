@@ -1,6 +1,7 @@
 ---
 interface Props {
-  id: string;
+  _id?: string;
+  id?: string;
   title: string;
   content: string;
   image: string;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 const {
+  _id,
   id,
   title,
   content,
@@ -24,7 +26,7 @@ const {
   category,
   createdAt,
   viewCount,
-} = Astro.props;
+} = Astro.props as Props;
 
 // Format tanggal
 const formatDate = (dateString: string) => {
@@ -38,6 +40,7 @@ const formatDate = (dateString: string) => {
 
 // Truncate content untuk preview
 const truncateContent = (text: string, maxLength: number = 200) => {
+  if (!text) return "";
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + "...";
 };
@@ -47,7 +50,7 @@ const truncateContent = (text: string, maxLength: number = 200) => {
   <a href={`/news/${slug}`} class="block h-full">
     <div class="bg-white rounded-lg overflow-hidden border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-md h-full flex flex-col">
       <!-- Image Section -->
-  <div class="news-image-container-large relative overflow-hidden shrink-0">
+      <div class="news-image-container-large relative overflow-hidden shrink-0">
         <img
           src={image || "/images/empty-image-placeholder.webp"}
           alt={title}
@@ -89,7 +92,7 @@ const truncateContent = (text: string, maxLength: number = 200) => {
   <p class="text-sm text-gray-600 mb-3 leading-relaxed line-clamp-3 grow">{truncateContent(content, 160)}</p>
 
         <!-- Read More -->
-  <div class="flex items-center justify-between shrink-0">
+        <div class="flex items-center justify-between shrink-0">
           <span class="inline-flex items-center gap-2 text-blue-600 group-hover:text-blue-700 font-medium text-sm transition-colors duration-300">
             Baca Selengkapnya
             <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
