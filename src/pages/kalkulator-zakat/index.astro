@@ -1,0 +1,387 @@
+---
+import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
+---
+<PrimaryLayout>
+    <section class="max-w-6xl mx-auto p-6">
+        <h1 class="text-2xl md:text-3xl font-bold mb-2">Kalkulator & Pembayaran Zakat</h1>
+        <p class="text-sm md:text-base text-gray-600 mb-6">Hitung kewajiban zakat Anda secara akurat dan lanjutkan ke formulir pembayaran.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <!-- Left: Calculator -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+                <!-- Tabs -->
+                <div class="mb-4">
+                    <nav class="flex space-x-2 overflow-auto" role="tablist" aria-label="Jenis Zakat">
+                        <button data-tab="penghasilan" class="tab-btn px-4 py-2 rounded-lg bg-green-50 text-green-700 border border-green-100">Zakat Penghasilan</button>
+                        <button data-tab="perdagangan" class="tab-btn px-4 py-2 rounded-lg bg-white text-gray-700 border">Zakat Perdagangan</button>
+                        <button data-tab="emasperak" class="tab-btn px-4 py-2 rounded-lg bg-white text-gray-700 border">Zakat Emas & Perak</button>
+                    </nav>
+                </div>
+
+                <!-- Price inputs used for nisab calculation -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <label class="flex flex-col text-sm">
+                        Harga Emas (per gr)
+                        <input id="priceGold" type="number" value="1150000" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                    </label>
+                    <label class="flex flex-col text-sm">
+                        Harga Perak (per gr)
+                        <input id="priceSilver" type="number" value="12000" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                    </label>
+                </div>
+
+                <!-- Forms -->
+                <div>
+                    <!-- Penghasilan -->
+                    <form id="form-penghasilan" class="zakat-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex flex-col text-sm">
+                                Jumlah penghasilan / gaji (1 tahun)
+                                <input id="income_year" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                            </label>
+                            <label class="flex flex-col text-sm">
+                                Pendapatan lain (bonus, THR) (1 tahun)
+                                <input id="income_other" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                            </label>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg">
+
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2 text-sm text-gray-700">
+                                                <!-- gold icon -->
+                                                <svg class="w-4 h-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
+                                                <span>Nisab (85 gr emas): <span id="nisab_income_text" class="font-medium">-</span></span>
+                                            </div>
+                                            <div>
+                                                <div id="status_income" class="flex items-center px-3 py-1 rounded-full bg-green-600 text-white text-xs font-semibold">WAJIB ZAKAT</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-2xl md:text-3xl font-bold text-green-700"> <span id="result_income">Rp 0</span></div>
+                            <div id="hint_income" class="hint-text mt-2 text-sm text-gray-600 hidden"></div>
+                        </div>
+                    </form>
+
+                    <!-- Perdagangan -->
+                    <form id="form-perdagangan" class="zakat-form hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex flex-col text-sm">
+                                Modal yang diputar
+                                <input id="trade_modal" type="number" value="0" class="mt-1 p-2 border border-gray-200 rounded" />
+                            </label>
+                            <label class="flex flex-col text-sm">
+                                Laba
+                                <input id="trade_profit" type="number" value="0" class="mt-1 p-2 border border-gray-200 rounded" />
+                            </label>
+                            <label class="flex flex-col text-sm">
+                                Piutang lancar
+                                <input id="trade_receivables" type="number" value="0" class="mt-1 p-2 border border-gray-200 rounded" />
+                            </label>
+                            <label class="flex flex-col text-sm">
+                                Hutang jatuh tempo
+                                <input id="trade_debts" type="number" value="0" class="mt-1 p-2 border border-gray-200 rounded" />
+                            </label>
+                            <label class="flex flex-col text-sm col-span-2">
+                                Kerugian
+                                <input id="trade_losses" type="number" value="0" class="mt-1 p-2 border border-gray-200 rounded" />
+                            </label>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center gap-2 text-sm text-gray-700"><svg class="w-4 h-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg> <span>Nisab (85 gr emas): <span id="nisab_trade_text" class="font-medium">-</span></span></div>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="text-2xl font-bold text-green-700"> <span id="result_trade">Rp 0</span></div>
+                                <div>
+                                    <div id="status_trade" class="px-3 py-1 rounded-full bg-green-600 text-white text-xs font-semibold">WAJIB ZAKAT</div>
+                                </div>
+                            </div>
+                            <div id="hint_trade" class="hint-text mt-2 text-sm text-gray-600 hidden"></div>
+                        </div>
+                    </form>
+
+                    <!-- Emas & Perak -->
+                    <form id="form-emasperak" class="zakat-form hidden">
+                        <div class="flex items-center gap-4 mb-3">
+                            <label class="flex items-center gap-2"><input type="radio" name="metal" value="gold" checked /> Emas</label>
+                            <label class="flex items-center gap-2"><input type="radio" name="metal" value="silver" /> Perak</label>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex flex-col text-sm">
+                                Jumlah dimiliki (gram)
+                                <input id="metal_owned" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                            </label>
+                            <label class="flex flex-col text-sm">
+                                Jumlah dipakai (gram)
+                                <input id="metal_worn" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                            </label>
+                        </div>
+                        <div class="mt-4 p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center gap-2 text-sm text-gray-700"><svg class="w-4 h-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg><span>Nisab: <span id="nisab_metal_text">85 gr emas / 595 gr perak</span></span></div>
+                            <div class="flex items-center justify-between mt-2">
+                                <div class="text-2xl font-bold text-green-700"> <span id="result_metal">Rp 0</span></div>
+                                <div>
+                                    <div id="status_metal" class="px-3 py-1 rounded-full bg-green-600 text-white text-xs font-semibold">WAJIB ZAKAT</div>
+                                </div>
+                            </div>
+                            <div id="hint_metal" class="hint-text mt-2 text-sm text-gray-600 hidden"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Payment form -->
+        <aside class="bg-white p-6 rounded-xl shadow-md border border-green-50">
+                <h3 class="font-semibold mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S17.523 1 12 1zm1 14h-2v-2h2v2zm0-4h-2V6h2v5z"/></svg>Detail Pembayaran</h3>
+                <div class="mb-4">
+                    <div class="text-sm text-gray-500">Nominal Zakat</div>
+            <div id="paymentAmount" class="mt-2 p-4 border rounded text-xl md:text-2xl font-bold bg-white text-green-700 border-green-200">Rp 0</div>
+                </div>
+
+                <label class="flex flex-col text-sm mb-3">Nama Lengkap
+                    <input id="pay_name" type="text" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" placeholder="Masukkan nama Anda" />
+                </label>
+                <label class="flex flex-col text-sm mb-3">Email
+                    <input id="pay_email" type="email" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" placeholder="alamat@email.com" />
+                </label>
+                <label class="flex flex-col text-sm mb-3">WhatsApp
+                    <input id="pay_whatsapp" type="text" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" placeholder="08xx..." />
+                </label>
+
+                <div class="mb-4">
+                    <div class="text-sm text-gray-600 mb-2">Pilih Metode Pembayaran</div>
+                    <div class="flex gap-2">
+                        <label class="flex items-center gap-3 p-2 border rounded cursor-pointer">
+                            <input type="radio" name="method" value="va" checked />
+                            <svg class="w-5 h-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7v10a2 2 0 0 0 2 2h16V5H4a2 2 0 0 0-2 2zM7 12h10v2H7v-2z"/></svg>
+                            <span class="text-sm">Virtual Account</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-2 border rounded cursor-pointer">
+                            <input type="radio" name="method" value="ewallet" />
+                            <svg class="w-5 h-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7v10a2 2 0 0 0 2 2h16V5H4a2 2 0 0 0-2 2zm4 2h10v2H6V9z"/></svg>
+                            <span class="text-sm">E-Wallet</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button id="payBtn" class="px-4 py-3 bg-green-600 text-white rounded-lg shadow-md w-full">Tunaikan Zakat Sekarang</button>
+                </div>
+
+                <!-- hidden field to capture numeric amount for submission or later use -->
+                <input type="hidden" id="paymentAmountValue" value="0" />
+            </aside>
+        </div>
+
+    <script type="module">
+            import { calcIncomeZakat, calcTradeZakat, calcMetalZakat, nisabValueForGold, nisabValueForSilver } from '/js/zakat.js';
+
+            const currencyFormatter = new Intl.NumberFormat('id-ID');
+            const toRupiah = (value) => {
+                const v = Number(value) || 0;
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Math.round(v));
+            };
+
+            const q = (s) => document.querySelector(s);
+            const qa = (s) => Array.from(document.querySelectorAll(s));
+
+            // Currency helpers
+            function parseNumberFromString(s){
+                if(typeof s === 'number') return s;
+                const digits = String(s).replace(/[^0-9]/g,'');
+                return digits ? Number(digits) : 0;
+            }
+
+            function formatNumberToText(n){
+                return currencyFormatter.format(Math.round(Number(n) || 0));
+            }
+
+            function getVal(selector){
+                const el = q(selector);
+                if(!el) return 0;
+                if(el.dataset && el.dataset.value) return Number(el.dataset.value) || 0;
+                return parseNumberFromString(el.value || '');
+            }
+
+            function bindCurrencyInput(selector){
+                qa(selector).forEach(el => {
+                    // ensure text input for formatting
+                    try{ el.type = 'text'; } catch(e){}
+                    // initialize dataset
+                    const initial = parseNumberFromString(el.value || el.getAttribute('value') || '0');
+                    el.dataset.value = initial;
+                    el.value = initial ? formatNumberToText(initial) : '';
+                    el.addEventListener('input', (e) => {
+                        const raw = parseNumberFromString(el.value);
+                        el.dataset.value = raw;
+                        el.value = raw ? formatNumberToText(raw) : '';
+                        clearValidation(el);
+                        recalcAll();
+                    });
+                    // keep caret at end on focus (simple UX)
+                    el.addEventListener('focus', () => { setTimeout(()=>{ el.selectionStart = el.selectionEnd = el.value.length; },0); });
+                });
+            }
+
+            // small validation helper
+            function showValidation(el, msg){
+                let node = el.nextElementSibling;
+                if(!node || !node.classList || !node.classList.contains('validation-msg')){
+                    node = document.createElement('div');
+                    node.className = 'validation-msg text-red-600 text-sm mt-1';
+                    el.parentNode.appendChild(node);
+                }
+                node.textContent = msg;
+            }
+
+            function clearValidation(el){
+                const node = el.nextElementSibling;
+                if(node && node.classList && node.classList.contains('validation-msg')) node.textContent = '';
+            }
+
+            // Tabs
+            qa('.tab-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                const tab = btn.getAttribute('data-tab');
+                qa('.tab-btn').forEach(b => b.classList.remove('bg-green-50','text-green-700'));
+                btn.classList.add('bg-green-50','text-green-700');
+                qa('.zakat-form').forEach(f => f.classList.add('hidden'));
+                q('#form-' + tab).classList.remove('hidden');
+                recalcAll();
+            }));
+
+            // Calculate functions using utils
+            function recalcIncome(){
+                const income = getVal('#income_year');
+                const other = getVal('#income_other');
+                const priceGold = getVal('#priceGold');
+                const nisab = nisabValueForGold(priceGold);
+                const taxable = income + other;
+                const zakat = calcIncomeZakat(income, other);
+                q('#nisab_income_text').textContent = toRupiah(nisab);
+                q('#result_income').textContent = toRupiah(zakat);
+                // status
+                const hintIncome = q('#hint_income');
+                if(taxable >= nisab){
+                    q('#status_income').textContent = 'WAJIB ZAKAT';
+                    q('#status_income').classList.remove('bg-gray-100','text-gray-600');
+                    q('#status_income').classList.add('bg-green-600','text-white');
+                    hintIncome.classList.add('hidden');
+                } else {
+                    q('#status_income').textContent = 'BELUM WAJIB';
+                    q('#status_income').classList.remove('bg-green-600','text-white');
+                    q('#status_income').classList.add('bg-gray-200','text-gray-700');
+                    const short = nisab - taxable;
+                    hintIncome.textContent = 'BELUM WAJIB ZAKAT. Nisab: ' + toRupiah(nisab) + '. Anda kekurangan ' + toRupiah(short) + ' untuk mencapai nisab.';
+                    hintIncome.classList.remove('hidden');
+                }
+                updatePayment(zakat);
+            }
+
+            function recalcTrade(){
+                const modal = getVal('#trade_modal');
+                const profit = getVal('#trade_profit');
+                const receivables = getVal('#trade_receivables');
+                const debts = getVal('#trade_debts');
+                const losses = getVal('#trade_losses');
+                const priceGold = getVal('#priceGold');
+                const nisab = nisabValueForGold(priceGold);
+                const net = (modal + profit + receivables) - (debts + losses);
+                const zakat = calcTradeZakat(modal, profit, receivables, debts, losses);
+                q('#nisab_trade_text').textContent = toRupiah(nisab);
+                q('#result_trade').textContent = toRupiah(zakat);
+                const hintTrade = q('#hint_trade');
+                if(net >= nisab){
+                    q('#status_trade').textContent = 'WAJIB ZAKAT';
+                    q('#status_trade').classList.remove('bg-gray-200','text-gray-700');
+                    q('#status_trade').classList.add('bg-green-600','text-white');
+                    hintTrade.classList.add('hidden');
+                } else {
+                    q('#status_trade').textContent = 'BELUM WAJIB';
+                    q('#status_trade').classList.remove('bg-green-600','text-white');
+                    q('#status_trade').classList.add('bg-gray-200','text-gray-700');
+                    const short = nisab - net;
+                    hintTrade.textContent = 'Nisab: ' + toRupiah(nisab) + '. Anda kekurangan ' + toRupiah(short) + ' untuk mencapai nisab.';
+                    hintTrade.classList.remove('hidden');
+                }
+                updatePayment(zakat);
+            }
+
+            function recalcMetal(){
+                const metal = document.querySelector('input[name="metal"]:checked').value;
+                const owned = parseNumberFromString(q('#metal_owned').value) || 0;
+                const worn = parseNumberFromString(q('#metal_worn').value) || 0;
+                const netGr = Math.max(0, owned - worn);
+                const price = metal === 'gold' ? getVal('#priceGold') : getVal('#priceSilver');
+                const nisabGr = metal === 'gold' ? 85 : 595;
+                const nisabIdr = nisabGr * price;
+                const zakatIdr = calcMetalZakat(netGr, price);
+                q('#nisab_metal_text').textContent = nisabGr + ' gr (' + toRupiah(nisabIdr) + ')';
+                q('#result_metal').textContent = toRupiah(zakatIdr);
+                // status by grams
+                if(netGr >= nisabGr){
+                    q('#status_metal').textContent = 'WAJIB ZAKAT';
+                    q('#status_metal').classList.remove('bg-gray-200','text-gray-700');
+                    q('#status_metal').classList.add('bg-green-600','text-white');
+                    q('#hint_metal').classList.add('hidden');
+                } else {
+                    q('#status_metal').textContent = 'BELUM WAJIB';
+                    q('#status_metal').classList.remove('bg-green-600','text-white');
+                    q('#status_metal').classList.add('bg-gray-200','text-gray-700');
+                    const shortGr = nisabGr - netGr;
+                    q('#hint_metal').textContent = 'Nisab: ' + nisabGr + ' gr. Anda kekurangan ' + shortGr + ' gr untuk mencapai nisab.';
+                    q('#hint_metal').classList.remove('hidden');
+                }
+                updatePayment(zakatIdr);
+            }
+
+            function recalcAll(){
+                const visible = document.querySelector('.zakat-form:not(.hidden)');
+                if(!visible) return;
+                if(visible.id === 'form-penghasilan') recalcIncome();
+                if(visible.id === 'form-perdagangan') recalcTrade();
+                if(visible.id === 'form-emasperak') recalcMetal();
+            }
+
+            // update payment display and hidden value
+            function updatePayment(amount){
+                const v = Number(amount) || 0;
+                q('#paymentAmount').textContent = toRupiah(v);
+                q('#paymentAmountValue').value = Math.round(v);
+            }
+
+            // Bind currency formatting to monetary inputs
+            bindCurrencyInput('#priceGold, #priceSilver, #income_year, #income_other, #trade_modal, #trade_profit, #trade_receivables, #trade_debts, #trade_losses');
+
+            // Wire inputs with basic validation for non-money fields
+            qa('#metal_owned, #metal_worn').forEach(el => el.addEventListener('input', (e) => { clearValidation(e.target); recalcAll(); }));
+            qa('input[name="metal"]').forEach(el => el.addEventListener('change', recalcAll));
+
+            // Initial calculation
+            recalcAll();
+
+            // Pay button with simple validation
+            q('#payBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                const amount = Number(q('#paymentAmountValue').value) || 0;
+                const nameEl = q('#pay_name');
+                const emailEl = q('#pay_email');
+                if(amount <= 0){
+                    alert('Nominal zakat masih 0 — pastikan Anda sudah mengisi form dan mendapat hasil zakat.');
+                    return;
+                }
+                if(!nameEl.value.trim()){
+                    showValidation(nameEl, 'Nama harus diisi');
+                    nameEl.focus();
+                    return;
+                }
+                if(!emailEl.value.trim()){
+                    showValidation(emailEl, 'Email harus diisi');
+                    emailEl.focus();
+                    return;
+                }
+                // Stub: replace with actual payment integration
+                console.log('Prepare payment', { amount, name: nameEl.value, email: emailEl.value });
+                alert('Form pembayaran siap. Nominal: ' + toRupiah(amount));
+            });
+        </script>
+    </section>
+</PrimaryLayout>
