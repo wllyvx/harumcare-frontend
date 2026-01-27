@@ -64,63 +64,133 @@ const categories = [
 <PrimaryLayout title="Berita - Harum Care Indonesia">
   <main class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <section class="bg-blue-600 text-white py-16">
+    <section class="bg-blue-50 text-blue-900 py-12">
       <div class="max-w-7xl mx-auto px-4">
         <div class="text-center">
-          <h1 class="text-4xl md:text-5xl font-bold mb-4">Berita & Informasi</h1>
-          <p class="text-xl text-blue-100 max-w-2xl mx-auto">
-            Dapatkan informasi terbaru seputar kegiatan, pengumuman, dan berita dari Harum Care Indonesia
+          <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Berita & Update</h1>
+          <p class="text-base text-blue-700 max-w-2xl mx-auto">
+            Ikuti perkembangan terbaru kegiatan dan penyaluran bantuan kami untuk transparansi dan inspirasi bersama.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- Filter Section -->
-    <section class="py-8 bg-white border-b">
+    <!-- Filters + Search (inline on desktop) -->
+    <section class="py-6 bg-white border-b">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <label for="category-filter" class="text-sm font-medium text-gray-700">
-              Filter Kategori:
-            </label>
-            <select 
-              id="category-filter" 
-              class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onchange="window.location.href = this.value ? `/news?category=${this.value}` : '/news'"
-            >
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap gap-2">
               {categories.map((cat) => (
-                <option value={cat.value} selected={cat.value === category}>
+                <a
+                  href={`/news?category=${cat.value}`}
+                  class={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                    cat.value === category ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'
+                  }`}
+                >
                   {cat.label}
-                </option>
+                </a>
               ))}
-            </select>
+            </div>
           </div>
-          
-          <div class="text-sm text-gray-600">
-            Menampilkan {news.length} dari {totalNews} berita
+
+          <div class="w-full sm:w-80">
+            <div class="relative">
+              <input
+                type="search"
+                placeholder="Cari berita..."
+                class="w-full rounded-full border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                onkeydown="if(event.key === 'Enter'){ const q = this.value.trim(); window.location.href = q ? `/news?q=${encodeURIComponent(q)}` : '/news'; }"
+              />
+              <button
+                onclick="{ const q = this.previousElementSibling.value.trim(); window.location.href = q ? `/news?q=${encodeURIComponent(q)}` : '/news'; }"
+                class="absolute right-1 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm"
+              >Cari</button>
+            </div>
           </div>
         </div>
+        <div class="mt-3 text-sm text-gray-600">Menampilkan {news.length} dari {totalNews} berita</div>
       </div>
     </section>
 
-    <!-- News Grid -->
+    <!-- News Grid + Sidebar -->
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4">
         {news.length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10">
-            {news.map((item) => (
-              <NewsCardLarge
-                _id={item._id}
-                title={item.title}
-                content={item.content}
-                image={item.image}
-                slug={item.slug}
-                author={item.author}
-                category={item.category}
-                createdAt={item.createdAt}
-                viewCount={item.viewCount}
-              />
-            ))}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Main list (2 cols on desktop) -->
+            <div class="md:col-span-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {news.map((item) => (
+                  <NewsCardLarge
+                    _id={item._id}
+                    title={item.title}
+                    content={item.content}
+                    image={item.image}
+                    slug={item.slug}
+                    author={item.author}
+                    category={item.category}
+                    createdAt={item.createdAt}
+                    viewCount={item.viewCount}
+                  />
+                ))}
+              </div>
+
+              <!-- Pagination -->
+              {totalPages > 1 && (
+                <div class="flex justify-center mt-10">
+                  <nav class="flex items-center gap-2">
+                    {currentPage > 1 && (
+                      <a
+                        href={`/news?page=${currentPage - 1}${category ? `&category=${category}` : ''}`}
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >Sebelumnya</a>
+                    )}
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <a
+                        href={`/news?page=${pageNum}${category ? `&category=${category}` : ''}`}
+                        class={`px-4 py-2 text-sm border rounded-md transition-colors ${
+                          pageNum === currentPage
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >{pageNum}</a>
+                    ))}
+
+                    {currentPage < totalPages && (
+                      <a
+                        href={`/news?page=${currentPage + 1}${category ? `&category=${category}` : ''}`}
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >Selanjutnya</a>
+                    )}
+                  </nav>
+                </div>
+              )}
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="space-y-6">
+              <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
+                <h4 class="text-sm font-semibold text-blue-700 mb-3">Trending Berita</h4>
+                <div class="space-y-3">
+                  {news.slice(0, 3).map((n) => (
+                    <a href={`/news/${n.slug}`} class="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50">
+                      <img src={n.image || '/images/empty-image-placeholder.webp'} alt={n.title} class="w-12 h-12 object-cover rounded-md" />
+                      <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900 line-clamp-2">{n.title}</p>
+                        <p class="text-xs text-gray-500 mt-1">{new Date(n.createdAt).toLocaleDateString('id-ID')}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hidden md:block">
+                <h4 class="text-sm font-semibold text-blue-700 mb-3">Tentang Kami</h4>
+                <p class="text-sm text-gray-600">Temukan informasi lebih lengkap mengenai kegiatan Harum Care dan cara berdonasi.</p>
+              </div>
+            </aside>
           </div>
         ) : (
           <div class="text-center py-16">
@@ -145,45 +215,5 @@ const categories = [
             )}
           </div>
         )}
-
-        <!-- Pagination -->
-        {totalPages > 1 && (
-          <div class="flex justify-center mt-12">
-            <nav class="flex items-center gap-2">
-              {currentPage > 1 && (
-                <a 
-                  href={`/news?page=${currentPage - 1}${category ? `&category=${category}` : ''}`}
-                  class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Sebelumnya
-                </a>
-              )}
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                <a 
-                  href={`/news?page=${pageNum}${category ? `&category=${category}` : ''}`}
-                  class={`px-4 py-2 text-sm border rounded-md transition-colors ${
-                    pageNum === currentPage 
-                      ? 'bg-blue-600 text-white border-blue-600' 
-                      : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {pageNum}
-                </a>
-              ))}
-              
-              {currentPage < totalPages && (
-                <a 
-                  href={`/news?page=${currentPage + 1}${category ? `&category=${category}` : ''}`}
-                  class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Selanjutnya
-                </a>
-              )}
-            </nav>
-          </div>
-        )}
       </div>
     </section>
-  </main>
-</PrimaryLayout>
