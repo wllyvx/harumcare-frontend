@@ -28,6 +28,11 @@
 /* Small utility styles for kalkulator zakat */
 .validation-msg { color: #dc2626; /* text-red-600 */ }
 .font-work-sans { font-family: 'Work Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+/* Material Symbols styling */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
 /* subtle card background used for results */
 .result-card { background: linear-gradient(180deg, rgba(240,253,244,1), rgba(236,252,241,1)); }
 
