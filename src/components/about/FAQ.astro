@@ -1,0 +1,90 @@
+---
+type FAQItem = {
+  question: string;
+  answer: string;
+};
+
+const faqs: FAQItem[] = [
+  {
+    question: "Bagaimana cara menggunakan kalkulator zakat?",
+    answer: "Menggunakan kalkulator zakat HarumCare sangat mudah. Cukup masukkan detail aset Anda termasuk emas, perak, uang tunai, dan investasi. Sistem kami akan otomatis menghitung zakat yang harus Anda keluarkan sesuai dengan hukum syariah."
+  },
+  {
+    question: "Apakah data saya aman?",
+    answer: "Keamanan data Anda adalah prioritas utama kami. Kami menggunakan enkripsi tingkat enterprise (SSL/TLS) dan mematuhi standar keamanan internasional. Data Anda tidak akan pernah dibagikan kepada pihak ketiga tanpa izin Anda."
+  },
+  {
+    question: "Bagaimana cara membayar zakat melalui platform?",
+    answer: "Setelah menghitung zakat Anda, Anda dapat langsung membayar melalui berbagai metode: transfer bank, e-wallet (GCash, OVO, Dana), atau cicilan. Kami bekerja sama dengan lembaga terpercaya untuk memastikan dana Anda tersalurkan dengan baik."
+  },
+  {
+    question: "Ke mana zakat saya disalurkan?",
+    answer: "Zakat Anda akan disalurkan kepada mustahik (yang berhak menerima zakat) melalui program-program sosial kami yang telah terbukti dampaknya. Kami menyediakan laporan transparan lengkap mengenai penggunaan setiap dana yang Anda sumbangkan."
+  },
+  {
+    question: "Apakah ada biaya tambahan saat membayar zakat?",
+    answer: "Zakat yang Anda bayar adalah jumlah yang sebenarnya. Tidak ada biaya tersembunyi atau potongan tambahan. Biaya administrasi minimal kami gunakan hanya untuk operasional platform yang transparan sepenuhnya."
+  }
+];
+---
+
+<section class="max-w-[1200px] mx-auto px-6 py-20 border-t border-[#dbe6e1] dark:border-[#2a3a34]">
+  <div class="text-center mb-16">
+    <h2 class="text-3xl font-bold">Pertanyaan Umum</h2>
+    <p class="text-gray-500 dark:text-gray-300 mt-2">Temukan jawaban untuk pertanyaan yang sering diajukan</p>
+  </div>
+  <div class="max-w-2xl mx-auto space-y-4">
+    {
+      faqs.map((faq, index) => (
+        <div class="accordion-item border border-[#dbe6e1] dark:border-[#2a3a34] rounded-lg overflow-hidden">
+          <button class="accordion-button w-full px-6 py-4 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-[#1a3a2e] flex items-center justify-between transition-colors" type="button">
+            <span class="font-semibold text-lg text-gray-900 dark:text-white text-left">{faq.question}</span>
+            <span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
+          </button>
+          <div class="accordion-content hidden">
+            <div class="px-6 py-4 bg-gray-50 dark:bg-[#0f1815] border-t border-[#dbe6e1] dark:border-[#2a3a34] text-gray-600 dark:text-gray-200">
+              {faq.answer}
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  const initAccordion = () => {
+    document.querySelectorAll('.accordion-button').forEach(button => {
+      button.addEventListener('click', function() {
+        const item = this.closest('.accordion-item');
+        const content = item.querySelector('.accordion-content');
+        const icon = this.querySelector('.material-symbols-outlined');
+        
+        // Close all other items
+        document.querySelectorAll('.accordion-item').forEach(otherItem => {
+          if (otherItem !== item) {
+            const otherContent = otherItem.querySelector('.accordion-content');
+            const otherIcon = otherItem.querySelector('.material-symbols-outlined');
+            otherContent?.classList.add('hidden');
+            if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+          }
+        });
+        
+        // Toggle current item
+        content?.classList.toggle('hidden');
+        if (content?.classList.contains('hidden')) {
+          icon.style.transform = 'rotate(0deg)';
+        } else {
+          icon.style.transform = 'rotate(180deg)';
+        }
+      });
+    });
+  };
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAccordion);
+  } else {
+    initAccordion();
+  }
+</script>
