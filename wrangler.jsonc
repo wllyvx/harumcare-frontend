@@ -17,6 +17,10 @@
     {
       "pattern": "www.harumcare.com",
       "custom_domain": true
+    },
+    {
+      "pattern": "harumcare.com",
+      "custom_domain": true
     }
   ]
 }
