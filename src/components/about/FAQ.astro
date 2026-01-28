@@ -28,21 +28,21 @@ const faqs: FAQItem[] = [
 ];
 ---
 
-<section class="max-w-[1200px] mx-auto px-6 py-20 border-t border-[#dbe6e1] dark:border-[#2a3a34]">
+<section class="max-w-[1200px] mx-auto px-6 py-20 border-t border-[#dbe6e1]">
   <div class="text-center mb-16">
     <h2 class="text-3xl font-bold">Pertanyaan Umum</h2>
-    <p class="text-gray-500 dark:text-gray-300 mt-2">Temukan jawaban untuk pertanyaan yang sering diajukan</p>
+    <p class="text-gray-500 mt-2">Temukan jawaban untuk pertanyaan yang sering diajukan</p>
   </div>
   <div class="max-w-2xl mx-auto space-y-4">
     {
       faqs.map((faq, index) => (
-        <div class="accordion-item border border-[#dbe6e1] dark:border-[#2a3a34] rounded-lg overflow-hidden">
-          <button class="accordion-button w-full px-6 py-4 bg-white dark:bg-background-dark hover:bg-gray-50 dark:hover:bg-[#1a3a2e] flex items-center justify-between transition-colors" type="button">
-            <span class="font-semibold text-lg text-gray-900 dark:text-white text-left">{faq.question}</span>
+        <div class="accordion-item border border-[#dbe6e1] rounded-lg overflow-hidden">
+          <button class="accordion-button w-full px-6 py-4 bg-white hover:bg-gray-50 flex items-center justify-between transition-colors" type="button">
+            <span class="font-semibold text-lg text-gray-900 text-left">{faq.question}</span>
             <span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
           </button>
           <div class="accordion-content hidden">
-            <div class="px-6 py-4 bg-gray-50 dark:bg-[#0f1815] border-t border-[#dbe6e1] dark:border-[#2a3a34] text-gray-600 dark:text-gray-200">
+            <div class="px-6 py-4 bg-gray-50 border-t border-[#dbe6e1] text-gray-600">
               {faq.answer}
             </div>
           </div>
