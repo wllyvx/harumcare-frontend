@@ -215,7 +215,8 @@ const formatDate = (dateString: string) => {
             />
             <p class="text-gray-600">
               Dibuat oleh <span class="font-semibold text-blue-600"
-                >{campaign.organizationName}</span>
+                >{campaign.organizationName}</span
+              >
             </p>
           </div>
         </div>
@@ -474,6 +475,19 @@ const formatDate = (dateString: string) => {
                     placeholder="Kosongkan jika ingin anonim"
                     disabled={!isCampaignActive}
                   />
+                </div>
+                <!-- Use Profile Name Checkbox -->
+                <div id="use-profile-container" class="hidden mb-4">
+                  <label class="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="use-profile-name"
+                      class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 h-4 w-4"
+                    />
+                    <span class="text-sm text-gray-600"
+                      >Gunakan nama dari profil saya</span
+                    >
+                  </label>
                 </div>
                 <div>
                   <label
@@ -1377,6 +1391,69 @@ const formatDate = (dateString: string) => {
       }
     }
 
+    // Setup use profile name functionality
+    function setupUseProfile() {
+      const checkboxContainer = document.getElementById(
+        "use-profile-container",
+      );
+      const checkbox = document.querySelector(
+        "#use-profile-name",
+      ) as HTMLInputElement;
+      const nameInput = document.querySelector(
+        "#donor-name",
+      ) as HTMLInputElement;
+      const token = localStorage.getItem("token");
+
+      if (checkboxContainer && checkbox && nameInput && token) {
+        // Show checkbox if user is logged in
+        checkboxContainer.classList.remove("hidden");
+
+        checkbox.addEventListener("change", async () => {
+          if (checkbox.checked) {
+            try {
+              // Show loading state
+              const originalPlaceholder = nameInput.placeholder;
+              nameInput.placeholder = "Mengambil data...";
+              nameInput.readOnly = true;
+
+              const response = await fetch(`${API_URL}/auth/profile`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              if (response.ok) {
+                const user = await response.json();
+                if (user && user.nama) {
+                  nameInput.value = user.nama;
+                  nameInput.readOnly = true;
+                }
+              } else {
+                console.error("Failed to fetch profile");
+                checkbox.checked = false;
+                nameInput.value = "";
+                nameInput.placeholder = originalPlaceholder;
+                nameInput.readOnly = false;
+                alert(
+                  "Gagal mengambil data profil. Silakan isi nama secara manual.",
+                );
+              }
+            } catch (error) {
+              console.error("Error fetching profile:", error);
+              checkbox.checked = false;
+              nameInput.value = "";
+              nameInput.readOnly = false;
+            }
+          } else {
+            // Restore manual entry
+            nameInput.value = "";
+            nameInput.readOnly = false;
+            nameInput.placeholder = "Kosongkan jika ingin anonim";
+          }
+        });
+      }
+    }
+
     // Setup message character counter
     function setupMessageCounter() {
       const messageInput =
@@ -1566,6 +1643,7 @@ const formatDate = (dateString: string) => {
       setupProgressiveDisclosure();
       setupCurrencyFormatting();
       setupMessageCounter();
+      setupUseProfile();
 
       const donateForm = document.querySelector("#donate-form");
       if (donateForm) {
