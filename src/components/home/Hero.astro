@@ -1,23 +1,23 @@
 ---
-const { campaigns = [] } = Astro.props;
-const campaignsToShow = Array.isArray(campaigns) ? campaigns.slice(0, 3) : [];
-const slideCount = campaignsToShow.length > 0 ? campaignsToShow.length : 3;
+const { news = [] } = Astro.props;
+const newsToShow = Array.isArray(news) ? news : [];
+const slideCount = newsToShow.length > 0 ? newsToShow.length : 3;
 ---
 
-<section class="relative w-full h-[28vh] md:h-[35vh] overflow-hidden">
+<section class="relative w-full h-screen md:h-[80vh] lg:h-screen overflow-hidden">
   <!-- background Slideshow -->
-  <div id="slideshow" aria-label="Galeri foto kampanye">
+  <div id="slideshow" aria-label="Galeri foto berita terbaru" class="absolute inset-0">
     {
-      campaignsToShow.length > 0 &&
-        campaignsToShow.map((c) => (
+      newsToShow.length > 0 &&
+        newsToShow.map((n) => (
           <div
             class="slide absolute inset-0 transition-opacity duration-1000 bg-cover bg-center"
-            style={`background-image: url('${c.imageUrl || "/images/slide1.jpg"}')`}
+            style={`background-image: url('${n.image || "/images/slide1.jpg"}')`}
           />
         ))
     }
     {
-      campaignsToShow.length === 0 && (
+      newsToShow.length === 0 && (
         <>
           <div
             class="slide absolute inset-0 transition-opacity duration-1000 bg-cover bg-center"
@@ -36,25 +36,54 @@ const slideCount = campaignsToShow.length > 0 ? campaignsToShow.length : 3;
     }
   </div>
 
-  <!-- teks di atas slideshow -->
+  <!-- Gradient overlays for better text contrast -->
+  <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-5"></div>
+
+  <!-- teks dan buttons di atas slideshow -->
   <div
-    class="relative z-10 flex items-center justify-center h-full bg-black/60 text-white text-center px-4"
+    class="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4 md:px-8"
   >
-    <div>
-      <h1 class="text-2xl md:text-3xl font-bold">Buat Perubahan.</h1>
-      <h1 class="text-2xl md:text-3xl text-brand-200 font-bold mb-3">
-        Satu Donasi, Sejuta Harapan
+    <div class="max-w-3xl mx-auto">
+      <!-- Main Slogan H1 -->
+      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight text-white drop-shadow-lg">
+        Hadirkan Kebaikan di Hati Anda
       </h1>
+      
+      <!-- Subtitle/Tagline -->
+      <p class="text-lg sm:text-xl md:text-2xl text-brand-200 mb-8 md:mb-12 font-medium drop-shadow-md">
+        Bersama Harum Care, wujudkan dampak positif untuk masyarakat
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-8">
+        <!-- Login Button -->
+        <a
+          href="/auth/login"
+          class="px-8 md:px-10 py-3 md:py-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+        >
+          Masuk Sekarang
+        </a>
+        
+        <!-- About Us Button -->
+        <a
+          href="/about-us"
+          class="px-8 md:px-10 py-3 md:py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg border-2 border-white/50 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
+        >
+          Tentang Kami
+        </a>
+      </div>
     </div>
-    <!-- selector -->
+
+    <!-- Slide indicators at bottom -->
     <div
-      class="absolute bottom-4 md:bottom-6 left-0 right-0 flex justify-center gap-2"
+      class="absolute bottom-8 md:bottom-12 left-0 right-0 flex justify-center gap-2"
     >
       {
         Array.from({ length: slideCount }).map((_, i) => (
           <button
-            class={`h-2 w-8 rounded-full ${i === 0 ? "bg-white/60" : "bg-white/30"} indicator`}
+            class={`h-2 w-8 md:w-10 rounded-full transition-all duration-300 ${i === 0 ? "bg-white/80" : "bg-white/40"} indicator hover:bg-white/60`}
             data-index={i}
+            aria-label={`Slide ${i + 1}`}
           />
         ))
       }

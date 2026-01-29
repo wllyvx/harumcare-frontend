@@ -34,11 +34,30 @@ async function fetchCampaigns() {
   }
 }
 
-const campaignData = await fetchCampaigns();
+// fetch latest news
+async function fetchLatestNews() {
+  try {
+    const response = await fetch(`${API_URL}/news?limit=3`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch news");
+    }
+    const data = await response.json();
+
+    return data.news || [];
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    return [];
+  }
+}
+
+const [campaignData, latestNews] = await Promise.all([
+  fetchCampaigns(),
+  fetchLatestNews()
+]);
 ---
 
 <PrimaryLayout>
-  <Hero campaigns={campaignData.campaigns?.slice(0, 3)} />
+  <Hero news={latestNews} />
   <MenuIcons />
   <LatestBlog />
   <LatestNews />
