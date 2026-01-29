@@ -199,7 +199,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 
 <script>
     interface User {
-        _id: string;
+        id: string;
         nama: string;
         username: string;
         email: string;
@@ -273,7 +273,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL;
         const nomorHpInput = document.getElementById('edit-nomorHp') as HTMLInputElement;
         const roleInput = document.getElementById('edit-role') as HTMLSelectElement;
         
-        userIdInput.value = user._id;
+        userIdInput.value = user.id;
         namaInput.value = user.nama;
         usernameInput.value = user.username;
         emailInput.value = user.email;
@@ -392,7 +392,7 @@ const API_URL = import.meta.env.PUBLIC_API_URL;
     // Fungsi untuk membuka modal konfirmasi hapus
     function openDeleteModal(user: User) {
         deleteUserName.textContent = user.nama;
-        deleteUserId.value = user._id;
+        deleteUserId.value = user.id;
         deleteConfirmModal.classList.remove('hidden');
         deleteConfirmModal.classList.add('flex');
     }
