@@ -72,6 +72,19 @@ export const generateReceipt = (donation, user) => {
     doc.text(donation.donorName || (donation.isAnonymous ? "Hamba Allah" : user?.nama || "-"), valueX, currentY);
     currentY += lineHeight;
 
+    // Metode Pembayaran
+    doc.text("Metode Pembayaran", leftX, currentY);
+    doc.text(":", 65, currentY);
+    const paymentMethodMap = {
+        "bank_transfer": "Transfer Bank",
+        "e_wallet": "E-Wallet",
+        "credit_card": "Kartu Kredit",
+        "qris": "QRIS"
+    };
+    const paymentMethodText = paymentMethodMap[donation.paymentMethod] || donation.paymentMethod || "-";
+    doc.text(paymentMethodText, valueX, currentY);
+    currentY += lineHeight;
+
     // Campaign
     doc.text("Untuk Program", leftX, currentY);
     doc.text(":", 65, currentY);
