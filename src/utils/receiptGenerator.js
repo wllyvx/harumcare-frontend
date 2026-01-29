@@ -1,11 +1,33 @@
 import { jsPDF } from "jspdf";
 
-export const generateReceipt = (donation, user) => {
+const loadImage = (url) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(img);
+        img.onerror = (err) => reject(err);
+    });
+};
+
+export const generateReceipt = async (donation, user) => {
     const doc = new jsPDF({
         orientation: "landscape",
         unit: "mm",
         format: "a5" // A5 size is good for receipts
     });
+
+    // Load Logo
+    try {
+        const logo = await loadImage("/images/logo/logo.png");
+        // Add logo at top left, adjust dimensions as needed
+        // x=10, y=5, width=25, height=auto (maintain aspect ratio)
+        const logoWidth = 25;
+        const logoHeight = (logo.height * logoWidth) / logo.width;
+        doc.addImage(logo, "PNG", 15, 10, logoWidth, logoHeight);
+    } catch (err) {
+        console.warn("Failed to load logo:", err);
+        // Continue without logo if fails
+    }
 
     // Colors
     const primaryColor = "#3B82F6"; // Blue-500
@@ -16,13 +38,14 @@ export const generateReceipt = (donation, user) => {
     doc.setFontSize(22);
     doc.setTextColor(secondaryColor);
     doc.setFont("helvetica", "bold");
-    doc.text("HARUM CARE INDONESIA", 105, 20, { align: "center" });
+    // Shift title slightly right if needed, but center align at 115 might balance with logo
+    doc.text("HARUM CARE INDONESIA", 115, 20, { align: "center" });
 
     doc.setFontSize(10);
     doc.setTextColor(grayColor);
     doc.setFont("helvetica", "normal");
-    doc.text("Jl. Pakuncen No. 1, Desa Sukaharja, Telukjambe Timur, Kabupaten Karawang", 105, 26, { align: "center" });
-    doc.text("Email: harumcare@gmail.com | Website: www.harumcare.com", 105, 30, { align: "center" });
+    doc.text("Jl. Pakuncen No. 1, Desa Sukaharja, Telukjambe Timur, Kabupaten Karawang", 115, 26, { align: "center" });
+    doc.text("Email: harumcare@gmail.com | Website: www.harumcare.com", 115, 30, { align: "center" });
 
     // Line Separator
     doc.setDrawColor(200, 200, 200);
