@@ -1,14 +1,20 @@
 ---
 // Layout untuk halaman profil
-import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
+import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
 ---
 
 <PrimaryLayout title="Profil - Harum Care Indonesia">
   <div id="profile-container" class="min-h-screen bg-gray-50">
     <!-- Loading State -->
-    <div id="loading-state" class="flex items-center justify-center min-h-screen">
+    <div
+      id="loading-state"
+      class="flex items-center justify-center min-h-screen"
+    >
       <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <div
+          class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"
+        >
+        </div>
         <p class="text-gray-600">Memuat profil...</p>
       </div>
     </div>
@@ -20,8 +26,17 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
         <div class="container mx-auto px-4 py-4">
           <div class="flex items-center">
             <a href="/" class="mr-4">
-              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              <svg
+                class="w-6 h-6 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 19l-7-7 7-7"></path>
               </svg>
             </a>
             <h1 class="text-xl font-semibold text-gray-800">Profil Saya</h1>
@@ -32,15 +47,31 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
       <!-- Profile Info -->
       <div class="container mx-auto px-4 py-6">
         <!-- User Info Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6 mb-6">
+        <div
+          class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6 mb-6"
+        >
           <div class="flex items-center space-x-4">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            <div
+              class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center"
+            >
+              <svg
+                class="w-8 h-8 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                ></path>
               </svg>
             </div>
             <div class="flex-1">
-              <h2 id="user-name" class="text-xl font-semibold text-gray-800">Loading...</h2>
+              <h2 id="user-name" class="text-xl font-semibold text-gray-800">
+                Loading...
+              </h2>
               <p id="user-role" class="text-gray-600">Loading...</p>
               <p id="user-email" class="text-sm text-gray-500">Loading...</p>
             </div>
@@ -48,30 +79,70 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
         </div>
 
         <!-- Action Buttons -->
-        <div id="action-buttons" class="space-y-3">
-          <!-- Placeholder untuk tombol aksi -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2">
+            <div
+              class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6 mb-6"
+            >
+              <h3
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Riwayat Donasi
+              </h3>
+              <div id="donation-history-container">
+                <!-- Content loaded via JS -->
+              </div>
+            </div>
+          </div>
+          <div id="action-buttons" class="space-y-3">
+            <!-- Placeholder untuk tombol aksi -->
+          </div>
         </div>
 
         <!-- Login Prompt (untuk user yang belum login) -->
-        <div id="login-prompt" class="hidden bg-white rounded-lg shadow-sm border border-gray-500/30 p-6">
+        <div
+          id="login-prompt"
+          class="hidden bg-white rounded-lg shadow-sm border border-gray-500/30 p-6"
+        >
           <div class="text-center">
-            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            <div
+              class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <svg
+                class="w-8 h-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                ></path>
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-800 mb-2">Anda Belum Masuk</h3>
-            <p class="text-gray-600 mb-6">Silakan masuk ke akun Anda untuk melihat profil lengkap dan mengakses fitur lainnya.</p>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">
+              Anda Belum Masuk
+            </h3>
+            <p class="text-gray-600 mb-6">
+              Silakan masuk ke akun Anda untuk melihat profil lengkap dan
+              mengakses fitur lainnya.
+            </p>
             <div class="space-y-3">
-              <a 
-                href="/auth/login" 
+              <a
+                href="/auth/login"
                 class="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition duration-200 font-medium text-center block"
               >
                 Masuk ke Akun
               </a>
               <p class="text-sm text-gray-500">
-                Belum punya akun? 
-                <a href="/auth/signup" class="text-blue-600 hover:text-blue-700 font-medium">Daftar di sini</a>
+                Belum punya akun?
+                <a
+                  href="/auth/signup"
+                  class="text-blue-600 hover:text-blue-700 font-medium"
+                  >Daftar di sini</a
+                >
               </p>
             </div>
           </div>
@@ -81,6 +152,8 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
   </div>
 
   <script>
+    import { generateReceipt } from "../../utils/receiptGenerator";
+
     // Fungsi untuk memeriksa status login
     function checkAuthStatus() {
       const userToken = localStorage.getItem("token");
@@ -110,8 +183,11 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
         const userEmailElement = document.querySelector("#user-email");
 
         if (userNameElement) userNameElement.textContent = userName || "User";
-        if (userRoleElement) userRoleElement.textContent = userRole === "admin" ? "Administrator" : "User";
-        if (userEmailElement) userEmailElement.textContent = userEmail || "Email tidak tersedia";
+        if (userRoleElement)
+          userRoleElement.textContent =
+            userRole === "admin" ? "Administrator" : "User";
+        if (userEmailElement)
+          userEmailElement.textContent = userEmail || "Email tidak tersedia";
 
         // Tampilkan tombol aksi
         actionButtons.innerHTML = `
@@ -125,17 +201,24 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
               >
                 Keluar dari Akun
               </a>
-              ${userRole === "admin" ? `
+              ${
+                userRole === "admin"
+                  ? `
                 <a 
                   href="/admin/" 
                   class="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition duration-200 font-medium text-center block"
                 >
                   Panel Administrator
                 </a>
-              ` : ""}
+              `
+                  : ""
+              }
             </div>
           </div>
         `;
+
+        // Load Donation History
+        fetchDonationHistory(userToken);
 
         // Event listener untuk logout
         const logoutBtn = document.querySelector("#logout-btn");
@@ -162,11 +245,140 @@ import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
         const userEmailElement = document.querySelector("#user-email");
 
         if (userNameElement) userNameElement.textContent = "Pengunjung";
-        if (userRoleElement) userRoleElement.textContent = "Belum masuk ke akun";
-        if (userEmailElement) userEmailElement.textContent = "Silakan masuk untuk melihat profil lengkap";
+        if (userRoleElement)
+          userRoleElement.textContent = "Belum masuk ke akun";
+        if (userEmailElement)
+          userEmailElement.textContent =
+            "Silakan masuk untuk melihat profil lengkap";
 
         // Sembunyikan tombol aksi untuk user yang belum login
         actionButtons.innerHTML = "";
+      }
+    }
+
+    async function fetchDonationHistory(token) {
+      const historyContainer = document.getElementById(
+        "donation-history-container",
+      );
+      if (!historyContainer) return;
+
+      try {
+        historyContainer.innerHTML =
+          '<div class="text-center py-4 text-gray-500">Memuat riwayat donasi...</div>';
+
+        const API_URL = import.meta.env.PUBLIC_API_URL;
+        const response = await fetch(
+          `${API_URL}/donations/my-donations?limit=50`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (!response.ok) throw new Error("Gagal memuat riwayat donasi");
+
+        const data = await response.json();
+        const donations = data.donations || [];
+
+        if (donations.length === 0) {
+          historyContainer.innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                        <p class="text-gray-500">Belum ada riwayat donasi.</p>
+                        <a href="/" class="text-blue-600 hover:text-blue-700 font-medium mt-2 inline-block">Mulai Donasi</a>
+                    </div>
+                `;
+          return;
+        }
+
+        // Render table or list
+        const html = donations
+          .map((donation) => {
+            const date = new Date(donation.createdAt).toLocaleDateString(
+              "id-ID",
+              {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              },
+            );
+            const amount = new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              minimumFractionDigits: 0,
+            }).format(donation.amount);
+
+            const statusColor =
+              donation.paymentStatus === "completed"
+                ? "text-green-600 bg-green-100"
+                : donation.paymentStatus === "pending"
+                  ? "text-yellow-600 bg-yellow-100"
+                  : "text-red-600 bg-red-100";
+
+            const statusLabel =
+              donation.paymentStatus === "completed"
+                ? "Berhasil"
+                : donation.paymentStatus === "pending"
+                  ? "Pending"
+                  : "Gagal";
+
+            const campaignTitle =
+              donation.campaignId?.title || "Unknown Campaign";
+
+            // Encode donation data for the button
+            const donationData = encodeURIComponent(JSON.stringify(donation));
+
+            return `
+                    <div class="bg-white border rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 mb-1">${date} • ${donation.transactionId || "-"}</p>
+                                <h4 class="font-semibold text-gray-800 line-clamp-1">${campaignTitle}</h4>
+                                <p class="text-blue-600 font-bold mt-1">${amount}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2 w-full md:w-auto">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">
+                                    ${statusLabel}
+                                </span>
+                                <button 
+                                    class="text-sm text-gray-600 hover:text-blue-600 flex items-center gap-1 border px-3 py-1.5 rounded-md hover:bg-gray-50 transition-colors btn-download-receipt"
+                                    data-donation="${donationData}"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Kwitansi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+
+        historyContainer.innerHTML = html;
+
+        // Add event listeners to buttons
+        document.querySelectorAll(".btn-download-receipt").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const btnEl = e.currentTarget; // Use currentTarget to get the button element
+            if (btnEl instanceof HTMLElement) {
+              const data = btnEl.getAttribute("data-donation");
+              if (data) {
+                const donation = JSON.parse(decodeURIComponent(data));
+                const user = {
+                  nama: localStorage.getItem("userName"),
+                  email: localStorage.getItem("userEmail"),
+                };
+                generateReceipt(donation, user);
+              }
+            }
+          });
+        });
+      } catch (error) {
+        console.error("Error fetching history:", error);
+        historyContainer.innerHTML =
+          '<div class="text-red-500 text-center">Gagal memuat data.</div>';
       }
     }
 

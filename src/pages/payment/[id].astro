@@ -146,7 +146,8 @@ export const prerender = false;
           <li>Scan QR code di atas</li>
           <li>
             Pastikan jumlah pembayaran sesuai dengan yang tertera <span
-              class="font-semibold">(termasuk kode unik)</span>
+              class="font-semibold">(termasuk kode unik)</span
+            >
           </li>
           <li>
             Simpan <span class="font-semibold">bukti pembayaran</span> untuk diunggah
@@ -625,7 +626,7 @@ export const prerender = false;
         );
         if (updatedDonation) {
           alert("Bukti transfer berhasil diunggah. Menunggu konfirmasi admin.");
-          window.location.href = `/`;
+          window.location.href = `/profile`;
         } else {
           alert("Gagal memperbarui donasi. Coba lagi.");
         }
