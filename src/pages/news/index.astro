@@ -4,7 +4,7 @@ import NewsCardLarge from '../../components/news/NewsCardLarge.astro';
 
 // News interface
 interface News {
-  _id: string;
+  id: string;
   title: string;
   content: string;
   image: string;
@@ -22,6 +22,7 @@ interface News {
 const { searchParams } = Astro.url;
 const page = parseInt(searchParams.get('page') || '1');
 const category = searchParams.get('category') || '';
+const searchQuery = searchParams.get('q') || '';
 const limit = 9;
 
 // Fetch news from API
@@ -42,6 +43,10 @@ try {
     queryParams.append('category', category);
   }
   
+  if (searchQuery) {
+    queryParams.append('q', searchQuery);
+  }
+  
   const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/news?${queryParams}`);
   if (response.ok) {
     newsData = await response.json();
@@ -51,6 +56,24 @@ try {
 }
 
 const { news, currentPage, totalPages, totalNews } = newsData;
+
+// Fetch trending news separately (without search filter)
+let trendingNews: News[] = [];
+try {
+  const trendingParams = new URLSearchParams({
+    page: '1',
+    limit: '3',
+    status: 'published'
+  });
+  
+  const trendingResponse = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/news?${trendingParams}`);
+  if (trendingResponse.ok) {
+    const trendingData = await trendingResponse.json();
+    trendingNews = trendingData.news || [];
+  }
+} catch (error) {
+  console.error('Error fetching trending news:', error);
+}
 
 // Categories for filter (populate dynamically)
 let categories: { value: string; label: string }[] = [
@@ -129,7 +152,31 @@ try {
             </div>
           </div>
         </div>
-        <div class="mt-3 text-sm text-gray-600">Menampilkan {news.length} dari {totalNews} berita</div>
+        
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="text-sm text-gray-600">
+            Menampilkan {news.length} dari {totalNews} berita
+            {(category || searchQuery) && (
+              <span class="ml-2 text-gray-500">
+                {category && <span>• Kategori: <strong>{category}</strong></span>}
+                {category && searchQuery && <span> • </span>}
+                {searchQuery && <span>Pencarian: <strong>"{searchQuery}"</strong></span>}
+              </span>
+            )}
+          </div>
+          
+          {(category || searchQuery) && (
+            <a 
+              href="/news"
+              class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full text-sm hover:bg-gray-300 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              Reset Filter
+            </a>
+          )}
+        </div>
       </div>
     </section>
 
@@ -143,7 +190,7 @@ try {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {news.map((item) => (
                   <NewsCardLarge
-                    id={item._id}
+                    id={item.id}
                     title={item.title}
                     content={item.content}
                     image={item.image}
@@ -162,14 +209,14 @@ try {
                   <nav class="flex items-center gap-2">
                     {currentPage > 1 && (
                       <a
-                        href={`/news?page=${currentPage - 1}${category ? `&category=${category}` : ''}`}
+                        href={`/news?page=${currentPage - 1}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
                         class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                       >Sebelumnya</a>
                     )}
 
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
                       <a
-                        href={`/news?page=${pageNum}${category ? `&category=${category}` : ''}`}
+                        href={`/news?page=${pageNum}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
                         class={`px-4 py-2 text-sm border rounded-md transition-colors ${
                           pageNum === currentPage
                             ? 'bg-blue-600 text-white border-blue-600'
@@ -180,7 +227,7 @@ try {
 
                     {currentPage < totalPages && (
                       <a
-                        href={`/news?page=${currentPage + 1}${category ? `&category=${category}` : ''}`}
+                        href={`/news?page=${currentPage + 1}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
                         class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                       >Selanjutnya</a>
                     )}
@@ -192,9 +239,9 @@ try {
             <!-- Sidebar -->
             <aside class="space-y-6">
               <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
-                <h4 class="text-sm font-semibold text-blue-700 mb-3">Trending Berita</h4>
+                <h4 class="text-lg font-bold text-blue-700 mb-3">Berita Terpopuler</h4>
                 <div class="space-y-3">
-                  {news.slice(0, 3).map((n) => (
+                  {trendingNews.map((n) => (
                     <a href={`/news/${n.slug}`} class="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50">
                       <img src={n.image || '/images/empty-image-placeholder.webp'} alt={n.title} class="w-12 h-12 object-cover rounded-md" />
                       <div class="flex-1">
@@ -208,7 +255,13 @@ try {
 
               <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hidden md:block">
                 <h4 class="text-sm font-semibold text-blue-700 mb-3">Tentang Kami</h4>
-                <p class="text-sm text-gray-600">Temukan informasi lebih lengkap mengenai kegiatan Harum Care dan cara berdonasi.</p>
+                <p class="text-sm text-gray-600 mb-4">Temukan informasi lebih lengkap mengenai kegiatan Harum Care dan cara berdonasi.</p>
+                <a 
+                  href="/about-us" 
+                  class="inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors w-full text-center"
+                >
+                  Pelajari Lebih Lanjut
+                </a>
               </div>
             </aside>
           </div>

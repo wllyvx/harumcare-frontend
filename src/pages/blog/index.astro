@@ -4,7 +4,7 @@ import BlogCardLarge from '../../components/blog/BlogCardLarge.astro';
 
 // Blog interface
 interface Blog {
-  _id: string;
+  id: string;
   title: string;
   content: string;
   image: string;
@@ -22,6 +22,7 @@ interface Blog {
 const { searchParams } = Astro.url;
 const page = parseInt(searchParams.get('page') || '1');
 const category = searchParams.get('category') || '';
+const searchQuery = searchParams.get('q') || '';
 const limit = 9;
 
 // Fetch blogs from API
@@ -32,7 +33,6 @@ let blogData: { blogs: Blog[], currentPage: number, totalPages: number, totalBlo
   totalBlogs: 0 
 };
 try {
-  const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api';
   const queryParams = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
@@ -43,19 +43,13 @@ try {
     queryParams.append('category', category);
   }
   
-  const apiUrl = `${API_URL}/blog?${queryParams}`;
-  const response = await fetch(apiUrl);
+  if (searchQuery) {
+    queryParams.append('q', searchQuery);
+  }
   
+  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/blog?${queryParams}`);
   if (response.ok) {
     blogData = await response.json();
-    console.log('Blog data fetched:', { 
-      count: blogData.blogs?.length || 0, 
-      total: blogData.totalBlogs || 0 
-    });
-  } else {
-    console.error('Failed to fetch blogs:', response.status, response.statusText);
-    const errorText = await response.text();
-    console.error('Error response:', errorText);
   }
 } catch (error) {
   console.error('Error fetching blogs:', error);
@@ -63,75 +57,213 @@ try {
 
 const { blogs, currentPage, totalPages, totalBlogs } = blogData;
 
-// Categories for filter
-const categories = [
-  { value: '', label: 'Semua Kategori' },
-  { value: 'umum', label: 'Umum' },
-  { value: 'kegiatan', label: 'Kegiatan' },
-  { value: 'pengumuman', label: 'Pengumuman' }
+// Fetch trending blogs separately (without search filter)
+let trendingBlogs: Blog[] = [];
+try {
+  const trendingParams = new URLSearchParams({
+    page: '1',
+    limit: '3',
+    status: 'published'
+  });
+  
+  const trendingResponse = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/blog?${trendingParams}`);
+  if (trendingResponse.ok) {
+    const trendingData = await trendingResponse.json();
+    trendingBlogs = trendingData.blogs || [];
+  }
+} catch (error) {
+  console.error('Error fetching trending blogs:', error);
+}
+
+// Categories for filter (populate dynamically)
+let categories: { value: string; label: string }[] = [
+  { value: '', label: 'Semua Kategori' }
 ];
+
+// Try to fetch available categories from API; if unavailable, derive from fetched blogs
+try {
+  const catResp = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/blog/categories`);
+  if (catResp.ok) {
+    const cats = await catResp.json();
+    if (Array.isArray(cats) && cats.length > 0) {
+      const items = cats.map((c: any) => {
+        if (typeof c === 'string') return { value: c, label: c.charAt(0).toUpperCase() + c.slice(1) };
+        // support objects: { value, label } or { name }
+        return { value: c.value ?? c.name ?? String(c), label: c.label ?? c.name ?? String(c) };
+      });
+      categories = [{ value: '', label: 'Semua Kategori' }, ...items];
+    }
+  } else {
+    // fallback: derive unique categories from fetched blogs
+    const unique = Array.from(new Set(blogData.blogs.map((b: any) => b.category).filter(Boolean)));
+    categories = [{ value: '', label: 'Semua Kategori' }, ...unique.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))];
+  }
+} catch (err) {
+  const unique = Array.from(new Set(blogData.blogs.map((b: any) => b.category).filter(Boolean)));
+  categories = [{ value: '', label: 'Semua Kategori' }, ...unique.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))];
+}
 ---
 
 <PrimaryLayout title="Blog - Harum Care Indonesia">
   <main class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <section class="bg-blue-600 text-white py-16">
+    <section class="bg-blue-50 text-blue-900 py-12">
       <div class="max-w-7xl mx-auto px-4">
         <div class="text-center">
-          <h1 class="text-4xl md:text-5xl font-bold mb-4">Blog & Artikel</h1>
-          <p class="text-xl text-blue-100 max-w-2xl mx-auto">
-            Dapatkan informasi terbaru seputar kegiatan, pengumuman, dan artikel dari Harum Care Indonesia
+          <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Blog & Artikel</h1>
+          <p class="text-base text-blue-700 max-w-2xl mx-auto">
+            Dapatkan informasi terbaru seputar kegiatan, pengumuman, dan artikel dari Harum Care Indonesia.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- Filter Section -->
-    <section class="py-8 bg-white border-b">
+    <!-- Filters + Search (inline on desktop) -->
+    <section class="py-6 bg-white border-b">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <label for="category-filter" class="text-sm font-medium text-gray-700">
-              Filter Kategori:
-            </label>
-            <select 
-              id="category-filter" 
-              class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onchange="window.location.href = this.value ? `/blog?category=${this.value}` : '/blog'"
-            >
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap gap-2">
               {categories.map((cat) => (
-                <option value={cat.value} selected={cat.value === category}>
+                <a
+                  href={`/blog?category=${cat.value}`}
+                  class={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                    cat.value === category ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'
+                  }`}
+                >
                   {cat.label}
-                </option>
+                </a>
               ))}
-            </select>
+            </div>
           </div>
-          
+
+          <div class="w-full sm:w-80">
+            <div class="relative">
+              <input
+                type="search"
+                placeholder="Cari blog..."
+                class="w-full rounded-full border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                onkeydown="if(event.key === 'Enter'){ const q = this.value.trim(); window.location.href = q ? `/blog?q=${encodeURIComponent(q)}` : '/blog'; }"
+              />
+              <button
+                onclick="{ const q = this.previousElementSibling.value.trim(); window.location.href = q ? `/blog?q=${encodeURIComponent(q)}` : '/blog'; }"
+                class="absolute right-1 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm"
+              >Cari</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="text-sm text-gray-600">
             Menampilkan {blogs.length} dari {totalBlogs} blog
+            {(category || searchQuery) && (
+              <span class="ml-2 text-gray-500">
+                {category && <span>• Kategori: <strong>{category}</strong></span>}
+                {category && searchQuery && <span> • </span>}
+                {searchQuery && <span>Pencarian: <strong>"{searchQuery}"</strong></span>}
+              </span>
+            )}
           </div>
+          
+          {(category || searchQuery) && (
+            <a 
+              href="/blog"
+              class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full text-sm hover:bg-gray-300 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              Reset Filter
+            </a>
+          )}
         </div>
       </div>
     </section>
 
-    <!-- Blog Grid -->
+    <!-- Blog Grid + Sidebar -->
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4">
         {blogs.length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-10">
-            {blogs.map((item) => (
-              <BlogCardLarge
-                _id={item._id}
-                title={item.title}
-                content={item.content}
-                image={item.image}
-                slug={item.slug}
-                author={item.author}
-                category={item.category}
-                createdAt={item.createdAt}
-                viewCount={item.viewCount}
-              />
-            ))}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Main list (2 cols on desktop) -->
+            <div class="md:col-span-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {blogs.map((item) => (
+                  <BlogCardLarge
+                    id={item.id}
+                    title={item.title}
+                    content={item.content}
+                    image={item.image}
+                    slug={item.slug}
+                    author={item.author}
+                    category={item.category}
+                    createdAt={item.createdAt}
+                    viewCount={item.viewCount}
+                  />
+                ))}
+              </div>
+
+              <!-- Pagination -->
+              {totalPages > 1 && (
+                <div class="flex justify-center mt-10">
+                  <nav class="flex items-center gap-2">
+                    {currentPage > 1 && (
+                      <a
+                        href={`/blog?page=${currentPage - 1}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >Sebelumnya</a>
+                    )}
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <a
+                        href={`/blog?page=${pageNum}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                        class={`px-4 py-2 text-sm border rounded-md transition-colors ${
+                          pageNum === currentPage
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >{pageNum}</a>
+                    ))}
+
+                    {currentPage < totalPages && (
+                      <a
+                        href={`/blog?page=${currentPage + 1}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >Selanjutnya</a>
+                    )}
+                  </nav>
+                </div>
+              )}
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="space-y-6">
+              <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
+                <h4 class="text-lg font-bold text-blue-700 mb-3">Blog Terpopuler</h4>
+                <div class="space-y-3">
+                  {trendingBlogs.map((b) => (
+                    <a href={`/blog/${b.slug}`} class="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50">
+                      <img src={b.image || '/images/empty-image-placeholder.webp'} alt={b.title} class="w-12 h-12 object-cover rounded-md" />
+                      <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900 line-clamp-2">{b.title}</p>
+                        <p class="text-xs text-gray-500 mt-1">{new Date(b.createdAt).toLocaleDateString('id-ID')}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hidden md:block">
+                <h4 class="text-sm font-semibold text-blue-700 mb-3">Tentang Kami</h4>
+                <p class="text-sm text-gray-600 mb-4">Temukan informasi lebih lengkap mengenai kegiatan Harum Care dan cara berdonasi.</p>
+                <a 
+                  href="/about-us" 
+                  class="inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors w-full text-center"
+                >
+                  Pelajari Lebih Lanjut
+                </a>
+              </div>
+            </aside>
           </div>
         ) : (
           <div class="text-center py-16">
@@ -154,44 +286,6 @@ const categories = [
                 Lihat Semua Blog
               </a>
             )}
-          </div>
-        )}
-
-        <!-- Pagination -->
-        {totalPages > 1 && (
-          <div class="flex justify-center mt-12">
-            <nav class="flex items-center gap-2">
-              {currentPage > 1 && (
-                <a 
-                  href={`/blog?page=${currentPage - 1}${category ? `&category=${category}` : ''}`}
-                  class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Sebelumnya
-                </a>
-              )}
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                <a 
-                  href={`/blog?page=${pageNum}${category ? `&category=${category}` : ''}`}
-                  class={`px-4 py-2 text-sm border rounded-md transition-colors ${
-                    pageNum === currentPage 
-                      ? 'bg-blue-600 text-white border-blue-600' 
-                      : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {pageNum}
-                </a>
-              ))}
-              
-              {currentPage < totalPages && (
-                <a 
-                  href={`/blog?page=${currentPage + 1}${category ? `&category=${category}` : ''}`}
-                  class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  Selanjutnya
-                </a>
-              )}
-            </nav>
           </div>
         )}
       </div>
