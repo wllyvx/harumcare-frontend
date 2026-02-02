@@ -150,8 +150,8 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
           </div>
         </div>
 
-        <!-- Category and Status -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Category, Status, and Publish Date -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label
               for="category"
@@ -201,6 +201,24 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
               <option value="draft">Draft</option>
               <option value="published" selected>Published</option>
             </select>
+          </div>
+
+          <div>
+            <label
+              for="createdAt"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Tanggal Publish (Opsional)
+            </label>
+            <input
+              type="datetime-local"
+              id="createdAt"
+              name="createdAt"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Kosongkan untuk menggunakan waktu sekarang
+            </p>
           </div>
         </div>
 
@@ -550,6 +568,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
           category: category,
           status: formData.get("status"),
           campaignId: formData.get("campaignId") || null,
+          createdAt: formData.get("createdAt") || null,
           ...(imageUrl && { image: imageUrl }),
         };
 
