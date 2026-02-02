@@ -67,7 +67,6 @@ const formatDate = (dateString: string) => {
   });
 };
 
-// Get category label
 const getCategoryLabel = (category: string) => {
   const categories = {
     umum: "Umum",
@@ -76,9 +75,30 @@ const getCategoryLabel = (category: string) => {
   };
   return categories[category as keyof typeof categories] || category;
 };
+
+// Helper to strip HTML and get description
+const getDescription = (content: string) => {
+  if (!content) return "";
+  const plainText = content
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return plainText.length > 160
+    ? plainText.substring(0, 157) + "..."
+    : plainText;
+};
+
+const metaDescription = getDescription(news.content);
 ---
 
-<PrimaryLayout title={`${news.title} - Harum Care Indonesia`}>
+<PrimaryLayout
+  title={`${news.title} - Harum Care Indonesia`}
+  description={metaDescription}
+  image={news.image}
+  type="article"
+  publishDate={news.createdAt}
+  author={news.author?.nama}
+>
   <main class="min-h-screen bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 py-8">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

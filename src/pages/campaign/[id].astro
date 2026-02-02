@@ -92,9 +92,21 @@ const formatDate = (dateString: string) => {
     year: "numeric",
   }).format(date);
 };
+
+const metaDescription = campaign.description
+  ? campaign.description.length > 160
+    ? campaign.description.substring(0, 157) + "..."
+    : campaign.description
+  : "Bantu kampanye ini di Harum Care Indonesia";
 ---
 
-<PrimaryLayout>
+<PrimaryLayout
+  title={`${campaign.title} - Harum Care Indonesia`}
+  description={metaDescription}
+  image={campaign.imageUrl}
+  type="website"
+  author={campaign.organizationName}
+>
   <section class="w-full relative max-w-6xl mx-auto">
     <div
       class="w-full h-[300px] md:h-[400px] lg:h-[500px] bg-gray-300 relative overflow-hidden"

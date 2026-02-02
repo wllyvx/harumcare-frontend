@@ -75,9 +75,30 @@ const getCategoryLabel = (category: string) => {
   };
   return categories[category as keyof typeof categories] || category;
 };
+
+// Helper to strip HTML and get description
+const getDescription = (content: string) => {
+  if (!content) return "";
+  const plainText = content
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return plainText.length > 160
+    ? plainText.substring(0, 157) + "..."
+    : plainText;
+};
+
+const metaDescription = getDescription(blog.content);
 ---
 
-<PrimaryLayout title={`${blog.title} - Harum Care Indonesia`}>
+<PrimaryLayout
+  title={`${blog.title} - Harum Care Indonesia`}
+  description={metaDescription}
+  image={blog.image}
+  type="article"
+  publishDate={blog.createdAt}
+  author={blog.author?.nama}
+>
   <main class="min-h-screen bg-gray-50">
     <article class="max-w-4xl mx-auto px-4 py-8">
       <!-- Breadcrumb -->
