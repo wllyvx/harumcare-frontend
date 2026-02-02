@@ -85,6 +85,19 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
               >
                 1. List
               </button>
+              <button
+                type="button"
+                id="imageBtn"
+                class="px-3 py-1 text-sm border rounded hover:bg-gray-50"
+              >
+                🖼️ Image
+              </button>
+              <input
+                type="file"
+                id="inlineImageInput"
+                class="hidden"
+                accept="image/*"
+              />
             </div>
           </div>
           <p class="mt-1 text-sm text-gray-500">
@@ -345,6 +358,34 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     if (numberListBtn)
       numberListBtn.addEventListener("click", () => addList("number"));
 
+    // Setup inline image insertion
+    const imageBtn = document.getElementById("imageBtn");
+    const inlineImageInput = document.getElementById(
+      "inlineImageInput",
+    ) as HTMLInputElement;
+
+    if (imageBtn && inlineImageInput) {
+      imageBtn.addEventListener("click", () => {
+        inlineImageInput.click();
+      });
+
+      inlineImageInput.addEventListener("change", async (e) => {
+        const input = e.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+          const file = input.files[0];
+          // Show loading state if needed
+          const imageUrl = await uploadImage(file);
+          if (imageUrl) {
+            insertImageMarkdown(imageUrl);
+          } else {
+            alert("Gagal mengupload gambar");
+          }
+          // Reset input
+          input.value = "";
+        }
+      });
+    }
+
     // Setup category selection handling
     const categorySelect = document.getElementById(
       "category",
@@ -419,6 +460,25 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
       textarea.value.substring(0, start) +
       formattedText +
       textarea.value.substring(end);
+  }
+
+  function insertImageMarkdown(imageUrl: string) {
+    const textarea = document.getElementById("content") as HTMLTextAreaElement;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Format: ![Alt text](imageUrl)
+    const markdown = `\n![Gambar](${imageUrl})\n`;
+
+    textarea.value =
+      textarea.value.substring(0, start) +
+      markdown +
+      textarea.value.substring(end);
+
+    // Set cursor position after the inserted image
+    const newCursorPos = start + markdown.length;
+    textarea.focus();
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
   }
 
   // Fungsi untuk upload gambar ke server

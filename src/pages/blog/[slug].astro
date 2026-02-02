@@ -1,5 +1,6 @@
 ---
 import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
+import { marked } from "marked";
 
 export const prerender = false;
 
@@ -167,9 +168,10 @@ const getCategoryLabel = (category: string) => {
       <!-- Article Content -->
       <div class="prose prose-lg max-w-none">
         <div class="bg-white p-6 md:p-8 rounded-lg shadow-sm">
-          <div class="whitespace-pre-wrap text-gray-700 leading-relaxed">
-            {blog.content}
-          </div>
+          <div
+            class="whitespace-pre-wrap text-gray-700 leading-relaxed"
+            set:html={marked.parse(blog.content)}
+          />
         </div>
       </div>
 

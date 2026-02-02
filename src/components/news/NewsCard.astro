@@ -37,9 +37,16 @@ const formatDate = (dateString: string) => {
 };
 
 // Truncate content untuk preview
+import { marked } from "marked";
+
 const truncateContent = (text: string, maxLength: number = 150) => {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + "...";
+  if (!text) return "";
+  // Parse markdown to HTML then strip tags
+  const html = marked.parse(text) as string;
+  const plainText = html.replace(/<[^>]*>/g, "");
+
+  if (plainText.length <= maxLength) return plainText;
+  return plainText.substring(0, maxLength) + "...";
 };
 ---
 
