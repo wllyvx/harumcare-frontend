@@ -256,6 +256,50 @@ export const prerender = false;
         Kirim Bukti Transfer
       </button>
     </form>
+
+    <!-- Payment success UI (replaces browser alert) -->
+    <div id="payment-success" class="hidden bg-white rounded-lg p-6 border border-green-200 text-center">
+      <div class="mx-auto w-28 h-28 flex items-center justify-center">
+        <!-- Animated checkmark SVG -->
+        <svg class="checkmark w-28 h-28" viewBox="0 0 52 52">
+          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" stroke="#10B981" stroke-width="2"/>
+          <path class="checkmark__check" fill="none" stroke="#10B981" stroke-width="4" d="M14 27 l8 8 l16 -16"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-bold mt-4">Transaksi sudah diterima</h2>
+      <p id="success-message" class="mt-2 text-gray-700">Transaksi sudah diterima. Kami membutuhkan waktu maksimal 1x24 jam untuk memproses transaksi.</p>
+      <p id="status-note" class="mt-2 text-sm text-gray-500 hidden">Status masih belum "lunas" karena transaksi masih diproses.</p>
+      <div class="mt-4 flex justify-center gap-3">
+        <button id="download-receipt" class="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition">Unduh Kwitansi</button>
+        <a id="back-to-profile" href="/profile" class="bg-gray-100 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-200 transition">Kembali ke Profil</a>
+      </div>
+    </div>
+
+    <style>
+      /* Checkmark animation styles */
+      .checkmark__circle {
+        stroke-dasharray: 166;
+        stroke-dashoffset: 166;
+        stroke-linecap: round;
+        animation: stroke 0.6s ease-in-out forwards;
+      }
+      .checkmark__check {
+        stroke-dasharray: 48;
+        stroke-dashoffset: 48;
+        stroke-linecap: round;
+        animation: stroke 0.4s 0.6s ease-in-out forwards, scale 0.3s 1s ease-in-out forwards;
+      }
+      @keyframes stroke {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      @keyframes scale {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+      }
+    </style>
   </section>
 </PrimaryLayout>
 
@@ -355,7 +399,17 @@ export const prerender = false;
       uploadFormElement.setAttribute("data-campaign-id", donation.campaignId);
 
       loading.classList.add("hidden");
-      paymentMethodSection.classList.remove("hidden");
+      // Jika bukti transfer sudah ada, tampilkan UI sukses (mis. user sudah unggah bukti sebelumnya)
+      if (donation.proofOfTransfer) {
+        bankTransferDetails.classList.add("hidden");
+        qrisPaymentDetails.classList.add("hidden");
+        paymentMethodSection.classList.add("hidden");
+        uploadFormElement.classList.add("hidden");
+        // Tampilkan UI sukses yang baru
+        showPaymentSuccess(donation);
+      } else {
+        paymentMethodSection.classList.remove("hidden");
+      }
     } catch (err: unknown) {
       console.error(
         "Error fetching donation:",
@@ -532,6 +586,72 @@ export const prerender = false;
     }
   }
 
+  // Menampilkan UI sukses pembayaran (mengganti penggunaan alert)
+  function showPaymentSuccess(donation) {
+    try {
+      const paymentSuccess = document.getElementById("payment-success");
+      const uploadForm = document.getElementById("upload-proof-form");
+      const successMessage = document.getElementById("success-message");
+      const statusNote = document.getElementById("status-note");
+      const downloadBtn = document.getElementById("download-receipt");
+
+      if (!paymentSuccess) return;
+
+      // Hapus form upload dan sembunyikan bagian lain
+      uploadForm?.classList.add("hidden");
+
+      // Set pesan dan catatan status
+      successMessage.textContent = "Transaksi sudah diterima. Kami membutuhkan waktu maksimal 1x24 jam untuk memproses transaksi. Kwitansi sudah bisa diunduh melalui tombol di bawah.";
+
+      // Jika status belum selesai, tampilkan catatan
+      if (donation.paymentStatus !== "completed" && donation.paymentStatus !== "lunas") {
+        statusNote.classList.remove("hidden");
+      } else {
+        statusNote.classList.add("hidden");
+      }
+
+      // Tombol unduh kwitansi
+      if (downloadBtn) {
+        downloadBtn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          downloadBtn.disabled = true;
+          const originalText = downloadBtn.textContent;
+          downloadBtn.textContent = "Membuat kwitansi...";
+          try {
+            const module = await import('../../utils/receiptGenerator.js');
+            if (module && module.generateReceipt) {
+              await module.generateReceipt(donation, null);
+            } else if (module && module.default) {
+              // in case it's default export
+              await module.default(donation, null);
+            }
+          } catch (err) {
+            console.error('Gagal membuat kwitansi:', err);
+            alert('Gagal membuat kwitansi. Silakan coba lagi.');
+          } finally {
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = originalText;
+          }
+        }, { once: true });
+      }
+
+      // Tampilkan UI sukses
+      paymentSuccess.classList.remove("hidden");
+      // animate checkmark by reflow (in case needed)
+      const svg = paymentSuccess.querySelector('.checkmark');
+      if (svg) {
+        svg.classList.remove('play');
+        void svg.offsetWidth;
+        svg.classList.add('play');
+      }
+
+      // Scroll ke UI sukses agar user melihatnya
+      paymentSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (err) {
+      console.error('Error displaying success UI:', err);
+    }
+  }
+
   window.addEventListener("load", () => {
     fetchDonation();
     setupImagePreview("proof-input", "proof-preview", "preview-proof");
@@ -625,8 +745,8 @@ export const prerender = false;
           proofUrl,
         );
         if (updatedDonation) {
-          alert("Bukti transfer berhasil diunggah. Menunggu konfirmasi admin.");
-          window.location.href = `/profile`;
+          // Tampilkan UI sukses yang lebih informatif dan interaktif
+          showPaymentSuccess(updatedDonation);
         } else {
           alert("Gagal memperbarui donasi. Coba lagi.");
         }
