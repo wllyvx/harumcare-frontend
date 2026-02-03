@@ -1,0 +1,46 @@
+---
+---
+
+<div id="toaster" class="fixed top-6 right-6 z-50 space-y-3 w-auto max-w-sm"></div>
+
+<script>
+  // Simple toaster exposed globally as showToast(message, type = 'success', timeout = 4000)
+  window.showToast = (message, type = 'success', timeout = 4000) => {
+    try {
+      const container = document.getElementById('toaster');
+      if (!container) return;
+
+      const color = type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-600';
+      const icon = type === 'error' ? '⚠️' : type === 'warning' ? '⚠️' : '✅';
+
+      const toast = document.createElement('div');
+      toast.className = `${color} text-white px-4 py-3 rounded-md shadow-md flex items-start gap-3 animate-slide-in`;
+      toast.style.display = 'flex';
+
+      toast.innerHTML = `
+        <div class="text-xl leading-none">${icon}</div>
+        <div class="text-sm leading-tight">${message}</div>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto remove
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition', 'duration-500');
+        setTimeout(() => {
+          try { container.removeChild(toast); } catch (e) {}
+        }, 500);
+      }, timeout);
+    } catch (err) {
+      console.error('showToast error', err);
+    }
+  };
+</script>
+
+<style>
+  @keyframes slide-in {
+    from { transform: translateY(-8px); opacity: 0 }
+    to { transform: translateY(0); opacity: 1 }
+  }
+  .animate-slide-in { animation: slide-in 180ms ease-out; }
+</style>
