@@ -50,31 +50,95 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         <div
           class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6 mb-6"
         >
-          <div class="flex items-center space-x-4">
-            <div
-              class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center"
-            >
-              <svg
-                class="w-8 h-8 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div class="flex items-start gap-6">
+            <div class="flex-shrink-0">
+              <div
+                class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                ></path>
-              </svg>
+                <svg
+                  class="w-10 h-10 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  ></path>
+                </svg>
+              </div>
             </div>
             <div class="flex-1">
-              <h2 id="user-name" class="text-xl font-semibold text-gray-800">
-                Loading...
-              </h2>
-              <p id="user-role" class="text-gray-600">Loading...</p>
-              <p id="user-email" class="text-sm text-gray-500">Loading...</p>
+              <div class="flex items-start justify-between">
+                <div>
+                  <h2 id="user-name" class="text-2xl font-semibold text-gray-800">
+                    Loading...
+                  </h2>
+                  <p id="user-role" class="text-gray-600">Loading...</p>
+                </div>
+                <div class="ml-4">
+                  <button id="edit-profile-inline" class="hidden inline-flex items-center gap-2 px-3 py-2 rounded-md border bg-white hover:bg-gray-50 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6"/></svg>
+                    <span class="text-sm text-blue-600 font-medium">Edit Profil</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <p class="text-sm text-gray-500">Nama</p>
+                  <p id="user-fullname" class="text-gray-800 font-medium">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Username</p>
+                  <p id="user-username" class="text-gray-800 font-medium">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Email</p>
+                  <p id="user-email" class="text-gray-800 font-medium">-</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Nomor HP</p>
+                  <p id="user-phone" class="text-gray-800 font-medium">-</p>
+                </div>
+                <div class="md:col-span-2">
+                  <p class="text-sm text-gray-500">Alamat</p>
+                  <p id="user-address" class="text-gray-800">-</p>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="edit-modal" class="fixed inset-0 hidden items-center justify-center z-50">
+          <div class="absolute inset-0 bg-black/40" id="edit-modal-backdrop"></div>
+          <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
+            <h3 class="text-lg font-semibold mb-4">Edit Profil</h3>
+            <form id="edit-profile-form" class="space-y-4">
+              <div>
+                <label class="text-sm text-gray-600">Nama</label>
+                <input id="input-nama" type="text" class="w-full border p-3 rounded-md" />
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Email</label>
+                <input id="input-email" type="email" class="w-full border p-3 rounded-md" />
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Nomor HP</label>
+                <input id="input-phone" type="text" class="w-full border p-3 rounded-md" />
+              </div>
+              <div>
+                <label class="text-sm text-gray-600">Alamat</label>
+                <textarea id="input-address" class="w-full border p-3 rounded-md" rows="3"></textarea>
+              </div>
+              <div class="flex justify-end items-center gap-3">
+                <button type="button" id="cancel-edit" class="px-4 py-2 rounded-md border">Batal</button>
+                <button type="submit" id="save-edit" class="px-4 py-2 rounded-md bg-blue-600 text-white">Simpan</button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -89,8 +153,11 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
               >
                 Riwayat Donasi
               </h3>
-              <div id="donation-history-container">
-                <!-- Content loaded via JS -->
+              <div id="donation-summary-container">
+                <div class="bg-white rounded-lg border border-gray-200 p-6 text-center">
+                  <p id="donation-summary-text" class="text-gray-600 mb-4">Memuat ringkasan riwayat donasi...</p>
+                  <a href="/profile/donations" class="inline-block w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Lihat Semua Riwayat Donasi</a>
+                </div>
               </div>
             </div>
           </div>
@@ -154,12 +221,19 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
   <script>
     import { generateReceipt } from "../../utils/receiptGenerator";
 
-    // Fungsi untuk memeriksa status login
+    const API_URL = import.meta.env.PUBLIC_API_URL;
+
+    function showElement(el) {
+      if (el) el.classList.remove("hidden");
+    }
+    function hideElement(el) {
+      if (el) el.classList.add("hidden");
+    }
+
+    // Cek status login dan load profil ringkas
     function checkAuthStatus() {
-      const userToken = localStorage.getItem("token");
-      const userRole = localStorage.getItem("role");
-      const userName = localStorage.getItem("userName");
-      const userEmail = localStorage.getItem("userEmail");
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
 
       const loadingState = document.querySelector("#loading-state");
       const profileContent = document.querySelector("#profile-content");
@@ -171,214 +245,211 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         return;
       }
 
-      if (userToken) {
-        // User sudah login
-        loadingState.classList.add("hidden");
-        profileContent.classList.remove("hidden");
-        loginPrompt.classList.add("hidden");
+      if (token) {
+        hideElement(loadingState);
+        showElement(profileContent);
+        hideElement(loginPrompt);
 
-        // Update user info
-        const userNameElement = document.querySelector("#user-name");
-        const userRoleElement = document.querySelector("#user-role");
-        const userEmailElement = document.querySelector("#user-email");
+        // Fetch full profile from server
+        fetchUserProfile(token).catch((e) => console.error(e));
 
-        if (userNameElement) userNameElement.textContent = userName || "User";
-        if (userRoleElement)
-          userRoleElement.textContent =
-            userRole === "admin" ? "Administrator" : "User";
-        if (userEmailElement)
-          userEmailElement.textContent = userEmail || "Email tidak tersedia";
-
-        // Tampilkan tombol aksi
-        actionButtons.innerHTML = `
-          <div class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi</h3>
-            <div class="space-y-3">
-              <a 
-                href="/auth/logout" 
-                id="logout-btn"
-                class="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition duration-200 font-medium text-center block"
-              >
-                Keluar dari Akun
-              </a>
-              ${
-                userRole === "admin"
-                  ? `
-                <a 
-                  href="/admin/" 
-                  class="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition duration-200 font-medium text-center block"
-                >
-                  Panel Administrator
-                </a>
-              `
-                  : ""
-              }
-            </div>
-          </div>
-        `;
-
-        // Load Donation History
-        fetchDonationHistory(userToken);
-
-        // Event listener untuk logout
-        const logoutBtn = document.querySelector("#logout-btn");
-        if (logoutBtn) {
-          logoutBtn.addEventListener("click", (event) => {
-            event.preventDefault();
-            console.log("Logging out...");
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            localStorage.removeItem("userName");
-            localStorage.removeItem("userEmail");
-            window.location.href = "/";
-          });
-        }
+        // Fetch donation summary (compact)
+        fetchDonationSummary(token).catch((e) => console.error(e));
       } else {
-        // User belum login
-        loadingState.classList.add("hidden");
-        profileContent.classList.remove("hidden");
-        loginPrompt.classList.remove("hidden");
+        hideElement(loadingState);
+        showElement(profileContent);
+        showElement(loginPrompt);
 
-        // Update user info untuk user yang belum login
         const userNameElement = document.querySelector("#user-name");
         const userRoleElement = document.querySelector("#user-role");
         const userEmailElement = document.querySelector("#user-email");
 
         if (userNameElement) userNameElement.textContent = "Pengunjung";
-        if (userRoleElement)
-          userRoleElement.textContent = "Belum masuk ke akun";
-        if (userEmailElement)
-          userEmailElement.textContent =
-            "Silakan masuk untuk melihat profil lengkap";
+        if (userRoleElement) userRoleElement.textContent = "Belum masuk ke akun";
+        if (userEmailElement) userEmailElement.textContent = "Silakan masuk untuk melihat profil lengkap";
 
-        // Sembunyikan tombol aksi untuk user yang belum login
         actionButtons.innerHTML = "";
       }
     }
 
-    async function fetchDonationHistory(token) {
-      const historyContainer = document.getElementById(
-        "donation-history-container",
-      );
-      if (!historyContainer) return;
+    // Ambil profil pengguna dari backend
+    async function fetchUserProfile(token) {
+      const res = await fetch(`${API_URL}/auth/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Gagal mengambil profil");
+      const user = await res.json();
+
+      // Update DOM
+      const nameHeading = document.querySelector("#user-name");
+      const roleEl = document.querySelector("#user-role");
+      const fullName = document.querySelector("#user-fullname");
+      const usernameEl = document.querySelector("#user-username");
+      const emailEl = document.querySelector("#user-email");
+      const phoneEl = document.querySelector("#user-phone");
+      const addressEl = document.querySelector("#user-address");
+      const editInlineBtn = document.querySelector("#edit-profile-inline");
+
+      if (nameHeading) nameHeading.textContent = user.nama || "User";
+      if (roleEl) roleEl.textContent = user.role === "admin" ? "Administrator" : "User";
+      if (fullName) fullName.textContent = user.nama || "-";
+      if (usernameEl) usernameEl.textContent = user.username || "-";
+      if (emailEl) emailEl.textContent = user.email || "-";
+      if (phoneEl) phoneEl.textContent = user.nomorHp || "-";
+      if (addressEl) addressEl.textContent = user.alamat || "-";
+
+      // Save for receipt generator if needed
+      if (user.nama) localStorage.setItem("userName", user.nama);
+      if (user.email) localStorage.setItem("userEmail", user.email);
+
+      // Show inline edit button
+      if (editInlineBtn) editInlineBtn.classList.remove("hidden");
+
+      // Render action buttons (logout/admin/edit)
+      renderActionButtons(user.role || "user");
+    }
+
+    function renderActionButtons(role) {
+      const actionButtons = document.querySelector("#action-buttons");
+      if (!actionButtons) return;
+
+      actionButtons.innerHTML = `
+        <div class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi</h3>
+          <div class="space-y-3">
+            <button id="open-edit-btn" class="w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-50">Edit Profil</button>
+            <a href="/auth/logout" id="logout-btn" class="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition duration-200 font-medium text-center block">Keluar dari Akun</a>
+            ${role === "admin" ? `<a href="/admin/" class="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition duration-200 font-medium text-center block">Panel Administrator</a>` : ""}
+          </div>
+        </div>
+      `;
+
+      // Event listeners
+      const logoutBtn = document.querySelector("#logout-btn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          localStorage.removeItem("userName");
+          localStorage.removeItem("userEmail");
+          window.location.href = "/";
+        });
+      }
+
+      const openEditBtn = document.querySelector("#open-edit-btn");
+      const inlineEdit = document.querySelector("#edit-profile-inline");
+      if (openEditBtn) openEditBtn.addEventListener("click", openEditModal);
+      if (inlineEdit) inlineEdit.addEventListener("click", openEditModal);
+
+      // Backdrop and cancel
+      const editBackdrop = document.querySelector("#edit-modal-backdrop");
+      const cancelBtn = document.querySelector("#cancel-edit");
+      if (editBackdrop) editBackdrop.addEventListener("click", closeEditModal);
+      if (cancelBtn) cancelBtn.addEventListener("click", closeEditModal);
+
+      // Form submit
+      const editForm = document.querySelector("#edit-profile-form");
+      if (editForm) editForm.addEventListener("submit", submitEditForm);
+    }
+
+    function openEditModal() {
+      const modal = document.querySelector("#edit-modal");
+      if (!modal) return;
+
+      // Prefill form from current DOM values
+      const inputNama = document.querySelector("#input-nama");
+      const inputEmail = document.querySelector("#input-email");
+      const inputPhone = document.querySelector("#input-phone");
+      const inputAddress = document.querySelector("#input-address");
+
+      const fullname = document.querySelector("#user-fullname")?.textContent || "";
+      const email = document.querySelector("#user-email")?.textContent || "";
+      const phone = document.querySelector("#user-phone")?.textContent || "";
+      const address = document.querySelector("#user-address")?.textContent || "";
+
+      if (inputNama) inputNama.value = fullname === "-" ? "" : fullname;
+      if (inputEmail) inputEmail.value = email === "-" ? "" : email;
+      if (inputPhone) inputPhone.value = phone === "-" ? "" : phone;
+      if (inputAddress) inputAddress.value = address === "-" ? "" : address;
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeEditModal() {
+      const modal = document.querySelector("#edit-modal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    async function submitEditForm(e) {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) return alert("Anda harus masuk untuk mengedit profil");
+
+      const nama = document.querySelector("#input-nama")?.value || "";
+      const email = document.querySelector("#input-email")?.value || "";
+      const nomorHp = document.querySelector("#input-phone")?.value || "";
+      const alamat = document.querySelector("#input-address")?.value || "";
 
       try {
-        historyContainer.innerHTML =
-          '<div class="text-center py-4 text-gray-500">Memuat riwayat donasi...</div>';
-
-        const API_URL = import.meta.env.PUBLIC_API_URL;
-        const response = await fetch(
-          `${API_URL}/donations/my-donations?limit=50`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        const res = await fetch(`${API_URL}/auth/profile`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-        );
-
-        if (!response.ok) throw new Error("Gagal memuat riwayat donasi");
-
-        const data = await response.json();
-        const donations = data.donations || [];
-
-        if (donations.length === 0) {
-          historyContainer.innerHTML = `
-                    <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                        <p class="text-gray-500">Belum ada riwayat donasi.</p>
-                        <a href="/" class="text-blue-600 hover:text-blue-700 font-medium mt-2 inline-block">Mulai Donasi</a>
-                    </div>
-                `;
-          return;
-        }
-
-        // Render table or list
-        const html = donations
-          .map((donation) => {
-            const date = new Date(donation.createdAt).toLocaleDateString(
-              "id-ID",
-              {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              },
-            );
-            const amount = new Intl.NumberFormat("id-ID", {
-              style: "currency",
-              currency: "IDR",
-              minimumFractionDigits: 0,
-            }).format(donation.amount);
-
-            const statusColor =
-              donation.paymentStatus === "completed"
-                ? "text-green-600 bg-green-100"
-                : donation.paymentStatus === "pending"
-                  ? "text-yellow-600 bg-yellow-100"
-                  : "text-red-600 bg-red-100";
-
-            const statusLabel =
-              donation.paymentStatus === "completed"
-                ? "Berhasil"
-                : donation.paymentStatus === "pending"
-                  ? "Pending"
-                  : "Gagal";
-
-            const campaignTitle =
-              donation.campaignId?.title || "Unknown Campaign";
-
-            // Encode donation data for the button
-            const donationData = encodeURIComponent(JSON.stringify(donation));
-
-            return `
-                    <div class="bg-white border rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500 mb-1">${date} • ${donation.transactionId || "-"}</p>
-                                <h4 class="font-semibold text-gray-800 line-clamp-1">${campaignTitle}</h4>
-                                <p class="text-blue-600 font-bold mt-1">${amount}</p>
-                            </div>
-                            <div class="flex flex-col items-end gap-2 w-full md:w-auto">
-                                <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">
-                                    ${statusLabel}
-                                </span>
-                                <button 
-                                    class="text-sm text-gray-600 hover:text-blue-600 flex items-center gap-1 border px-3 py-1.5 rounded-md hover:bg-gray-50 transition-colors btn-download-receipt"
-                                    data-donation="${donationData}"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Kwitansi
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-          })
-          .join("");
-
-        historyContainer.innerHTML = html;
-
-        // Add event listeners to buttons
-        document.querySelectorAll(".btn-download-receipt").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            const btnEl = e.currentTarget; // Use currentTarget to get the button element
-            if (btnEl instanceof HTMLElement) {
-              const data = btnEl.getAttribute("data-donation");
-              if (data) {
-                const donation = JSON.parse(decodeURIComponent(data));
-                const user = {
-                  nama: localStorage.getItem("userName"),
-                  email: localStorage.getItem("userEmail"),
-                };
-                generateReceipt(donation, user);
-              }
-            }
-          });
+          body: JSON.stringify({ nama, email, nomorHp, alamat }),
         });
-      } catch (error) {
-        console.error("Error fetching history:", error);
-        historyContainer.innerHTML =
-          '<div class="text-red-500 text-center">Gagal memuat data.</div>';
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Gagal mengupdate profil");
+
+        // Update DOM with new data
+        document.querySelector("#user-name").textContent = data.user.nama || nama;
+        document.querySelector("#user-fullname").textContent = data.user.nama || nama;
+        document.querySelector("#user-email").textContent = data.user.email || email;
+        document.querySelector("#user-phone").textContent = data.user.nomorHp || nomorHp;
+        document.querySelector("#user-address").textContent = data.user.alamat || alamat;
+
+        // Update localStorage
+        if (data.user.nama) localStorage.setItem("userName", data.user.nama);
+        if (data.user.email) localStorage.setItem("userEmail", data.user.email);
+
+        closeEditModal();
+        alert("Profil berhasil diperbarui");
+      } catch (err) {
+        console.error(err);
+        alert(err instanceof Error ? err.message : "Gagal mengupdate profil");
+      }
+    }
+
+    // Ringkasan riwayat donasi: gunakan endpoint yang sama tapi tampilkan ringkasan + tombol ke subhalaman
+    async function fetchDonationSummary(token) {
+      const container = document.querySelector("#donation-summary-container");
+      const textEl = document.querySelector("#donation-summary-text");
+      if (!container || !textEl) return;
+
+      try {
+        textEl.textContent = "Memuat ringkasan riwayat donasi...";
+        const res = await fetch(`${API_URL}/donations/my-donations?limit=50`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Gagal memuat riwayat donasi");
+        const data = await res.json();
+        const donations = data.donations || [];
+        if (donations.length === 0) {
+          textEl.innerHTML = `Belum ada riwayat donasi. <a href="/" class="text-blue-600 hover:text-blue-700 font-medium">Mulai Donasi</a>`;
+        } else {
+          const count = donations.length;
+          const last = donations[0];
+          const date = new Date(last.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+          textEl.innerHTML = `Anda memiliki <strong>${count}</strong> donasi. Donasi terakhir: <span class="font-medium">${date}</span>`;
+        }
+      } catch (err) {
+        console.error(err);
+        textEl.textContent = "Gagal memuat ringkasan riwayat donasi.";
       }
     }
 
@@ -387,7 +458,6 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
       checkAuthStatus();
     });
 
-    // Listen untuk perubahan localStorage
     window.addEventListener("storage", checkAuthStatus);
   </script>
 </PrimaryLayout>

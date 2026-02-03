@@ -1,0 +1,108 @@
+---
+import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
+---
+
+<PrimaryLayout title="Riwayat Donasi - Profil">
+  <div class="container mx-auto px-4 py-6">
+    <div class="mb-6">
+      <a href="/profile" class="inline-flex items-center text-gray-600 hover:text-gray-800">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        Kembali ke Profil
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <h2 class="text-xl font-semibold mb-4">Semua Riwayat Donasi</h2>
+      <div id="donations-list">
+        <div class="text-center text-gray-600 py-6">Memuat riwayat donasi...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { generateReceipt } from "../../utils/receiptGenerator";
+    const API_URL = import.meta.env.PUBLIC_API_URL;
+
+    async function loadDonations() {
+      const container = document.getElementById("donations-list");
+      const token = localStorage.getItem("token");
+      if (!container) return;
+      if (!token) {
+        container.innerHTML = '<div class="text-center text-gray-600 py-6">Silakan masuk untuk melihat riwayat donasi.</div>';
+        return;
+      }
+
+      try {
+        container.innerHTML = '<div class="text-center text-gray-600 py-6">Memuat riwayat donasi...</div>';
+        const res = await fetch(`${API_URL}/donations/my-donations?limit=100`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Gagal memuat riwayat donasi");
+        const data = await res.json();
+        const donations = data.donations || [];
+
+        if (donations.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <p class="text-gray-500">Belum ada riwayat donasi.</p>
+              <a href="/" class="text-blue-600 hover:text-blue-700 font-medium mt-2 inline-block">Mulai Donasi</a>
+            </div>
+          `;
+          return;
+        }
+
+        const html = donations.map(donation => {
+          const date = new Date(donation.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+          const amount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(donation.amount);
+          const statusColor = donation.paymentStatus === 'completed' ? 'text-green-600 bg-green-100' : donation.paymentStatus === 'pending' ? 'text-yellow-600 bg-yellow-100' : 'text-red-600 bg-red-100';
+          const statusLabel = donation.paymentStatus === 'completed' ? 'Berhasil' : donation.paymentStatus === 'pending' ? 'Pending' : 'Gagal';
+          const campaignTitle = donation.campaignId?.title || 'Unknown Campaign';
+          const donationData = encodeURIComponent(JSON.stringify(donation));
+
+          return `
+            <div class="bg-white border rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex-1">
+                  <p class="text-xs text-gray-500 mb-1">${date} • ${donation.transactionId || '-'}</p>
+                  <h4 class="font-semibold text-gray-800 line-clamp-1">${campaignTitle}</h4>
+                  <p class="text-blue-600 font-bold mt-1">${amount}</p>
+                </div>
+                <div class="flex flex-col items-end gap-2 w-full md:w-auto">
+                  <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">${statusLabel}</span>
+                  <button class="text-sm text-gray-600 hover:text-blue-600 flex items-center gap-1 border px-3 py-1.5 rounded-md hover:bg-gray-50 transition-colors btn-download-receipt" data-donation="${donationData}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Kwitansi
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        container.innerHTML = html;
+
+        document.querySelectorAll('.btn-download-receipt').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const btnEl = e.currentTarget;
+            if (btnEl instanceof HTMLElement) {
+              const data = btnEl.getAttribute('data-donation');
+              if (data) {
+                const donation = JSON.parse(decodeURIComponent(data));
+                const user = {
+                  nama: localStorage.getItem('userName'),
+                  email: localStorage.getItem('userEmail')
+                };
+                generateReceipt(donation, user);
+              }
+            }
+          });
+        });
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<div class="text-red-500 text-center">Gagal memuat data.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDonations);
+  </script>
+</PrimaryLayout>
