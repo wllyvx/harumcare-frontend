@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Toaster from "@/components/common/Toaster.astro";
 ---
 
 <html lang="id">
@@ -36,5 +37,6 @@ import "../styles/global.css";
     <main class="container mx-auto min-h-[calc(100vh-200px)]">
       <slot />
     </main>
+    <Toaster />
   </body>
 </html>

@@ -1,26 +1,44 @@
 ---
 import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
-import Toaster from "../../components/common/Toaster.astro";
 ---
 
 <PrimaryLayout title="Riwayat Donasi - Profil">
   <div class="container mx-auto px-4 py-6">
     <div class="mb-6 flex items-center justify-between">
-      <a href="/profile" class="inline-flex items-center text-gray-600 hover:text-gray-800">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <a
+        href="/profile"
+        class="inline-flex items-center text-gray-600 hover:text-gray-800"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"></path></svg
+        >
         Kembali ke Profil
       </a>
-      <div><Toaster /></div>
+      <div></div>
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h2 class="text-xl font-semibold mb-4">Semua Riwayat Donasi</h2>
       <div id="donations-list">
-        <div class="text-center text-gray-600 py-6">Memuat riwayat donasi...</div>
+        <div class="text-center text-gray-600 py-6">
+          Memuat riwayat donasi...
+        </div>
       </div>
 
       <!-- Pagination -->
-      <div id="donations-pagination" class="mt-4 flex items-center justify-center gap-3"></div>
+      <div
+        id="donations-pagination"
+        class="mt-4 flex items-center justify-center gap-3"
+      >
+      </div>
     </div>
   </div>
 
@@ -31,23 +49,26 @@ import Toaster from "../../components/common/Toaster.astro";
     let currentPage = 1;
     const LIMIT = 10; // items per page
 
-
-
     async function loadDonations(page = 1) {
       const container = document.getElementById("donations-list");
-      const pagination = document.getElementById('donations-pagination');
+      const pagination = document.getElementById("donations-pagination");
       const token = localStorage.getItem("token");
       if (!container) return;
       if (!token) {
-        container.innerHTML = '<div class="text-center text-gray-600 py-6">Silakan masuk untuk melihat riwayat donasi.</div>';
+        container.innerHTML =
+          '<div class="text-center text-gray-600 py-6">Silakan masuk untuk melihat riwayat donasi.</div>';
         return;
       }
 
       try {
-        container.innerHTML = '<div class="text-center text-gray-600 py-6">Memuat riwayat donasi...</div>';
-        const res = await fetch(`${API_URL}/donations/my-donations?limit=${LIMIT}&page=${page}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        container.innerHTML =
+          '<div class="text-center text-gray-600 py-6">Memuat riwayat donasi...</div>';
+        const res = await fetch(
+          `${API_URL}/donations/my-donations?limit=${LIMIT}&page=${page}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
         if (!res.ok) throw new Error("Gagal memuat riwayat donasi");
         const data = await res.json();
         const donations = data.donations || [];
@@ -59,23 +80,42 @@ import Toaster from "../../components/common/Toaster.astro";
               <a href="/" class="text-blue-600 hover:text-blue-700 font-medium mt-2 inline-block">Mulai Donasi</a>
             </div>
           `;
-          pagination.innerHTML = '';
+          pagination.innerHTML = "";
           return;
         }
 
-        const html = donations.map(donation => {
-          const date = new Date(donation.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-          const amount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(donation.amount);
-          const statusColor = donation.paymentStatus === 'completed' ? 'text-green-600 bg-green-100' : donation.paymentStatus === 'pending' ? 'text-yellow-600 bg-yellow-100' : 'text-red-600 bg-red-100';
-          const statusLabel = donation.paymentStatus === 'completed' ? 'Berhasil' : donation.paymentStatus === 'pending' ? 'Pending' : 'Gagal';
-          const campaignTitle = donation.campaignId?.title || 'Unknown Campaign';
-          const donationData = encodeURIComponent(JSON.stringify(donation));
+        const html = donations
+          .map((donation) => {
+            const date = new Date(donation.createdAt).toLocaleDateString(
+              "id-ID",
+              { day: "numeric", month: "short", year: "numeric" },
+            );
+            const amount = new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
+              minimumFractionDigits: 0,
+            }).format(donation.amount);
+            const statusColor =
+              donation.paymentStatus === "completed"
+                ? "text-green-600 bg-green-100"
+                : donation.paymentStatus === "pending"
+                  ? "text-yellow-600 bg-yellow-100"
+                  : "text-red-600 bg-red-100";
+            const statusLabel =
+              donation.paymentStatus === "completed"
+                ? "Berhasil"
+                : donation.paymentStatus === "pending"
+                  ? "Pending"
+                  : "Gagal";
+            const campaignTitle =
+              donation.campaignId?.title || "Unknown Campaign";
+            const donationData = encodeURIComponent(JSON.stringify(donation));
 
-          return `
+            return `
             <div class="bg-white border rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
               <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="flex-1">
-                  <p class="text-xs text-gray-500 mb-1">${date} • ${donation.transactionId || '-'}</p>
+                  <p class="text-xs text-gray-500 mb-1">${date} • ${donation.transactionId || "-"}</p>
                   <h4 class="font-semibold text-gray-800 line-clamp-1">${campaignTitle}</h4>
                   <p class="text-blue-600 font-bold mt-1">${amount}</p>
                 </div>
@@ -89,7 +129,8 @@ import Toaster from "../../components/common/Toaster.astro";
               </div>
             </div>
           `;
-        }).join('');
+          })
+          .join("");
 
         container.innerHTML = html;
 
@@ -98,29 +139,35 @@ import Toaster from "../../components/common/Toaster.astro";
           const totalPages = data.totalPages || 1;
           currentPage = data.currentPage || page;
 
-          let pagHtml = '';
-          pagHtml += `<button id="page-prev" class="px-3 py-1 rounded-md border" ${currentPage <= 1 ? 'disabled' : ''}>Prev</button>`;
+          let pagHtml = "";
+          pagHtml += `<button id="page-prev" class="px-3 py-1 rounded-md border" ${currentPage <= 1 ? "disabled" : ""}>Prev</button>`;
           pagHtml += `<span class="px-3">Halaman ${currentPage} / ${totalPages}</span>`;
-          pagHtml += `<button id="page-next" class="px-3 py-1 rounded-md border" ${currentPage >= totalPages ? 'disabled' : ''}>Next</button>`;
+          pagHtml += `<button id="page-next" class="px-3 py-1 rounded-md border" ${currentPage >= totalPages ? "disabled" : ""}>Next</button>`;
 
           pagination.innerHTML = pagHtml;
 
-          const prevBtn = document.getElementById('page-prev');
-          const nextBtn = document.getElementById('page-next');
-          if (prevBtn) prevBtn.addEventListener('click', () => { if (currentPage > 1) loadDonations(currentPage - 1); });
-          if (nextBtn) nextBtn.addEventListener('click', () => { if (currentPage < totalPages) loadDonations(currentPage + 1); });
+          const prevBtn = document.getElementById("page-prev");
+          const nextBtn = document.getElementById("page-next");
+          if (prevBtn)
+            prevBtn.addEventListener("click", () => {
+              if (currentPage > 1) loadDonations(currentPage - 1);
+            });
+          if (nextBtn)
+            nextBtn.addEventListener("click", () => {
+              if (currentPage < totalPages) loadDonations(currentPage + 1);
+            });
         }
 
-        document.querySelectorAll('.btn-download-receipt').forEach(btn => {
-          btn.addEventListener('click', (e) => {
+        document.querySelectorAll(".btn-download-receipt").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
             const btnEl = e.currentTarget;
             if (btnEl instanceof HTMLElement) {
-              const data = btnEl.getAttribute('data-donation');
+              const data = btnEl.getAttribute("data-donation");
               if (data) {
                 const donation = JSON.parse(decodeURIComponent(data));
                 const user = {
-                  nama: localStorage.getItem('userName'),
-                  email: localStorage.getItem('userEmail')
+                  nama: localStorage.getItem("userName"),
+                  email: localStorage.getItem("userEmail"),
                 };
                 generateReceipt(donation, user);
               }
@@ -129,11 +176,13 @@ import Toaster from "../../components/common/Toaster.astro";
         });
       } catch (err) {
         console.error(err);
-        if (window.showToast) window.showToast('Gagal memuat data riwayat donasi', 'error');
-        container.innerHTML = '<div class="text-red-500 text-center">Gagal memuat data.</div>';
+        if (window.showToast)
+          window.showToast("Gagal memuat data riwayat donasi", "error");
+        container.innerHTML =
+          '<div class="text-red-500 text-center">Gagal memuat data.</div>';
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => loadDonations(1));
+    document.addEventListener("DOMContentLoaded", () => loadDonations(1));
   </script>
 </PrimaryLayout>

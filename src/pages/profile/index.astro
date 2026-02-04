@@ -1,16 +1,11 @@
 ---
 // Layout untuk halaman profil
 import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
-import Toaster from "../../components/common/Toaster.astro";
 import Button from "../../components/common/Button.astro";
 ---
 
 <PrimaryLayout title="Profil - Harum Care Indonesia">
   <div id="profile-container" class="min-h-screen bg-gray-50">
-    <!-- Toaster -->
-    <div class="container mx-auto px-4">
-      <Toaster />
-    </div>
     <!-- Loading State -->
     <div
       id="loading-state"
@@ -55,22 +50,57 @@ import Button from "../../components/common/Button.astro";
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Left column: Profile + Actions -->
           <div class="md:col-span-1 space-y-6">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6">
+            <div
+              class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6"
+            >
               <div class="flex items-start gap-4">
                 <div class="flex-shrink-0">
-                  <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  <div
+                    class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center"
+                  >
+                    <svg
+                      class="w-10 h-10 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      ></path></svg
+                    >
                   </div>
                 </div>
                 <div class="flex-1">
                   <div class="flex items-start justify-between">
                     <div>
-                      <h2 id="user-name" class="text-2xl font-semibold text-gray-800">Loading...</h2>
+                      <h2
+                        id="user-name"
+                        class="text-2xl font-semibold text-gray-800"
+                      >
+                        Loading...
+                      </h2>
                       <p id="user-role" class="text-gray-600">Loading...</p>
                     </div>
                     <div class="ml-2">
-                      <button id="edit-profile-inline" class="hidden inline-flex items-center gap-2 px-3 py-2 rounded-md border bg-white hover:bg-gray-50 transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6"/></svg>
+                      <button
+                        id="edit-profile-inline"
+                        class="hidden inline-flex items-center gap-2 px-3 py-2 rounded-md border bg-white hover:bg-gray-50 transition"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-4 w-4 text-blue-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6"
+                          ></path></svg
+                        >
                       </button>
                     </div>
                   </div>
@@ -78,11 +108,15 @@ import Button from "../../components/common/Button.astro";
                   <div class="mt-4 space-y-2 text-sm text-gray-700">
                     <div>
                       <p class="text-sm text-gray-500">Nama</p>
-                      <p id="user-fullname" class="text-gray-800 font-medium">-</p>
+                      <p id="user-fullname" class="text-gray-800 font-medium">
+                        -
+                      </p>
                     </div>
                     <div>
                       <p class="text-sm text-gray-500">Username</p>
-                      <p id="user-username" class="text-gray-800 font-medium">-</p>
+                      <p id="user-username" class="text-gray-800 font-medium">
+                        -
+                      </p>
                     </div>
                     <div>
                       <p class="text-sm text-gray-500">Email</p>
@@ -101,54 +135,90 @@ import Button from "../../components/common/Button.astro";
               </div>
             </div>
 
-            <div id="action-buttons" class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6 space-y-3 sticky top-24">
+            <div
+              id="action-buttons"
+              class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6 space-y-3 sticky top-24"
+            >
               <!-- Action buttons injected by JS -->
             </div>
           </div>
 
           <!-- Right column: Donations -->
           <div class="md:col-span-2 space-y-6">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6">
-              <h3 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Riwayat Donasi</h3>
+            <div
+              class="bg-white rounded-lg shadow-sm border border-gray-500/30 p-6"
+            >
+              <h3
+                class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2"
+              >
+                Riwayat Donasi
+              </h3>
               <div id="donation-summary-container">
-                <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 text-center">
-                  <p id="donation-summary-text" class="text-gray-600 mb-4">Memuat ringkasan riwayat donasi...</p>
+                <div
+                  class="bg-gray-50 rounded-lg border border-gray-200 p-6 text-center"
+                >
+                  <p id="donation-summary-text" class="text-gray-600 mb-4">
+                    Memuat ringkasan riwayat donasi...
+                  </p>
                   <Button asChild variant="default">
-                    <a href="/profile/donations" class="inline-block w-full md:w-auto">Lihat Semua Riwayat Donasi</a>
+                    <a
+                      href="/profile/donations"
+                      class="inline-block w-full md:w-auto"
+                      >Lihat Semua Riwayat Donasi</a
+                    >
                   </Button>
                 </div>
               </div>
             </div>
-
-
           </div>
         </div>
 
         <!-- Edit Modal -->
-        <div id="edit-modal" class="fixed inset-0 hidden items-center justify-center z-50">
-          <div class="absolute inset-0 bg-black/40" id="edit-modal-backdrop"></div>
+        <div
+          id="edit-modal"
+          class="fixed inset-0 hidden items-center justify-center z-50"
+        >
+          <div class="absolute inset-0 bg-black/40" id="edit-modal-backdrop">
+          </div>
           <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 z-10">
             <h3 class="text-lg font-semibold mb-4">Edit Profil</h3>
             <form id="edit-profile-form" class="space-y-4">
               <div>
                 <label class="text-sm text-gray-600">Nama</label>
-                <input id="input-nama" type="text" class="w-full border p-3 rounded-md" />
+                <input
+                  id="input-nama"
+                  type="text"
+                  class="w-full border p-3 rounded-md"
+                />
               </div>
               <div>
                 <label class="text-sm text-gray-600">Email</label>
-                <input id="input-email" type="email" class="w-full border p-3 rounded-md" />
+                <input
+                  id="input-email"
+                  type="email"
+                  class="w-full border p-3 rounded-md"
+                />
               </div>
               <div>
                 <label class="text-sm text-gray-600">Nomor HP</label>
-                <input id="input-phone" type="text" class="w-full border p-3 rounded-md" />
+                <input
+                  id="input-phone"
+                  type="text"
+                  class="w-full border p-3 rounded-md"
+                />
               </div>
               <div>
                 <label class="text-sm text-gray-600">Alamat</label>
-                <textarea id="input-address" class="w-full border p-3 rounded-md" rows="3"></textarea>
+                <textarea
+                  id="input-address"
+                  class="w-full border p-3 rounded-md"
+                  rows="3"></textarea>
               </div>
               <div class="flex justify-end items-center gap-3">
                 <Button id="cancel-edit" variant="outline">Batal</Button>
-                <Button type="submit" id="save-edit" variant="default">Simpan</Button>
+                <Button type="submit" id="save-edit" variant="default"
+                  >Simpan</Button
+                >
               </div>
             </form>
           </div>
@@ -239,7 +309,11 @@ import Button from "../../components/common/Button.astro";
         hideElement(loginPrompt);
 
         // Fetch full profile from server
-        fetchUserProfile(token).catch((e) => { console.error(e); if (window.showToast) window.showToast('Gagal memuat profil', 'error'); });
+        fetchUserProfile(token).catch((e) => {
+          console.error(e);
+          if (window.showToast)
+            window.showToast("Gagal memuat profil", "error");
+        });
 
         // Fetch donation summary (compact)
         fetchDonationSummary(token).catch((e) => console.error(e));
@@ -253,8 +327,11 @@ import Button from "../../components/common/Button.astro";
         const userEmailElement = document.querySelector("#user-email");
 
         if (userNameElement) userNameElement.textContent = "Pengunjung";
-        if (userRoleElement) userRoleElement.textContent = "Belum masuk ke akun";
-        if (userEmailElement) userEmailElement.textContent = "Silakan masuk untuk melihat profil lengkap";
+        if (userRoleElement)
+          userRoleElement.textContent = "Belum masuk ke akun";
+        if (userEmailElement)
+          userEmailElement.textContent =
+            "Silakan masuk untuk melihat profil lengkap";
 
         actionButtons.innerHTML = "";
       }
@@ -263,11 +340,11 @@ import Button from "../../components/common/Button.astro";
     // Ambil profil pengguna dari backend
     async function fetchUserProfile(token) {
       try {
-        console.log('fetchUserProfile - token:', token);
+        console.log("fetchUserProfile - token:", token);
         const res = await fetch(`${API_URL}/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('fetchUserProfile - status:', res.status, res.statusText);
+        console.log("fetchUserProfile - status:", res.status, res.statusText);
 
         const text = await res.text();
         let parsed;
@@ -276,23 +353,26 @@ import Button from "../../components/common/Button.astro";
         } catch (e) {
           parsed = text;
         }
-        console.log('fetchUserProfile - body:', parsed);
+        console.log("fetchUserProfile - body:", parsed);
 
         if (!res.ok) {
           // Special handling for auth errors
           if (res.status === 401 || res.status === 403) {
             // clear token to force re-login
-            console.warn('Authentication failed when fetching profile. Clearing token.');
-            localStorage.removeItem('token');
-            localStorage.removeItem('role');
-            if (window.showToast) window.showToast(parsed?.error || 'Autentikasi gagal', 'error');
+            console.warn(
+              "Authentication failed when fetching profile. Clearing token.",
+            );
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            if (window.showToast)
+              window.showToast(parsed?.error || "Autentikasi gagal", "error");
             // Optionally redirect to login: window.location.href = '/auth/login';
             return;
           }
-          throw new Error(parsed?.error || 'Gagal mengambil profil');
+          throw new Error(parsed?.error || "Gagal mengambil profil");
         }
 
-        const user = typeof parsed === 'object' ? parsed : JSON.parse(text);
+        const user = typeof parsed === "object" ? parsed : JSON.parse(text);
 
         // Update DOM
         const nameHeading = document.querySelector("#user-name");
@@ -305,7 +385,8 @@ import Button from "../../components/common/Button.astro";
         const editInlineBtn = document.querySelector("#edit-profile-inline");
 
         if (nameHeading) nameHeading.textContent = user.nama || "User";
-        if (roleEl) roleEl.textContent = user.role === "admin" ? "Administrator" : "User";
+        if (roleEl)
+          roleEl.textContent = user.role === "admin" ? "Administrator" : "User";
         if (fullName) fullName.textContent = user.nama || "-";
         if (usernameEl) usernameEl.textContent = user.username || "-";
         if (emailEl) emailEl.textContent = user.email || "-";
@@ -322,8 +403,9 @@ import Button from "../../components/common/Button.astro";
         // Render action buttons (logout/admin/edit)
         renderActionButtons(user.role || "user");
       } catch (err) {
-        console.error('fetchUserProfile error:', err);
-        if (window.showToast) window.showToast(err.message || 'Gagal memuat profil', 'error');
+        console.error("fetchUserProfile error:", err);
+        if (window.showToast)
+          window.showToast(err.message || "Gagal memuat profil", "error");
       }
     }
 
@@ -334,35 +416,39 @@ import Button from "../../components/common/Button.astro";
       // Clear
       actionButtons.innerHTML = "";
 
-      const box = document.createElement('div');
-      box.className = 'bg-white rounded-lg shadow-sm border border-gray-500/30 p-6';
+      const box = document.createElement("div");
+      box.className =
+        "bg-white rounded-lg shadow-sm border border-gray-500/30 p-6";
 
-      const title = document.createElement('h3');
-      title.className = 'text-lg font-semibold text-gray-800 mb-4';
-      title.textContent = 'Aksi';
+      const title = document.createElement("h3");
+      title.className = "text-lg font-semibold text-gray-800 mb-4";
+      title.textContent = "Aksi";
       box.appendChild(title);
 
-      const list = document.createElement('div');
-      list.className = 'space-y-3';
+      const list = document.createElement("div");
+      list.className = "space-y-3";
 
-      const editBtn = document.createElement('button');
-      editBtn.id = 'open-edit-btn';
-      editBtn.className = 'w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-50';
-      editBtn.textContent = 'Edit Profil';
+      const editBtn = document.createElement("button");
+      editBtn.id = "open-edit-btn";
+      editBtn.className =
+        "w-full bg-white border border-gray-300 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-50";
+      editBtn.textContent = "Edit Profil";
       list.appendChild(editBtn);
 
-      const logoutLink = document.createElement('a');
-      logoutLink.id = 'logout-btn';
-      logoutLink.href = '/auth/logout';
-      logoutLink.className = 'w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition duration-200 font-medium text-center block';
-      logoutLink.textContent = 'Keluar dari Akun';
+      const logoutLink = document.createElement("a");
+      logoutLink.id = "logout-btn";
+      logoutLink.href = "/auth/logout";
+      logoutLink.className =
+        "w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition duration-200 font-medium text-center block";
+      logoutLink.textContent = "Keluar dari Akun";
       list.appendChild(logoutLink);
 
-      if (role === 'admin') {
-        const adminLink = document.createElement('a');
-        adminLink.href = '/admin/';
-        adminLink.className = 'w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition duration-200 font-medium text-center block';
-        adminLink.textContent = 'Panel Administrator';
+      if (role === "admin") {
+        const adminLink = document.createElement("a");
+        adminLink.href = "/admin/";
+        adminLink.className =
+          "w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition duration-200 font-medium text-center block";
+        adminLink.textContent = "Panel Administrator";
         list.appendChild(adminLink);
       }
 
@@ -370,24 +456,32 @@ import Button from "../../components/common/Button.astro";
       actionButtons.appendChild(box);
 
       // Event listeners
-      logoutLink.addEventListener('click', (e) => {
+      logoutLink.addEventListener("click", (e) => {
         e.preventDefault();
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userEmail');
-        window.location.href = '/';
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userEmail");
+        window.location.href = "/";
       });
 
-      editBtn.addEventListener('click', openEditModal);
-      document.querySelector('#edit-profile-inline')?.addEventListener('click', openEditModal);
+      editBtn.addEventListener("click", openEditModal);
+      document
+        .querySelector("#edit-profile-inline")
+        ?.addEventListener("click", openEditModal);
 
       // Backdrop and cancel
-      document.querySelector('#edit-modal-backdrop')?.addEventListener('click', closeEditModal);
-      document.querySelector('#cancel-edit')?.addEventListener('click', closeEditModal);
+      document
+        .querySelector("#edit-modal-backdrop")
+        ?.addEventListener("click", closeEditModal);
+      document
+        .querySelector("#cancel-edit")
+        ?.addEventListener("click", closeEditModal);
 
       // Form submit
-      document.querySelector('#edit-profile-form')?.addEventListener('submit', submitEditForm);
+      document
+        .querySelector("#edit-profile-form")
+        ?.addEventListener("submit", submitEditForm);
     }
 
     function openEditModal() {
@@ -400,10 +494,12 @@ import Button from "../../components/common/Button.astro";
       const inputPhone = document.querySelector("#input-phone");
       const inputAddress = document.querySelector("#input-address");
 
-      const fullname = document.querySelector("#user-fullname")?.textContent || "";
+      const fullname =
+        document.querySelector("#user-fullname")?.textContent || "";
       const email = document.querySelector("#user-email")?.textContent || "";
       const phone = document.querySelector("#user-phone")?.textContent || "";
-      const address = document.querySelector("#user-address")?.textContent || "";
+      const address =
+        document.querySelector("#user-address")?.textContent || "";
 
       if (inputNama) inputNama.value = fullname === "-" ? "" : fullname;
       if (inputEmail) inputEmail.value = email === "-" ? "" : email;
@@ -425,7 +521,8 @@ import Button from "../../components/common/Button.astro";
       e.preventDefault();
       const token = localStorage.getItem("token");
       if (!token) {
-        if (window.showToast) window.showToast('Anda harus masuk untuk mengedit profil', 'warning');
+        if (window.showToast)
+          window.showToast("Anda harus masuk untuk mengedit profil", "warning");
         return;
       }
 
@@ -447,22 +544,29 @@ import Button from "../../components/common/Button.astro";
         if (!res.ok) throw new Error(data.error || "Gagal mengupdate profil");
 
         // Update DOM with new data
-        document.querySelector("#user-name").textContent = data.user.nama || nama;
-        document.querySelector("#user-fullname").textContent = data.user.nama || nama;
-        document.querySelector("#user-email").textContent = data.user.email || email;
-        document.querySelector("#user-phone").textContent = data.user.nomorHp || nomorHp;
-        document.querySelector("#user-address").textContent = data.user.alamat || alamat;
+        document.querySelector("#user-name").textContent =
+          data.user.nama || nama;
+        document.querySelector("#user-fullname").textContent =
+          data.user.nama || nama;
+        document.querySelector("#user-email").textContent =
+          data.user.email || email;
+        document.querySelector("#user-phone").textContent =
+          data.user.nomorHp || nomorHp;
+        document.querySelector("#user-address").textContent =
+          data.user.alamat || alamat;
 
         // Update localStorage
         if (data.user.nama) localStorage.setItem("userName", data.user.nama);
         if (data.user.email) localStorage.setItem("userEmail", data.user.email);
 
         closeEditModal();
-        if (window.showToast) window.showToast('Profil berhasil diperbarui', 'success');
+        if (window.showToast)
+          window.showToast("Profil berhasil diperbarui", "success");
       } catch (err) {
         console.error(err);
-        const msg = err instanceof Error ? err.message : 'Gagal mengupdate profil';
-        if (window.showToast) window.showToast(msg, 'error');
+        const msg =
+          err instanceof Error ? err.message : "Gagal mengupdate profil";
+        if (window.showToast) window.showToast(msg, "error");
       }
     }
 
@@ -485,12 +589,17 @@ import Button from "../../components/common/Button.astro";
         } else {
           const count = donations.length;
           const last = donations[0];
-          const date = new Date(last.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+          const date = new Date(last.createdAt).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
           textEl.innerHTML = `Anda memiliki <strong>${count}</strong> donasi. Donasi terakhir: <span class="font-medium">${date}</span>`;
         }
       } catch (err) {
         console.error(err);
-        if (window.showToast) window.showToast('Gagal memuat ringkasan riwayat donasi', 'error');
+        if (window.showToast)
+          window.showToast("Gagal memuat ringkasan riwayat donasi", "error");
         textEl.textContent = "Gagal memuat ringkasan riwayat donasi.";
       }
     }

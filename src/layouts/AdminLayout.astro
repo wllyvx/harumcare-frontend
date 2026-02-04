@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
-import Button from '@/components/common/Button.astro';
+import Button from "@/components/common/Button.astro";
+import Toaster from "@/components/common/Toaster.astro";
 
 export interface Props {
   title?: string;
@@ -109,8 +110,12 @@ const menuItems = [
           Anda tidak memiliki akses ke halaman admin atau sesi telah berakhir.
         </p>
         <div class="space-y-3">
-          <Button id="loginRedirect" className="w-full" variant="default">Login sebagai Admin</Button>
-          <Button id="homeRedirect" className="w-full" variant="outline">Kembali ke Beranda</Button>
+          <Button id="loginRedirect" className="w-full" variant="default"
+            >Login sebagai Admin</Button
+          >
+          <Button id="homeRedirect" className="w-full" variant="outline"
+            >Kembali ke Beranda</Button
+          >
         </div>
       </div>
     </div>
@@ -441,5 +446,6 @@ const menuItems = [
       // Make auth guard globally available for other scripts
       window.AdminAuthGuard = AdminAuthGuard;
     </script>
+    <Toaster />
   </body>
 </html>
