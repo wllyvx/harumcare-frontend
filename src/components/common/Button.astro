@@ -1,0 +1,7 @@
+---
+import { Button as ShadButton } from '@/components/components/ui/button';
+const { variant, size, asChild, className, ...rest } = Astro.props;
+---
+<ShadButton variant={variant} size={size} asChild={asChild} className={className} {...rest}>
+  <slot />
+</ShadButton>

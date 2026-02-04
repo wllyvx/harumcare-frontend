@@ -4,22 +4,34 @@
 <div id="toaster" class="fixed top-6 right-6 z-50 space-y-3 w-auto max-w-sm"></div>
 
 <script>
-  // Simple toaster exposed globally as showToast(message, type = 'success', timeout = 4000)
+  // Enhanced toaster using shadcn alert styles.
   window.showToast = (message, type = 'success', timeout = 4000) => {
     try {
       const container = document.getElementById('toaster');
       if (!container) return;
 
-      const color = type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-600';
-      const icon = type === 'error' ? '⚠️' : type === 'warning' ? '⚠️' : '✅';
+      const variantClasses = {
+        success: 'bg-green-600 text-white',
+        error: 'bg-red-500 text-white',
+        warning: 'bg-yellow-500 text-black',
+        default: 'bg-white text-black border'
+      };
+
+      const icons = {
+        success: '✅',
+        error: '⚠️',
+        warning: '⚠️',
+        default: 'ℹ️'
+      };
 
       const toast = document.createElement('div');
-      toast.className = `${color} text-white px-4 py-3 rounded-md shadow-md flex items-start gap-3 animate-slide-in`;
+      toast.setAttribute('role', 'status');
+      toast.className = `relative w-full rounded-lg px-4 py-3 text-sm grid grid-cols-[auto_1fr] gap-x-3 items-start animate-slide-in ${variantClasses[type] || variantClasses.default}`;
       toast.style.display = 'flex';
 
       toast.innerHTML = `
-        <div class="text-xl leading-none">${icon}</div>
-        <div class="text-sm leading-tight">${message}</div>
+        <div class="text-xl leading-none">${icons[type] || icons.default}</div>
+        <div class="leading-tight">${message}</div>
       `;
 
       container.appendChild(toast);

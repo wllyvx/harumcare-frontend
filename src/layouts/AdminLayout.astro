@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Button from '@/components/common/Button.astro';
 
 export interface Props {
   title?: string;
@@ -108,18 +109,8 @@ const menuItems = [
           Anda tidak memiliki akses ke halaman admin atau sesi telah berakhir.
         </p>
         <div class="space-y-3">
-          <button
-            id="loginRedirect"
-            class="w-full bg-brand-600 hover:bg-brand-700 text-white px-6 py-3 rounded-button font-medium transition-colors duration-200"
-          >
-            Login sebagai Admin
-          </button>
-          <button
-            id="homeRedirect"
-            class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-          >
-            Kembali ke Beranda
-          </button>
+          <Button id="loginRedirect" className="w-full" variant="default">Login sebagai Admin</Button>
+          <Button id="homeRedirect" className="w-full" variant="outline">Kembali ke Beranda</Button>
         </div>
       </div>
     </div>

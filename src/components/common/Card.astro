@@ -49,13 +49,13 @@ const trimmedDescription =
   description.length > 120
     ? `${description.substring(0, 120)}...`
     : description;
+
+import { Card, CardContent, CardFooter } from '@/components/components/ui/card';
+import Button from '@/components/common/Button.astro';
 ---
 
 <a href={`/campaign/${id}`} class="block h-full">
-  <div
-    class="bg-white rounded-card overflow-hidden shadow-md group hover:shadow-xl transition-all duration-300 max-w-sm h-full flex flex-col cursor-pointer"
-  >
-    <!-- Badge kategori -->
+  <Card className="max-w-sm h-full group hover:shadow-xl transition-all duration-300 cursor-pointer">
     <div class="relative shrink-0">
       <img
         src={imageUrl}
@@ -70,36 +70,28 @@ const trimmedDescription =
       </span>
     </div>
 
-    <div class="p-5 flex flex-col grow">
-      <!-- Detail donasi -->
-      <div class="mb-4 grow">
+    <CardContent className="p-5 flex flex-col grow">
+      <div className="mb-4 grow">
         <h3
           class="font-bold text-xl mb-2 text-gray-800 group-hover:text-brand-600 transition-colors duration-200 line-clamp-2"
         >
           {title}
         </h3>
-        <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-          {trimmedDescription}
-        </p>
+        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{trimmedDescription}</p>
 
-        <!-- Progress bar -->
         <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
           <div
             class="bg-brand-600 h-2.5 rounded-full"
             style={`width: ${percentageFunded}%`}
-          >
-          </div>
+          ></div>
         </div>
 
         <div class="flex justify-between text-sm mb-4">
-          <span class="font-semibold text-brand-700"
-            >{formatCurrency(currentAmount)}</span
-          >
+          <span class="font-semibold text-brand-700">{formatCurrency(currentAmount)}</span>
           <span class="text-gray-500">dari {formatCurrency(targetAmount)}</span>
         </div>
       </div>
 
-      <!-- Info tambahan -->
       <div class="grid grid-cols-3 gap-2 mb-4 text-center shrink-0">
         <div class="bg-gray-50 p-2 rounded">
           <p class="text-xs text-gray-500">Terkumpul</p>
@@ -114,31 +106,23 @@ const trimmedDescription =
           <p class="font-semibold text-gray-800">{daysLeft}</p>
         </div>
       </div>
+    </CardContent>
 
-      <!-- Informasi penggalang dana -->
-      <div class="flex items-center mb-4 shrink-0">
+    <CardFooter className="flex items-center justify-between px-5">
+      <div class="flex items-center">
         <img
-          src={organizationLogo
-            ? organizationLogo
-            : "/images/icons/user-default.svg"}
+          src={organizationLogo ? organizationLogo : "/images/icons/user-default.svg"}
           alt={organizationName}
           class="w-8 h-8 rounded-full mr-2 object-cover"
         />
-        <span class="text-sm text-gray-600"
-          >Oleh <span class="font-medium">{organizationName}</span></span
-        >
+        <span class="text-sm text-gray-600">Oleh <span class="font-medium">{organizationName}</span></span>
       </div>
 
-      <!-- Tombol donasi -->
       <div class="shrink-0">
-        <div
-          class="w-full bg-brand-600 text-white p-3 rounded-button font-medium hover:bg-brand-700 transition-colors duration-200 text-center"
-        >
-          Donasi Sekarang
-        </div>
+        <Button className="w-full" variant="default">Donasi Sekarang</Button>
       </div>
-    </div>
-  </div>
+    </CardFooter>
+  </Card>
 </a>
 
 <style>
