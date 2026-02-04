@@ -1,36 +1,42 @@
 ---
+
 ---
 
-<div id="toaster" class="fixed top-6 right-6 z-50 space-y-3 w-auto max-w-sm"></div>
+<div id="toaster" class="fixed top-6 right-6 z-50 space-y-3 w-auto max-w-sm">
+</div>
 
 <script>
   // Enhanced toaster using shadcn alert styles.
-  window.showToast = (message, type = 'success', timeout = 4000) => {
+  window.showToast = (message: string, type = "success", timeout = 4000) => {
     try {
-      const container = document.getElementById('toaster');
+      const container = document.getElementById("toaster");
       if (!container) return;
 
       const variantClasses = {
-        success: 'bg-green-600 text-white',
-        error: 'bg-red-500 text-white',
-        warning: 'bg-yellow-500 text-black',
-        default: 'bg-white text-black border'
+        success: "bg-green-600 text-white",
+        error: "bg-red-500 text-white",
+        warning: "bg-yellow-500 text-black",
+        default: "bg-white text-black border",
       };
 
       const icons = {
-        success: '✅',
-        error: '⚠️',
-        warning: '⚠️',
-        default: 'ℹ️'
+        success: "✅",
+        error: "⚠️",
+        warning: "⚠️",
+        default: "ℹ️",
       };
 
-      const toast = document.createElement('div');
-      toast.setAttribute('role', 'status');
-      toast.className = `relative w-full rounded-lg px-4 py-3 text-sm grid grid-cols-[auto_1fr] gap-x-3 items-start animate-slide-in ${variantClasses[type] || variantClasses.default}`;
-      toast.style.display = 'flex';
+      const toast = document.createElement("div");
+      toast.setAttribute("role", "status");
+      const variantClass =
+        variantClasses[type as keyof typeof variantClasses] ||
+        variantClasses.default;
+      toast.className = `relative w-full rounded-lg px-4 py-3 text-sm grid grid-cols-[auto_1fr] gap-x-3 items-start animate-slide-in ${variantClass}`;
+      toast.style.display = "flex";
 
+      const icon = icons[type as keyof typeof icons] || icons.default;
       toast.innerHTML = `
-        <div class="text-xl leading-none">${icons[type] || icons.default}</div>
+        <div class="text-xl leading-none">${icon}</div>
         <div class="leading-tight">${message}</div>
       `;
 
@@ -38,21 +44,31 @@
 
       // Auto remove
       setTimeout(() => {
-        toast.classList.add('opacity-0', 'transition', 'duration-500');
+        toast.classList.add("opacity-0", "transition", "duration-500");
         setTimeout(() => {
-          try { container.removeChild(toast); } catch (e) {}
+          try {
+            container.removeChild(toast);
+          } catch (e) {}
         }, 500);
       }, timeout);
     } catch (err) {
-      console.error('showToast error', err);
+      console.error("showToast error", err);
     }
   };
 </script>
 
 <style>
   @keyframes slide-in {
-    from { transform: translateY(-8px); opacity: 0 }
-    to { transform: translateY(0); opacity: 1 }
+    from {
+      transform: translateY(-8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
-  .animate-slide-in { animation: slide-in 180ms ease-out; }
+  .animate-slide-in {
+    animation: slide-in 180ms ease-out;
+  }
 </style>

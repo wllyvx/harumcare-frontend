@@ -50,12 +50,18 @@ const trimmedDescription =
     ? `${description.substring(0, 120)}...`
     : description;
 
-import { Card, CardContent, CardFooter } from '@/components/components/ui/card';
-import Button from '@/components/common/Button.astro';
+import {
+  Card as ShadCard,
+  CardContent,
+  CardFooter,
+} from "@/components/components/ui/card";
+import Button from "@/components/common/Button.astro";
 ---
 
 <a href={`/campaign/${id}`} class="block h-full">
-  <Card className="max-w-sm h-full group hover:shadow-xl transition-all duration-300 cursor-pointer">
+  <ShadCard
+    className="max-w-sm h-full group hover:shadow-xl transition-all duration-300 cursor-pointer"
+  >
     <div class="relative shrink-0">
       <img
         src={imageUrl}
@@ -77,17 +83,22 @@ import Button from '@/components/common/Button.astro';
         >
           {title}
         </h3>
-        <p class="text-gray-600 text-sm mb-4 line-clamp-3">{trimmedDescription}</p>
+        <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+          {trimmedDescription}
+        </p>
 
         <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
           <div
             class="bg-brand-600 h-2.5 rounded-full"
             style={`width: ${percentageFunded}%`}
-          ></div>
+          >
+          </div>
         </div>
 
         <div class="flex justify-between text-sm mb-4">
-          <span class="font-semibold text-brand-700">{formatCurrency(currentAmount)}</span>
+          <span class="font-semibold text-brand-700"
+            >{formatCurrency(currentAmount)}</span
+          >
           <span class="text-gray-500">dari {formatCurrency(targetAmount)}</span>
         </div>
       </div>
@@ -111,18 +122,22 @@ import Button from '@/components/common/Button.astro';
     <CardFooter className="flex flex-col items-center justify-between">
       <div class="flex items-left align-middle w-full">
         <img
-          src={organizationLogo ? organizationLogo : "/images/icons/user-default.svg"}
+          src={organizationLogo
+            ? organizationLogo
+            : "/images/icons/user-default.svg"}
           alt={organizationName}
           class="w-8 h-8 rounded-full mr-2 object-cover"
         />
-        <span class="text-sm align-middle text-gray-600">Oleh <span class="font-medium">{organizationName}</span></span>
+        <span class="text-sm align-middle text-gray-600"
+          >Oleh <span class="font-medium">{organizationName}</span></span
+        >
       </div>
 
       <div class="shrink-0 w-full mt-4">
         <Button className="w-full" variant="default">Donasi Sekarang</Button>
       </div>
     </CardFooter>
-  </Card>
+  </ShadCard>
 </a>
 
 <style>
