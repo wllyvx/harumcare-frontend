@@ -37,9 +37,24 @@
                     class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 transition-colors"
                     aria-label="Toggle password visibility"
                 >
-                    <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    <svg
+                        id="eye-icon"
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        ></path>
                     </svg>
                 </button>
             </div>
@@ -51,10 +66,27 @@
             Login
         </button>
     </form>
+
+    <!-- Divider -->
+    <div class="flex items-center w-full my-6">
+        <div class="flex-1 border-t border-gray-300"></div>
+        <span class="px-4 text-sm text-gray-500">atau</span>
+        <div class="flex-1 border-t border-gray-300"></div>
+    </div>
+
+    <!-- Google Sign-In Button -->
+    <div id="google-signin-btn" class="w-full flex justify-center"></div>
+    <div
+        id="google-error"
+        class="hidden w-full mt-3 text-center text-sm text-red-600"
+    >
+    </div>
+
     <div class="text-center mt-8">
         <p>
             Belum punya akun? <span class="font-bold text-blue-400"
-                ><a href="/auth/signup">Daftar</a></span>
+                ><a href="/auth/signup">Daftar</a></span
+            >
         </p>
     </div>
 </div>
@@ -65,13 +97,16 @@
         password: string;
     }
     const API_URL = import.meta.env.PUBLIC_API_URL;
+    const GOOGLE_CLIENT_ID = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID;
 
     // Fungsi toggle password visibility
     function setupPasswordToggle() {
         const passwordInput = document.querySelector(
             "#password-input",
         ) as HTMLInputElement;
-        const toggleButton = document.querySelector("#password-toggle") as HTMLButtonElement;
+        const toggleButton = document.querySelector(
+            "#password-toggle",
+        ) as HTMLButtonElement;
         const eyeIcon = document.querySelector("#eye-icon") as SVGSVGElement;
 
         if (toggleButton && passwordInput && eyeIcon) {
@@ -118,8 +153,77 @@
         }
     }
 
+    // Google Sign-In callback
+    async function handleGoogleSignIn(response: any) {
+        const errorEl = document.querySelector("#google-error") as HTMLElement;
+        if (errorEl) {
+            errorEl.classList.add("hidden");
+            errorEl.textContent = "";
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/auth/google`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credential: response.credential }),
+            });
+
+            const result = await res.json();
+            if (!res.ok) {
+                throw new Error(result.error || "Google Sign-In failed");
+            }
+
+            if (result.token) {
+                localStorage.setItem("token", result.token);
+                localStorage.setItem("role", result.role);
+                localStorage.setItem("userName", result.nama);
+                window.location.href = "/";
+            }
+        } catch (error) {
+            console.error("Google Sign-In error:", error);
+            if (errorEl) {
+                errorEl.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "Login dengan Google gagal";
+                errorEl.classList.remove("hidden");
+            }
+        }
+    }
+
+    // Make callback globally accessible for Google GSI
+    (window as any).handleGoogleSignIn = handleGoogleSignIn;
+
+    // Initialize Google Sign-In
+    function initGoogleSignIn() {
+        if (typeof (window as any).google === "undefined") {
+            // GSI not loaded yet, retry
+            setTimeout(initGoogleSignIn, 100);
+            return;
+        }
+
+        (window as any).google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleSignIn,
+        });
+
+        const btnContainer = document.querySelector("#google-signin-btn");
+        if (btnContainer) {
+            (window as any).google.accounts.id.renderButton(btnContainer, {
+                theme: "outline",
+                size: "large",
+                width: "100%",
+                text: "signin_with",
+                shape: "pill",
+                logo_alignment: "center",
+            });
+        }
+    }
+
     window.addEventListener("load", () => {
         setupPasswordToggle();
+        initGoogleSignIn();
+
         const loginForm = document.querySelector("#login-form");
         if (loginForm) {
             console.log("Login form found, adding event listener...");

@@ -78,8 +78,7 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            ></path>
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -116,8 +115,7 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            ></path>
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -137,10 +135,27 @@
             Daftar Sekarang
         </button>
     </form>
+
+    <!-- Divider -->
+    <div class="flex items-center w-full my-6">
+        <div class="flex-1 border-t border-gray-300"></div>
+        <span class="px-4 text-sm text-gray-500">atau</span>
+        <div class="flex-1 border-t border-gray-300"></div>
+    </div>
+
+    <!-- Google Sign-In Button -->
+    <div id="google-signup-btn" class="w-full flex justify-center"></div>
+    <div
+        id="google-error"
+        class="hidden w-full mt-3 text-center text-sm text-red-600"
+    >
+    </div>
+
     <div class="text-center mt-6">
         <p>
             Sudah punya akun? <span class="font-bold text-blue-400"
-                ><a href="/auth/login">Masuk di sini</a></span>
+                ><a href="/auth/login">Masuk di sini</a></span
+            >
         </p>
     </div>
 </div>
@@ -155,6 +170,7 @@
     }
 
     const API_URL = import.meta.env.PUBLIC_API_URL;
+    const GOOGLE_CLIENT_ID = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID;
 
     // Setup password toggle for all password fields
     function setupPasswordToggles() {
@@ -165,7 +181,9 @@
         toggleButtons.forEach((button) => {
             button.addEventListener("click", (e) => {
                 e.preventDefault();
-                const eyeIcon = button.querySelector(".eye-icon") as SVGSVGElement;
+                const eyeIcon = button.querySelector(
+                    ".eye-icon",
+                ) as SVGSVGElement;
                 const inputElement = button.parentElement?.querySelector(
                     "input",
                 ) as HTMLInputElement;
@@ -209,8 +227,76 @@
         }
     }
 
+    // Google Sign-In callback
+    async function handleGoogleSignUp(response: any) {
+        const errorEl = document.querySelector("#google-error") as HTMLElement;
+        if (errorEl) {
+            errorEl.classList.add("hidden");
+            errorEl.textContent = "";
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/auth/google`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ credential: response.credential }),
+            });
+
+            const result = await res.json();
+            if (!res.ok) {
+                throw new Error(result.error || "Google Sign-In failed");
+            }
+
+            if (result.token) {
+                localStorage.setItem("token", result.token);
+                localStorage.setItem("role", result.role);
+                localStorage.setItem("userName", result.nama);
+                window.location.href = "/";
+            }
+        } catch (error) {
+            console.error("Google Sign-Up error:", error);
+            if (errorEl) {
+                errorEl.textContent =
+                    error instanceof Error
+                        ? error.message
+                        : "Pendaftaran dengan Google gagal";
+                errorEl.classList.remove("hidden");
+            }
+        }
+    }
+
+    // Make callback globally accessible for Google GSI
+    (window as any).handleGoogleSignUp = handleGoogleSignUp;
+
+    // Initialize Google Sign-In
+    function initGoogleSignIn() {
+        if (typeof (window as any).google === "undefined") {
+            setTimeout(initGoogleSignIn, 100);
+            return;
+        }
+
+        (window as any).google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleSignUp,
+        });
+
+        const btnContainer = document.querySelector("#google-signup-btn");
+        if (btnContainer) {
+            (window as any).google.accounts.id.renderButton(btnContainer, {
+                theme: "outline",
+                size: "large",
+                width: "100%",
+                text: "signup_with",
+                shape: "pill",
+                logo_alignment: "center",
+            });
+        }
+    }
+
     window.addEventListener("load", () => {
         setupPasswordToggles();
+        initGoogleSignIn();
+
         const signupForm = document.querySelector("#signup-form");
         if (signupForm) {
             console.log("Signup form found, adding event listener...");
@@ -218,7 +304,9 @@
                 event.preventDefault();
                 console.log("Signup form submitted");
 
-                const namaInput = document.querySelector("#nama") as HTMLInputElement;
+                const namaInput = document.querySelector(
+                    "#nama",
+                ) as HTMLInputElement;
                 const usernameInput = document.querySelector(
                     "#username",
                 ) as HTMLInputElement;
