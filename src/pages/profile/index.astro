@@ -20,6 +20,49 @@ import Button from "../../components/common/Button.astro";
       </div>
     </div>
 
+    <!-- Error State -->
+    <div
+      id="error-state"
+      class="hidden flex items-center justify-center min-h-screen p-4"
+    >
+      <div
+        class="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center animate-in fade-in zoom-in duration-300"
+      >
+        <div
+          class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6"
+        >
+          <svg
+            class="w-10 h-10 text-red-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            ></path>
+          </svg>
+        </div>
+        <h3 id="error-title" class="text-2xl font-bold text-gray-900 mb-2">
+          Terjadi Kesalahan
+        </h3>
+        <p id="error-message" class="text-gray-600 mb-8">
+          Maaf, kami gagal memuat data profil Anda. Ini mungkin karena sesi Anda
+          telah berakhir atau masalah koneksi.
+        </p>
+        <div id="error-actions" class="space-y-4">
+          <button
+            onclick="window.location.reload()"
+            class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-blue-100"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Profile Content -->
     <div id="profile-content" class="hidden">
       <!-- Header -->
@@ -288,6 +331,44 @@ import Button from "../../components/common/Button.astro";
       if (el) el.classList.add("hidden");
     }
 
+    /**
+     * @param {string} title
+     * @param {string} message
+     * @param {boolean} isSessionError
+     */
+    function showError(title, message, isSessionError = false) {
+      const loadingState = document.querySelector("#loading-state");
+      const profileContent = document.querySelector("#profile-content");
+      const errorState = document.querySelector("#error-state");
+      const errorTitle = document.querySelector("#error-title");
+      const errorMessage = document.querySelector("#error-message");
+      const errorActions = document.querySelector("#error-actions");
+
+      hideElement(loadingState);
+      hideElement(profileContent);
+      showElement(errorState);
+
+      if (errorTitle) errorTitle.textContent = title;
+      if (errorMessage) errorMessage.textContent = message;
+
+      if (isSessionError && errorActions) {
+        errorActions.innerHTML = `
+          <a
+            href="/auth/login"
+            class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-blue-100 text-center"
+          >
+            Masuk Kembali
+          </a>
+          <button
+            onclick="window.location.reload()"
+            class="block w-full bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium py-3 px-6 rounded-xl transition-all duration-200 text-center"
+          >
+            Coba Lagi
+          </button>
+        `;
+      }
+    }
+
     // Cek status login dan load profil ringkas
     function checkAuthStatus() {
       const token = localStorage.getItem("token");
@@ -297,8 +378,15 @@ import Button from "../../components/common/Button.astro";
       const profileContent = document.querySelector("#profile-content");
       const actionButtons = document.querySelector("#action-buttons");
       const loginPrompt = document.querySelector("#login-prompt");
+      const errorState = document.querySelector("#error-state");
 
-      if (!loadingState || !profileContent || !actionButtons || !loginPrompt) {
+      if (
+        !loadingState ||
+        !profileContent ||
+        !actionButtons ||
+        !loginPrompt ||
+        !errorState
+      ) {
         console.error("Required elements not found");
         return;
       }
@@ -307,12 +395,15 @@ import Button from "../../components/common/Button.astro";
         hideElement(loadingState);
         showElement(profileContent);
         hideElement(loginPrompt);
+        hideElement(errorState);
 
         // Fetch full profile from server
         fetchUserProfile(token).catch((e) => {
           console.error(e);
-          if (window.showToast)
-            window.showToast("Gagal memuat profil", "error");
+          showError(
+            "Gagal Memuat Profil",
+            e.message || "Terjadi kesalahan saat mengambil data profil.",
+          );
         });
 
         // Fetch donation summary (compact)
@@ -321,6 +412,7 @@ import Button from "../../components/common/Button.astro";
         hideElement(loadingState);
         showElement(profileContent);
         showElement(loginPrompt);
+        hideElement(errorState);
 
         const userNameElement = document.querySelector("#user-name");
         const userRoleElement = document.querySelector("#user-role");
@@ -364,9 +456,11 @@ import Button from "../../components/common/Button.astro";
             );
             localStorage.removeItem("token");
             localStorage.removeItem("role");
-            if (window.showToast)
-              window.showToast(parsed?.error || "Autentikasi gagal", "error");
-            // Optionally redirect to login: window.location.href = '/auth/login';
+            showError(
+              "Sesi Berakhir",
+              "Sesi Anda telah berakhir. Silakan masuk kembali untuk mengakses halaman profil.",
+              true,
+            );
             return;
           }
           throw new Error(parsed?.error || "Gagal mengambil profil");
@@ -404,8 +498,11 @@ import Button from "../../components/common/Button.astro";
         renderActionButtons(user.role || "user");
       } catch (err) {
         console.error("fetchUserProfile error:", err);
-        if (window.showToast)
-          window.showToast(err.message || "Gagal memuat profil", "error");
+        showError(
+          "Gagal Memuat Profil",
+          err.message ||
+            "Terjadi kesalahan yang tidak terduga saat mengambil data profil.",
+        );
       }
     }
 
