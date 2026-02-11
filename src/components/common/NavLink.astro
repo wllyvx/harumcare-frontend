@@ -7,7 +7,10 @@ interface Props {
 const { href, label, class: className = "" } = Astro.props;
 ---
 
-<a href={href} class={`flex flex-col items-center py-2 px-3 text-gray-600 hover:text-blue-600 transition duration-200 ${className}`}>
+<a
+  href={href}
+  class={`flex flex-col items-center py-2 px-3 text-gray-600 hover:text-brand-600 transition duration-200 ${className}`}
+>
   <slot name="icon" />
   <span class="text-xs">{label}</span>
 </a>
