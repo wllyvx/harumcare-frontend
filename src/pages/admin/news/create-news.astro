@@ -486,7 +486,8 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
     const end = textarea.selectionEnd;
 
     // Format: ![Alt text](imageUrl)
-    const markdown = `\n![Gambar](${imageUrl})\n`;
+    const encodedUrl = encodeURI(imageUrl);
+    const markdown = `\n![Gambar](${encodedUrl})\n`;
 
     textarea.value =
       textarea.value.substring(0, start) +

@@ -197,7 +197,11 @@ const metaDescription = getDescription(news.content);
               >
                 <div
                   class="whitespace-pre-wrap text-gray-700 leading-relaxed"
-                  set:html={marked.parse(news.content)}
+                  set:html={marked.parse(
+                    news.content.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+                      return `![${alt}](${encodeURI(url)})`;
+                    })
+                  )}
                 />
               </div>
             </div>

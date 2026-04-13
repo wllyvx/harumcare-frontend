@@ -191,7 +191,11 @@ const metaDescription = getDescription(blog.content);
         <div class="bg-white p-6 md:p-8 rounded-lg shadow-sm">
           <div
             class="whitespace-pre-wrap text-gray-700 leading-relaxed"
-            set:html={marked.parse(blog.content)}
+            set:html={marked.parse(
+              blog.content.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+                return `![${alt}](${encodeURI(url)})`;
+              })
+            )}
           />
         </div>
       </div>
