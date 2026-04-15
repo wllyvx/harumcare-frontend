@@ -1,0 +1,116 @@
+---
+import PrimaryLayout from 'src/layouts/PrimaryLayout.astro';
+import ConsultationCard from 'src/components/consultation/ConsultationCard.astro';
+import ConsultationForm from 'src/components/consultation/ConsultationForm.astro';
+import { consultationCategories } from 'src/data/consultationCategories.js';
+
+const { searchParams } = Astro.url;
+const category = searchParams.get('category') || '';
+const page = parseInt(searchParams.get('page') || '1');
+const limit = 10;
+
+let consultationsData = {
+  data: [],
+  pagination: {
+    page: 1,
+    limit,
+    total: 0,
+    totalPages: 1
+  }
+};
+
+try {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString()
+  });
+
+  if (category) {
+    queryParams.append('category', category);
+  }
+
+  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/consultations?${queryParams}`);
+  if (response.ok) {
+    consultationsData = await response.json();
+  }
+} catch (error) {
+  console.error('Error fetching consultations:', error);
+}
+
+const { data: consultations, pagination } = consultationsData;
+---
+
+<PrimaryLayout title="Pojok Konsultasi - Harum Care Indonesia">
+  <main class="min-h-screen bg-slate-50 py-10">
+    <div class="mx-auto max-w-7xl px-4">
+      <section class="rounded-[2rem] bg-white p-8 shadow-sm border border-slate-200">
+        <div class="mb-10 space-y-4 text-center">
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Pojok Konsultasi</p>
+          <h1 class="text-3xl font-extrabold text-slate-900 md:text-4xl">Tanya dan dapatkan jawaban dari admin</h1>
+          <p class="mx-auto max-w-2xl text-sm leading-7 text-slate-600">
+            Ajukan pertanyaan seputar zakat, donasi, ibadah, dan topik umum. Semua pertanyaan dan jawaban akan ditampilkan di sini sebagai threads.
+          </p>
+        </div>
+
+        <div class="grid gap-10 lg:grid-cols-[1fr_360px]">
+          <div class="space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-slate-50 p-5">
+              <div>
+                <h2 class="text-lg font-semibold text-slate-900">Pertanyaan Terbaru</h2>
+                <p class="text-sm text-slate-600">Lihat thread publik dan pilih kategori yang Anda minati.</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <a href="/pojok-konsultasi" class={`rounded-full border px-4 py-2 text-sm ${category === '' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}>
+                  Semua
+                </a>
+                {consultationCategories.map((item) => (
+                  <a
+                    href={`/pojok-konsultasi?category=${item.value}`}
+                    class={`rounded-full border px-4 py-2 text-sm ${category === item.value ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div class="grid gap-4">
+              {consultations.length > 0 ? (
+                consultations.map((consultation) => (
+                  <ConsultationCard consultation={consultation} />
+                ))
+              ) : (
+                <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-600">
+                  Belum ada pertanyaan untuk kategori ini.
+                </div>
+              )}
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white p-5 text-sm text-slate-600 shadow-sm">
+              <div>{pagination.total} pertanyaan ditemukan</div>
+              <div class="flex items-center gap-2">
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNumber) => (
+                  <a
+                    href={`/pojok-konsultasi?category=${category}&page=${pageNumber}`}
+                    class={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 ${pageNumber === pagination.page ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}
+                  >
+                    {pageNumber}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <aside class="space-y-6">
+            <div class="rounded-[2rem] border border-slate-200 bg-slate-50 p-6">
+              <h2 class="text-lg font-semibold text-slate-900">Ajukan Pertanyaan</h2>
+              <p class="mt-2 text-sm text-slate-600">Bisa dijawab sebagai anonim atau ditautkan dengan akun Anda jika sudah login.</p>
+            </div>
+
+            <ConsultationForm actionUrl={`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/consultations`} />
+          </aside>
+        </div>
+      </section>
+    </div>
+  </main>
+</PrimaryLayout>

@@ -1,0 +1,42 @@
+---
+import PrimaryLayout from 'src/layouts/PrimaryLayout.astro';
+import ConsultationThread from 'src/components/consultation/ConsultationThread.astro';
+
+const { params } = Astro;
+const id = params.id;
+
+let consultation = null;
+let loadError = null;
+
+try {
+  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/consultations/${id}`);
+  if (!response.ok) {
+    loadError = 'Thread tidak ditemukan.';
+  } else {
+    consultation = await response.json();
+  }
+} catch (error) {
+  console.error('Error loading consultation thread:', error);
+  loadError = 'Terjadi kesalahan saat memuat thread.';
+}
+---
+
+<PrimaryLayout title={consultation ? consultation.title : 'Pojok Konsultasi'}>
+  <main class="min-h-screen bg-slate-50 py-10">
+    <div class="mx-auto max-w-5xl px-4">
+      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Pojok Konsultasi</p>
+          <h1 class="text-3xl font-extrabold text-slate-900">{consultation ? consultation.title : 'Thread Konsultasi'}</h1>
+        </div>
+        <a href="/pojok-konsultasi" class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm border border-slate-200 transition hover:bg-slate-100">Kembali ke daftar</a>
+      </div>
+
+      {loadError ? (
+        <div class="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700">{loadError}</div>
+      ) : (
+        <ConsultationThread consultation={consultation} />
+      )}
+    </div>
+  </main>
+</PrimaryLayout>

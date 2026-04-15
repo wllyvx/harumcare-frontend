@@ -1,0 +1,96 @@
+---
+import { consultationCategories } from 'src/data/consultationCategories.js';
+const { actionUrl } = Astro.props;
+---
+<form id="consultation-form" class="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-action-url={actionUrl}>
+  <div class="space-y-2">
+    <label for="title" class="block text-sm font-medium text-slate-700">Judul Pertanyaan</label>
+    <input id="title" name="title" type="text" placeholder="Masukkan judul pertanyaan" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" required />
+  </div>
+
+  <div class="space-y-2">
+    <label for="content" class="block text-sm font-medium text-slate-700">Pertanyaan</label>
+    <textarea id="content" name="content" rows="5" placeholder="Tulis pertanyaan Anda..." class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" required></textarea>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div class="space-y-2">
+      <label for="category" class="block text-sm font-medium text-slate-700">Kategori</label>
+      <select id="category" name="category" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" required>
+        <option value="">Pilih kategori</option>
+        {consultationCategories.map((item) => (
+          <option value={item.value}>{item.label}</option>
+        ))}
+      </select>
+    </div>
+
+    <div class="space-y-2">
+      <label for="isAnonymous" class="block text-sm font-medium text-slate-700">Posting sebagai</label>
+      <div class="flex items-center gap-3 rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3">
+        <input id="isAnonymous" name="isAnonymous" type="checkbox" class="h-4 w-4 rounded text-slate-600 focus:ring-slate-500" />
+        <label for="isAnonymous" class="text-sm text-slate-700">Anonim</label>
+      </div>
+    </div>
+  </div>
+
+  <div id="anonymous-fields" class="hidden space-y-4">
+    <div class="space-y-2">
+      <label for="authorName" class="block text-sm font-medium text-slate-700">Nama (opsional)</label>
+      <input id="authorName" name="authorName" type="text" placeholder="Misalnya: Anonim" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" />
+    </div>
+    <div class="space-y-2">
+      <label for="authorEmail" class="block text-sm font-medium text-slate-700">Email (opsional)</label>
+      <input id="authorEmail" name="authorEmail" type="email" placeholder="Alamat email untuk kontak" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" />
+    </div>
+  </div>
+
+  <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Kirim Pertanyaan</button>
+</form>
+
+<script type="module">
+const form = document.getElementById('consultation-form');
+const anonymousToggle = document.getElementById('isAnonymous');
+const anonymousFields = document.getElementById('anonymous-fields');
+const actionUrl = form.dataset.actionUrl;
+
+anonymousToggle.addEventListener('change', () => {
+  anonymousFields.classList.toggle('hidden', !anonymousToggle.checked);
+});
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const formData = new FormData(form);
+  const payload = {
+    title: formData.get('title'),
+    content: formData.get('content'),
+    category: formData.get('category'),
+    isAnonymous: formData.get('isAnonymous') === 'on',
+    authorName: formData.get('authorName'),
+    authorEmail: formData.get('authorEmail')
+  };
+
+  try {
+    const response = await fetch(actionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      alert(error.error || 'Gagal mengirim pertanyaan');
+      return;
+    }
+
+    alert('Pertanyaan berhasil dikirim. Admin akan menjawab secepatnya.');
+    form.reset();
+    anonymousFields.classList.add('hidden');
+    window.location.reload();
+  } catch (error) {
+    console.error(error);
+    alert('Terjadi kesalahan saat mengirim pertanyaan');
+  }
+});
+</script>
