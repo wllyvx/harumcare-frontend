@@ -60,13 +60,13 @@ const { data: consultations, pagination } = consultationsData;
                 <p class="text-sm text-slate-600">Lihat thread publik dan pilih kategori yang Anda minati.</p>
               </div>
               <div class="flex flex-wrap gap-2">
-                <a href="/pojok-konsultasi" class={`rounded-full border px-4 py-2 text-sm ${category === '' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}>
+                <a href="/pojok-konsultasi" class={`rounded-full border px-4 py-2 text-sm ${category === '' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}>
                   Semua
                 </a>
                 {consultationCategories.map((item) => (
                   <a
                     href={`/pojok-konsultasi?category=${item.value}`}
-                    class={`rounded-full border px-4 py-2 text-sm ${category === item.value ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}
+                    class={`rounded-full border px-4 py-2 text-sm ${category === item.value ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
                   >
                     {item.label}
                   </a>
@@ -92,7 +92,7 @@ const { data: consultations, pagination } = consultationsData;
                 {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNumber) => (
                   <a
                     href={`/pojok-konsultasi?category=${category}&page=${pageNumber}`}
-                    class={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 ${pageNumber === pagination.page ? 'bg-slate-900 text-white' : 'bg-white text-slate-700'}`}
+                    class={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 ${pageNumber === pagination.page ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
                   >
                     {pageNumber}
                   </a>
