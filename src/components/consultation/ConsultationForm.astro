@@ -52,6 +52,7 @@ const form = document.getElementById('consultation-form');
 const anonymousToggle = document.getElementById('isAnonymous');
 const anonymousFields = document.getElementById('anonymous-fields');
 const actionUrl = form.dataset.actionUrl;
+const globalWindow = window;
 
 anonymousToggle.addEventListener('change', () => {
   anonymousFields.classList.toggle('hidden', !anonymousToggle.checked);
@@ -80,17 +81,26 @@ form.addEventListener('submit', async (event) => {
 
     if (!response.ok) {
       const error = await response.json();
-      alert(error.error || 'Gagal mengirim pertanyaan');
+      const showToast = globalWindow.showToast;
+      if (showToast) {
+        showToast(error.error || 'Gagal mengirim pertanyaan', 'error');
+      }
       return;
     }
 
-    alert('Pertanyaan berhasil dikirim. Admin akan menjawab secepatnya.');
+    const showToast = globalWindow.showToast;
+    if (showToast) {
+      showToast('Pertanyaan berhasil dikirim. Admin akan menjawab secepatnya.', 'success');
+    }
     form.reset();
     anonymousFields.classList.add('hidden');
-    window.location.reload();
+    setTimeout(() => window.location.reload(), 2000);
   } catch (error) {
     console.error(error);
-    alert('Terjadi kesalahan saat mengirim pertanyaan');
+    const showToast = globalWindow.showToast;
+    if (showToast) {
+      showToast('Terjadi kesalahan saat mengirim pertanyaan', 'error');
+    }
   }
 });
 </script>
