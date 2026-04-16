@@ -26,11 +26,19 @@ interface Consultation {
 
 const { consultation } = Astro.props as { consultation: Consultation };
 const authorLabel = consultation.isAnonymous ? (consultation.authorName || 'Anonim') : (consultation.author?.nama || 'Pengguna');
+const formatDate = (dateInput: string | number | Date) => {
+  try {
+    const date = typeof dateInput === 'string' ? new Date(dateInput) : typeof dateInput === 'number' ? new Date(dateInput * 1000) : dateInput;
+    return date.toLocaleDateString('id-ID');
+  } catch (e) {
+    return '-';
+  }
+};
 ---
 <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
   <div class="mb-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
     <span class="font-semibold text-slate-700">{consultation.category}</span>
-    <span>{new Date(consultation.createdAt * 1000).toLocaleDateString('id-ID')}</span>
+    <span>{formatDate(consultation.createdAt)}</span>
   </div>
 
   <h2 class="text-xl font-semibold text-slate-900">{consultation.title}</h2>
@@ -50,7 +58,7 @@ const authorLabel = consultation.isAnonymous ? (consultation.authorName || 'Anon
         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div class="mb-2 flex items-center justify-between gap-3 text-xs uppercase tracking-wide text-slate-500">
             <span>{reply.author?.role === 'admin' ? 'Admin HarumCare' : reply.author?.nama || 'Pengguna'}</span>
-            <span>{new Date(reply.createdAt * 1000).toLocaleDateString('id-ID')}</span>
+            <span>{formatDate(reply.createdAt)}</span>
           </div>
           <p class="text-sm leading-7 text-slate-700">{reply.content}</p>
         </div>

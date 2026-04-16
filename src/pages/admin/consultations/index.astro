@@ -91,9 +91,10 @@ let searchQuery = '';
   let searchQuery = '';
   let searchTimeout: number | undefined;
 
-  const formatDate = (timestamp: number) => {
+  const formatDate = (dateInput: string | number | Date) => {
     try {
-      return new Date(timestamp * 1000).toLocaleString('id-ID', {
+      const date = typeof dateInput === 'string' ? new Date(dateInput) : typeof dateInput === 'number' ? new Date(dateInput * 1000) : dateInput;
+      return date.toLocaleString('id-ID', {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
@@ -195,7 +196,20 @@ let searchQuery = '';
       if (!result.data || result.data.length === 0) {
         consultationList.innerHTML = '<div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-600">Tidak ada thread konsultasi.</div>';
       } else {
-        consultationList.innerHTML = result.data.map(renderConsultationCard).join('');
+        // Fetch detailed consultations with replies
+        const detailedConsultations = await Promise.all(
+          result.data.map(async (consultation: any) => {
+            try {
+              const detailResponse = await fetch(`${API_URL}/consultations/${consultation.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              return await detailResponse.json();
+            } catch (err) {
+              return consultation;
+            }
+          })
+        );
+        consultationList.innerHTML = detailedConsultations.map(renderConsultationCard).join('');
       }
 
       attachReplyListeners();
