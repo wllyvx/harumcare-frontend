@@ -18,21 +18,18 @@ import FAQ from "../../components/about/FAQ.astro";
                 <div class="@container">
                     <div
                         class="flex min-h-130 flex-col gap-6 bg-cover bg-center bg-no-repeat rounded-xl items-center justify-center p-8 text-center"
-                        style='background-image: linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.7) 100%), url("https://images.unsplash.com/photo-1559027615-cd2628902d4a?w=1200&h=520&fit=crop")'
+                        style='background-image: linear-gradient(rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.7) 100%), url("/images/profil/hero.jpg")'
                     >
                         <div class="flex flex-col gap-4 max-w-2xl">
                             <h1
                                 class="text-white text-4xl font-black leading-tight tracking-tight @[480px]:text-6xl"
                             >
-                                Membangun Masa Depan Bersama
+                                Harum Care Indonesia
                             </h1>
                             <p
                                 class="text-white/90 text-base @[480px]:text-xl font-normal leading-relaxed"
                             >
-                                Harum Care Indonesia berkomitmen untuk
-                                memberikan solusi digital terbaik dalam membantu
-                                Anda mengelola zakat dan amal dengan mudah dan
-                                transparan.
+                                Hadirkan Kebaikan di Hati Anda
                             </p>
                         </div>
                     </div>
@@ -51,7 +48,7 @@ import FAQ from "../../components/about/FAQ.astro";
                     Sejarah Kami
                 </h2>
                 <h3 class="text-3xl md:text-4xl font-bold mb-6 leading-tight">
-                    Perjalanan Kami dalam Pelayanan Digital
+                    Perjalanan Kami dalam membangun Harum Care Indonesia
                 </h3>
                 <p class="text-lg text-gray-600 mb-4 leading-relaxed">
                     HARUM Care Indonesia adalah sub-divisi dari Yayasan Dakwah &
@@ -79,11 +76,11 @@ import FAQ from "../../components/about/FAQ.astro";
             <div
                 class="rounded-xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500"
             >
-                <img
+                <!-- <img
                     alt="HarumCare Team"
                     class="w-full h-100 object-cover"
                     src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=400&fit=crop"
-                />
+                /> -->
             </div>
         </section>
 
@@ -210,7 +207,7 @@ import FAQ from "../../components/about/FAQ.astro";
                     <p class="text-gray-600 flex-grow text-sm">
                         Surat Keputusan Badan Amil Zakat Nasional (BAZNAS)
                         sebagai Unit Pengumpul Zakat (UPZ) resmi yang diwakili
-                        oleh Harum Care.
+                        oleh Harum Care Indonesia.
                     </p>
                     <a
                         href="#"
@@ -265,10 +262,11 @@ import FAQ from "../../components/about/FAQ.astro";
                         <div
                             class="aspect-square rounded-xl overflow-hidden mb-4 relative bg-gray-300 flex items-center justify-center"
                         >
-                            <span
-                                class="material-symbols-outlined text-6xl text-gray-500"
-                                >account_circle</span
-                            >
+                            <img
+                                alt=""
+                                class="w-full h-full object-cover"
+                                src="/images/profil/ridwan.png"
+                                >
                         </div>
                         <h4 class="font-bold text-lg">Ridwan, Lc., M.Pd.I.</h4>
                         <p class="text-primary text-sm font-medium">Founder</p>
@@ -277,13 +275,14 @@ import FAQ from "../../components/about/FAQ.astro";
                         <div
                             class="aspect-square rounded-xl overflow-hidden mb-4 relative bg-gray-300 flex items-center justify-center"
                         >
-                            <span
-                                class="material-symbols-outlined text-6xl text-gray-500"
-                                >account_circle</span
-                            >
+                            ,<img
+                                class="w-full h-full object-cover" 
+                                src="/images/profil/basith.png"
+                                alt="Basith"
+                                >
                         </div>
                         <h4 class="font-bold text-lg">
-                            M. Basith Ayyasyi Suhenda, S.T.
+                            M. Basith Ayyasy Suhenda, S.T.
                         </h4>
                         <p class="text-primary text-sm font-medium">Program</p>
                     </div>
@@ -291,10 +290,11 @@ import FAQ from "../../components/about/FAQ.astro";
                         <div
                             class="aspect-square rounded-xl overflow-hidden mb-4 relative bg-gray-300 flex items-center justify-center"
                         >
-                            <span
-                                class="material-symbols-outlined text-6xl text-gray-500"
-                                >account_circle</span
-                            >
+                            <img
+                                alt="Willy"
+                                class="w-full h-full object-cover"
+                                src="/images/profil/willy.png"
+                                >
                         </div>
                         <h4 class="font-bold text-lg">
                             Willy Fajar Ramadhan, S.Kom.
@@ -322,7 +322,7 @@ import FAQ from "../../components/about/FAQ.astro";
         </section>
 
         <!-- Values Section -->
-        <section class="max-w-300 mx-auto px-6 py-20 border-t border-[#dbe6e1]">
+<!--         <section class="max-w-300 mx-auto px-6 py-20 border-t border-[#dbe6e1]">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold">Nilai-Nilai Kami</h2>
                 <p class="text-gray-500 mt-2">
@@ -370,12 +370,12 @@ import FAQ from "../../components/about/FAQ.astro";
                     </p>
                 </div>
             </div>
-        </section>
+        </section> -->
 
-        <FAQ />
+        <!-- <FAQ /> -->
 
         <!-- CTA Section -->
-        <section class="max-w-300 mx-auto px-6 pb-20">
+        <!-- <section class="max-w-300 mx-auto px-6 pb-20">
             <div
                 class="bg-primary rounded-2xl p-10 md:p-16 text-[#111815] flex flex-col md:flex-row items-center justify-between gap-8"
             >
@@ -397,6 +397,6 @@ import FAQ from "../../components/about/FAQ.astro";
                     >
                 </div>
             </div>
-        </section>
+        </section> -->
     </main>
 </PrimaryLayout>
