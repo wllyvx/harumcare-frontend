@@ -1,0 +1,314 @@
+---
+import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
+import KajianCardLarge from '../../components/kajian/KajianCardLarge.astro';
+
+// Kajian interface
+interface Kajian {
+  id: string;
+  title: string;
+  description: string;
+  youtubeLink: string;
+  slug: string;
+  author?: {
+    nama: string;
+    username: string;
+  };
+  category: string;
+  createdAt: string;
+  viewCount: number;
+}
+
+// Get query parameters
+const { searchParams } = Astro.url;
+const page = parseInt(searchParams.get('page') || '1');
+const category = searchParams.get('category') || '';
+const searchQuery = searchParams.get('q') || '';
+const limit = 9;
+
+// Fetch kajians from API
+let kajianData: { kajians: Kajian[], currentPage: number, totalPages: number, totalKajians: number } = {
+  kajians: [],
+  currentPage: 1,
+  totalPages: 1,
+  totalKajians: 0
+};
+try {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+    status: 'published'
+  });
+
+  if (category) {
+    queryParams.append('category', category);
+  }
+
+  if (searchQuery) {
+    queryParams.append('q', searchQuery);
+  }
+
+  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/kajian?${queryParams}`);
+  if (response.ok) {
+    kajianData = await response.json();
+  }
+} catch (error) {
+  console.error('Error fetching kajians:', error);
+}
+
+const { kajians, currentPage, totalPages, totalKajians } = kajianData;
+
+// Fetch trending kajians separately (without search filter)
+let trendingKajians: Kajian[] = [];
+try {
+  const trendingParams = new URLSearchParams({
+    page: '1',
+    limit: '3',
+    status: 'published'
+  });
+
+  const trendingResponse = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/kajian?${trendingParams}`);
+  if (trendingResponse.ok) {
+    const trendingData = await trendingResponse.json();
+    trendingKajians = trendingData.kajians || [];
+  }
+} catch (error) {
+  console.error('Error fetching trending kajians:', error);
+}
+
+// Categories for filter (populate dynamically)
+let categories: { value: string; label: string }[] = [
+  { value: '', label: 'Semua Kategori' }
+];
+
+// Try to fetch available categories from API; if unavailable, derive from fetched kajians
+try {
+  const catResp = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/kajian/categories`);
+  if (catResp.ok) {
+    const cats = await catResp.json();
+    if (Array.isArray(cats) && cats.length > 0) {
+      const items = cats.map((c: any) => {
+        if (typeof c === 'string') return { value: c, label: c.charAt(0).toUpperCase() + c.slice(1) };
+        // support objects: { value, label } or { name }
+        return { value: c.value ?? c.name ?? String(c), label: c.label ?? c.name ?? String(c) };
+      });
+      categories = [{ value: '', label: 'Semua Kategori' }, ...items];
+    }
+  } else {
+    // fallback: derive unique categories from fetched kajians
+    const unique = Array.from(new Set(kajianData.kajians.map((k: any) => k.category).filter(Boolean)));
+    categories = [{ value: '', label: 'Semua Kategori' }, ...unique.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))];
+  }
+} catch (err) {
+  const unique = Array.from(new Set(kajianData.kajians.map((k: any) => k.category).filter(Boolean)));
+  categories = [{ value: '', label: 'Semua Kategori' }, ...unique.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))];
+}
+
+// Helper function to extract video ID
+const extractVideoId = (url: string): string | null => {
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&\n?#]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^&\n?#]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/live\/([^&\n?#]+)/
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+---
+
+<PrimaryLayout title="Kajian - Harum Care Indonesia">
+  <main class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <section class="bg-blue-50 text-blue-900 py-12">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="text-center">
+          <h1 class="text-3xl md:text-4xl font-extrabold mb-2">Kajian & Dakwah</h1>
+          <p class="text-base text-blue-700 max-w-2xl mx-auto">
+            Dengarkan kajian-kajian inspiratif dari para ustadz dan ahli agama untuk memperdalam pemahaman agama.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters + Search (inline on desktop) -->
+    <section class="py-6 bg-white border-b">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <a
+                  href={`/kajian?category=${cat.value}`}
+                  class={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                    cat.value === category ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200'
+                  }`}
+                >
+                  {cat.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div class="w-full sm:w-80">
+            <div class="relative">
+              <input
+                type="search"
+                placeholder="Cari kajian..."
+                class="w-full rounded-full border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                onkeydown="if(event.key === 'Enter'){ const q = this.value.trim(); window.location.href = q ? `/kajian?q=${encodeURIComponent(q)}` : '/kajian'; }"
+              />
+              <button
+                onclick="{ const q = this.previousElementSibling.value.trim(); window.location.href = q ? `/kajian?q=${encodeURIComponent(q)}` : '/kajian'; }"
+                class="absolute right-1 top-1/2 -translate-y-1/2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm"
+              >Cari</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="text-sm text-gray-600">
+            Menampilkan {kajians.length} dari {totalKajians} kajian
+            {(category || searchQuery) && (
+              <span class="ml-2 text-gray-500">
+                {category && <span>• Kategori: <strong>{category}</strong></span>}
+                {category && searchQuery && <span> • </span>}
+                {searchQuery && <span>Pencarian: <strong>"{searchQuery}"</strong></span>}
+              </span>
+            )}
+          </div>
+
+          {(category || searchQuery) && (
+            <a
+              href="/kajian"
+              class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-full text-sm hover:bg-gray-300 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              Reset Filter
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <!-- Kajian Grid + Sidebar -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4">
+        {kajians.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Main list (2 cols on desktop) -->
+            <div class="md:col-span-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {kajians.map((item) => (
+                  <KajianCardLarge
+                    id={item.id}
+                    title={item.title}
+                    description={item.description}
+                    youtubeLink={item.youtubeLink}
+                    slug={item.slug}
+                    author={item.author}
+                    category={item.category}
+                    createdAt={item.createdAt}
+                    viewCount={item.viewCount}
+                  />
+                ))}
+              </div>
+
+              <!-- Pagination -->
+              {totalPages > 1 && (
+                <div class="flex justify-center mt-10">
+                  <nav class="flex items-center gap-2">
+                    {currentPage > 1 && (
+                      <a
+                        href={`/kajian?page=${currentPage - 1}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >Sebelumnya</a>
+                    )}
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <a
+                        href={`/kajian?page=${pageNum}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                        class={`px-4 py-2 text-sm border rounded-md transition-colors ${
+                          pageNum === currentPage
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >{pageNum}</a>
+                    ))}
+
+                    {currentPage < totalPages && (
+                      <a
+                        href={`/kajian?page=${currentPage + 1}${category ? `&category=${category}` : ''}${searchQuery ? `&q=${encodeURIComponent(searchQuery)}` : ''}`}
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                      >Selanjutnya</a>
+                    )}
+                  </nav>
+                </div>
+              )}
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="space-y-6">
+              <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
+                <h4 class="text-lg font-bold text-blue-700 mb-3">Kajian Terpopuler</h4>
+                <div class="space-y-3">
+                  {trendingKajians.map((k) => (
+                    <a href={`/kajian/${k.slug}`} class="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50">
+                      <img 
+                        src={`https://img.youtube.com/vi/${extractVideoId(k.youtubeLink)}/hqdefault.jpg`} 
+                        alt={k.title} 
+                        class="w-12 h-12 object-cover rounded-md" 
+                        onerror="this.onerror=null; this.src='/images/empty-image-placeholder.webp'"
+                        loading="lazy"
+                      />
+                      <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900 line-clamp-2">{k.title}</p>
+                        <p class="text-xs text-gray-500 mt-1">{new Date(k.createdAt).toLocaleDateString('id-ID')}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hidden md:block">
+                <h4 class="text-sm font-semibold text-blue-700 mb-3">Tentang Kami</h4>
+                <p class="text-sm text-gray-600 mb-4">Temukan informasi lebih lengkap mengenai kegiatan Harum Care dan cara berdonasi.</p>
+                <a
+                  href="/about-us"
+                  class="inline-block px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors w-full text-center"
+                >
+                  Pelajari Lebih Lanjut
+                </a>
+              </div>
+            </aside>
+          </div>
+        ) : (
+          <div class="text-center py-16">
+            <div class="mb-6">
+              <img
+                src="/images/empty-image-placeholder.webp"
+                alt="No kajian"
+                class="w-32 h-32 mx-auto opacity-50"
+              />
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-700 mb-2">Tidak Ada Kajian</h3>
+            <p class="text-gray-500 mb-6">
+              {category ? `Tidak ada kajian dalam kategori "${category}"` : 'Belum ada kajian yang tersedia'}
+            </p>
+            {category && (
+              <a
+                href="/kajian"
+                class="inline-block px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Lihat Semua Kajian
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+</PrimaryLayout>

@@ -1,0 +1,369 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Tambah Kajian Baru">
+  <div class="container mx-auto py-6">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-semibold text-gray-900">Tambah Kajian Baru</h1>
+      <p class="mt-1 text-sm text-gray-600">
+        Buat kajian baru dengan video YouTube untuk ditampilkan di website.
+      </p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <form id="createKajianForm" class="p-6 space-y-6">
+        <!-- YouTube Link -->
+        <div>
+          <label
+            for="youtubeLink"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Link Video YouTube <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="url"
+            id="youtubeLink"
+            name="youtubeLink"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="https://www.youtube.com/watch?v=VIDEO_ID atau https://youtu.be/VIDEO_ID"
+          />
+          <p class="mt-1 text-sm text-gray-500">
+            Masukkan link YouTube, judul dan deskripsi akan diambil otomatis
+          </p>
+          <button
+            type="button"
+            id="fetchYouTubeBtn"
+            class="mt-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Ambil Data dari YouTube
+          </button>
+        </div>
+
+        <!-- Title (auto-filled) -->
+        <div>
+          <label
+            for="title"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Judul Kajian
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Judul akan diambil dari YouTube..."
+          />
+          <p class="mt-1 text-sm text-gray-500">
+            Akan diisi otomatis dari YouTube, atau edit manual
+          </p>
+        </div>
+
+        <!-- Description (auto-filled) -->
+        <div>
+          <label
+            for="description"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Deskripsi Kajian
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            rows="6"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Deskripsi akan diambil dari YouTube..."></textarea>
+          <p class="mt-1 text-sm text-gray-500">
+            Akan diisi otomatis dari YouTube, atau edit manual
+          </p>
+        </div>
+
+        <!-- Category and Status -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label
+              for="category"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Kategori <span class="text-red-500">*</span>
+            </label>
+            <div class="space-y-2">
+              <select
+                id="category"
+                name="category"
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Pilih Kategori</option>
+              </select>
+
+              <!-- Custom Category Input (hidden by default) -->
+              <div id="customCategoryInput" class="hidden">
+                <input
+                  type="text"
+                  id="customCategory"
+                  name="customCategory"
+                  placeholder="Masukkan nama kategori baru..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p class="mt-1 text-xs text-gray-500">
+                  Kategori baru akan ditambahkan ke daftar kategori
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label
+              for="status"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Status <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="status"
+              name="status"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="draft">Draft</option>
+              <option value="published" selected>Published</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Publish Date -->
+        <div>
+          <label
+            for="createdAt"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Tanggal Publish (Opsional)
+          </label>
+          <input
+            type="datetime-local"
+            id="createdAt"
+            name="createdAt"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p class="mt-1 text-xs text-gray-500">
+            Kosongkan untuk menggunakan waktu sekarang
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-3 pt-6 border-t">
+          <a
+            href="/admin/kajian"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Batal
+          </a>
+          <button
+            type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Simpan Kajian
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const API_URL = import.meta.env.PUBLIC_API_URL;
+
+  // Function to extract video ID from YouTube URL
+  function extractVideoId(url: string): string | null {
+    const patterns = [
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&\n?#]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^&\n?#]+)/,
+      /(?:https?:\/\/)?(?:www\.)?youtube\.com\/live\/([^&\n?#]+)/
+    ];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
+  }
+
+  // Function to fetch YouTube video info
+  async function fetchYouTubeInfo(videoId: string) {
+    try {
+      const response = await fetch(`${API_URL}/kajian/fetch-youtube?videoId=${videoId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch YouTube data');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching YouTube info:', error);
+      throw error;
+    }
+  }
+
+  // Load categories from API
+  async function loadCategories() {
+    try {
+      const response = await fetch(`${API_URL}/kajian/categories`);
+      if (response.ok) {
+        const categories = await response.json();
+        const categorySelect = document.getElementById(
+          "category",
+        ) as HTMLSelectElement;
+
+        if (categorySelect) {
+          // Clear existing options except the first one
+          categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
+
+          // Add existing categories
+          categories.forEach((category: string) => {
+            const option = document.createElement("option");
+            option.value = category;
+            option.textContent =
+              category.charAt(0).toUpperCase() + category.slice(1);
+            categorySelect.appendChild(option);
+          });
+
+          // Add custom option
+          const customOption = document.createElement("option");
+          customOption.value = "custom";
+          customOption.textContent = "+ Tambah Kategori Baru";
+          categorySelect.appendChild(customOption);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  }
+
+  // Setup event listeners
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Load categories first
+    await loadCategories();
+
+    // Setup fetch YouTube button
+    const fetchYouTubeBtn = document.getElementById("fetchYouTubeBtn");
+    const youtubeLinkInput = document.getElementById("youtubeLink") as HTMLInputElement;
+    const titleInput = document.getElementById("title") as HTMLInputElement;
+    const descriptionTextarea = document.getElementById("description") as HTMLTextAreaElement;
+
+    if (fetchYouTubeBtn) {
+      fetchYouTubeBtn.addEventListener("click", async () => {
+        const url = youtubeLinkInput.value.trim();
+        if (!url) {
+          alert("Masukkan link YouTube terlebih dahulu");
+          return;
+        }
+
+        const videoId = extractVideoId(url);
+        if (!videoId) {
+          alert("Link YouTube tidak valid");
+          return;
+        }
+
+        try {
+          fetchYouTubeBtn.textContent = "Mengambil data...";
+          fetchYouTubeBtn.disabled = true;
+
+          const data = await fetchYouTubeInfo(videoId);
+
+          if (data.title) titleInput.value = data.title;
+          if (data.description) descriptionTextarea.value = data.description;
+
+          alert("Data berhasil diambil dari YouTube!");
+        } catch (error) {
+          alert("Gagal mengambil data dari YouTube. Pastikan link valid dan API key sudah dikonfigurasi.");
+        } finally {
+          fetchYouTubeBtn.textContent = "Ambil Data dari YouTube";
+          fetchYouTubeBtn.disabled = false;
+        }
+      });
+    }
+
+    // Setup category selection handling
+    const categorySelect = document.getElementById(
+      "category",
+    ) as HTMLSelectElement;
+    const customCategoryInput = document.getElementById(
+      "customCategoryInput",
+    ) as HTMLDivElement;
+    const customCategoryField = document.getElementById(
+      "customCategory",
+    ) as HTMLInputElement;
+
+    if (categorySelect) {
+      categorySelect.addEventListener("change", () => {
+        if (categorySelect.value === "custom") {
+          customCategoryInput.classList.remove("hidden");
+          customCategoryField.required = true;
+          categorySelect.required = false;
+        } else {
+          customCategoryInput.classList.add("hidden");
+          customCategoryField.required = false;
+          categorySelect.required = true;
+        }
+      });
+    }
+  });
+
+  // Form submission
+  document
+    .getElementById("createKajianForm")
+    ?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      try {
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+
+        // Validate and handle category selection
+        let category = formData.get("category") as string;
+        if (category === "custom") {
+          const customCategory = formData.get("customCategory") as string;
+          if (!customCategory || customCategory.trim() === "") {
+            alert("Silakan masukkan nama kategori baru");
+            return;
+          }
+          category = customCategory.trim();
+        } else if (!category) {
+          alert("Silakan pilih kategori");
+          return;
+        }
+
+        // Create kajian
+        const kajianData = {
+          youtubeLink: formData.get("youtubeLink"),
+          title: formData.get("title"),
+          description: formData.get("description"),
+          category: category,
+          status: formData.get("status"),
+          createdAt: formData.get("createdAt") || null,
+        };
+
+        console.log("Sending kajian data:", kajianData);
+
+        const response = await fetch(`${API_URL}/kajian`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(kajianData),
+        });
+
+        if (!response.ok) throw new Error("Failed to create kajian");
+
+        alert("Kajian berhasil dibuat!");
+        window.location.href = "/admin/kajian";
+      } catch (error) {
+        console.error("Error creating kajian:", error);
+        alert("Gagal membuat kajian. Silakan coba lagi.");
+      }
+    });
+</script>

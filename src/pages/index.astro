@@ -5,6 +5,7 @@ import Hero from "../components/home/Hero.astro";
 import MenuIcons from "../components/home/MenuIcons.astro";
 import LatestNews from "../components/news/LatestNews.astro";
 import LatestBlog from "../components/blog/LatestBlog.astro";
+import LatestKajian from "../components/kajian/LatestKajian.astro";
 
 const API_URL = import.meta.env.PUBLIC_API_URL;
 
@@ -60,6 +61,7 @@ const [campaignData, latestNews] = await Promise.all([
   <Hero news={latestNews} />
   <MenuIcons />
   <LatestBlog />
+  <LatestKajian />
   <LatestNews />
   <LatestCampaign campaigns={campaignData.campaigns} />
 </PrimaryLayout>
