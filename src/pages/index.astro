@@ -60,8 +60,8 @@ const [campaignData, latestNews] = await Promise.all([
 <PrimaryLayout>
   <Hero news={latestNews} />
   <MenuIcons />
-  <LatestBlog />
-  <LatestKajian />
   <LatestNews />
   <LatestCampaign campaigns={campaignData.campaigns} />
+  <LatestBlog />
+  <LatestKajian />
 </PrimaryLayout>
