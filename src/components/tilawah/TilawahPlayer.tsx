@@ -12,6 +12,7 @@ import {
   ChevronRight,
   X,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 import { useTilawahState } from "./useTilawahState";
 import type { Surah, Ayah } from "./types";
@@ -87,7 +88,9 @@ export function TilawahPlayer() {
     }
   };
 
-  // Handle FAB click - different behavior based on player state
+  const [showControlsHint, setShowControlsHint] = useState(false);
+
+  // Handle FAB click - toggle play/pause or open player
   const handleFabClick = async () => {
     // Load surahs on first interaction if not loaded
     if (state.surahs.length === 0) {
@@ -105,6 +108,14 @@ export function TilawahPlayer() {
       // When open, close the player (keep audio playing)
       handleClose();
     }
+  };
+
+  // Handle controls button click - open full player
+  const handleControlsClick = () => {
+    if (state.surahs.length === 0) {
+      fetchSurahs();
+    }
+    setIsOpen(true);
   };
 
   // Play current ayat
@@ -271,20 +282,48 @@ export function TilawahPlayer() {
       />
 
       {/* FAB - Floating Action Button */}
-      <button
-        onClick={handleFabClick}
-        aria-label={state.isOpen ? "Close Tilawah player" : (state.isPlaying ? "Pause audio" : "Play audio")}
-        title={state.isOpen ? "Close Quran audio player" : (state.isPlaying ? "Pause audio" : "Play audio")}
-        className="fixed bottom-24 md:bottom-8 right-8 z-[60] w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-110 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
-      >
-        {state.isOpen ? (
-          <Headphones size={24} className="text-white" />
-        ) : state.isPlaying ? (
-          <Pause size={24} className="text-white" />
-        ) : (
-          <Play size={24} className="text-white ml-1" />
+      <div className="fixed bottom-24 md:bottom-8 right-8 z-[60] flex flex-col items-end gap-3">
+        {/* Main FAB */}
+        <button
+          onClick={handleFabClick}
+          onMouseEnter={() => setShowControlsHint(true)}
+          onMouseLeave={() => setShowControlsHint(false)}
+          aria-label={state.isOpen ? "Close Tilawah player" : (state.isPlaying ? "Pause audio" : "Play audio")}
+          title={state.isOpen ? "Close Quran audio player" : (state.isPlaying ? "Pause audio" : "Play audio")}
+          className="flex items-center gap-2 px-4 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-medium cursor-pointer shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+        >
+          {state.isOpen ? (
+            <Headphones size={20} />
+          ) : state.isPlaying ? (
+            <Pause size={20} />
+          ) : (
+            <Play size={20} />
+          )}
+          <span className="text-sm">Tilawah</span>
+        </button>
+
+        {/* Secondary Controls Button - only when player is closed */}
+        {!state.isOpen && (
+          <button
+            onClick={handleControlsClick}
+            onMouseEnter={() => setShowControlsHint(true)}
+            onMouseLeave={() => setShowControlsHint(false)}
+            aria-label="Open full audio controls"
+            title="Open full audio controls"
+            className="w-10 h-10 rounded-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white flex items-center justify-center cursor-pointer shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-110 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+          >
+            <Settings size={18} />
+          </button>
         )}
-      </button>
+        
+        {/* Controls hint tooltip */}
+        {showControlsHint && !state.isOpen && (
+          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap">
+            Click gear icon for full controls
+            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+          </div>
+        )}
+      </div>
 
       {/* Expanded Player Card */}
       {state.isOpen && (
