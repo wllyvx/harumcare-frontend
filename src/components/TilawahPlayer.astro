@@ -1,0 +1,54 @@
+---
+/**
+ * Tilawah Audio Player - Astro Component Wrapper
+ * Imports the React component with client:load for persistent audio player
+ * across page navigation
+ */
+
+import { TilawahPlayer } from "./tilawah/TilawahPlayer";
+---
+
+<TilawahPlayer client:load />
+
+<style>
+  /* Ensure font for Arabic text is properly rendered */
+  :global(.font-arabic) {
+    font-family: "Arial", "Simplified Arabic", "Arabic Typesetting", sans-serif;
+  }
+
+  /* Smooth animations for player card */
+  :global(.animate-in) {
+    animation: slideIn 0.3s ease-out forwards;
+  }
+
+  :global(.fade-in) {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  :global(.slide-in-from-bottom-2) {
+    --tw-translate-y: 8px;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y))
+      scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) skewX(var(--tw-skew-x))
+      skewY(var(--tw-skew-y));
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>
