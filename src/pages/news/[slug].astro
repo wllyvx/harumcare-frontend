@@ -88,6 +88,15 @@ const getDescription = (content: string) => {
     : plainText;
 };
 
+const encodeMarkdownImageUrl = (url: string) => {
+  try {
+    return encodeURI(url).replace(/\(/g, "%28").replace(/\)/g, "%29");
+  } catch (err) {
+    console.error("Failed to encode image URL:", err);
+    return url;
+  }
+};
+
 const metaDescription = getDescription(news.content);
 ---
 
@@ -199,7 +208,7 @@ const metaDescription = getDescription(news.content);
                   class="whitespace-pre-wrap text-gray-700 leading-relaxed"
                   set:html={marked.parse(
                     news.content.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
-                      return `![${alt}](${encodeURI(url)})`;
+                      return `![${alt}](${encodeMarkdownImageUrl(url)})`;
                     })
                   )}
                 />
