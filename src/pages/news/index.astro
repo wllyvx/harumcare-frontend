@@ -2,22 +2,8 @@
 import PrimaryLayout from '../../layouts/PrimaryLayout.astro';
 import NewsCardLarge from '../../components/news/NewsCardLarge.astro';
 import TrendingNewsSidebar from '../../components/news/TrendingNewsSidebar.astro';
-
-// News interface
-interface News {
-  id: string;
-  title: string;
-  content: string;
-  image: string;
-  slug: string;
-  author?: {
-    nama: string;
-    username: string;
-  };
-  category: string;
-  createdAt: string;
-  viewCount: number;
-}
+import { NewsService } from '../../services/newsService';
+import type { News } from '../../types';
 
 // Get query parameters
 const { searchParams } = Astro.url;
@@ -26,63 +12,39 @@ const category = searchParams.get('category') || '';
 const searchQuery = searchParams.get('q') || '';
 const limit = 9;
 
-// Fetch news from API
-let newsData: { news: News[], currentPage: number, totalPages: number, totalNews: number } = { 
-  news: [], 
-  currentPage: 1, 
-  totalPages: 1, 
-  totalNews: 0 
-};
-try {
-  const queryParams = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-    status: 'published'
-  });
-  
-  if (category) {
-    queryParams.append('category', category);
-  }
-  
-  if (searchQuery) {
-    queryParams.append('q', searchQuery);
-  }
-  
-  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/news?${queryParams}`);
-  if (response.ok) {
-    newsData = await response.json();
-  }
-} catch (error) {
+// Fetch news from Service
+const newsData = await NewsService.getAll({
+  page,
+  limit,
+  category,
+  q: searchQuery,
+  status: 'published'
+}).catch((error) => {
   console.error('Error fetching news:', error);
-}
+  return { news: [], currentPage: 1, totalPages: 1, totalNews: 0 };
+});
 
 const { news, currentPage, totalPages, totalNews } = newsData;
 
-// Categories for filter (populate dynamically)
+// Categories for filter
 let categories: { value: string; label: string }[] = [
   { value: '', label: 'Semua Kategori' }
 ];
 
-// Try to fetch available categories from API; if unavailable, derive from fetched news
 try {
-  const catResp = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/news/categories`);
-  if (catResp.ok) {
-    const cats = await catResp.json();
-    if (Array.isArray(cats) && cats.length > 0) {
-      const items = cats.map((c: any) => {
-        if (typeof c === 'string') return { value: c, label: c.charAt(0).toUpperCase() + c.slice(1) };
-        // support objects: { value, label } or { name }
-        return { value: c.value ?? c.name ?? String(c), label: c.label ?? c.name ?? String(c) };
-      });
-      categories = [{ value: '', label: 'Semua Kategori' }, ...items];
-    }
+  const cats = await NewsService.getCategories();
+  if (Array.isArray(cats) && cats.length > 0) {
+    const items = cats.map((c: any) => {
+      if (typeof c === 'string') return { value: c, label: c.charAt(0).toUpperCase() + c.slice(1) };
+      return { value: c.value ?? c.name ?? String(c), label: c.label ?? c.name ?? String(c) };
+    });
+    categories = [{ value: '', label: 'Semua Kategori' }, ...items];
   } else {
-    // fallback: derive unique categories from fetched news
-    const unique = Array.from(new Set(newsData.news.map((n: any) => n.category).filter(Boolean)));
-    categories = [{ value: '', label: 'Semua Kategori' }, ...unique.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))];
+    throw new Error('Fallback to derivation');
   }
 } catch (err) {
-  const unique = Array.from(new Set(newsData.news.map((n: any) => n.category).filter(Boolean)));
+  // fallback: derive unique categories from fetched news
+  const unique = Array.from(new Set(news.map((n: News) => n.category).filter(Boolean)));
   categories = [{ value: '', label: 'Semua Kategori' }, ...unique.map((c) => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1) }))];
 }
 ---

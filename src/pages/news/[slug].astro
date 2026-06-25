@@ -2,30 +2,10 @@
 import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
 import { marked } from "marked";
 import TrendingNewsSidebar from "../../components/news/TrendingNewsSidebar.astro";
+import { NewsService } from "../../services/newsService";
+import type { News } from "../../types";
 
 export const prerender = false;
-
-// News interface
-interface News {
-  _id: string;
-  title: string;
-  content: string;
-  image: string;
-  slug: string;
-  author?: {
-    nama: string;
-    username: string;
-  };
-  category: string;
-  createdAt: string;
-  updatedAt: string;
-  viewCount: number;
-}
-
-// Props interface
-interface Props {
-  article: News;
-}
 
 // Ambil slug dari URL params
 const { slug } = Astro.params;
@@ -36,13 +16,9 @@ let error = null;
 
 if (slug) {
   try {
-    const API_URL = import.meta.env.PUBLIC_API_URL;
-    const response = await fetch(`${API_URL}/news/${slug}`);
-
-    if (response.ok) {
-      news = await response.json();
-    } else {
-      error = "Berita tidak ditemukan";
+    news = await NewsService.getBySlug(slug);
+    if (!news) {
+       error = "Berita tidak ditemukan";
     }
   } catch (err) {
     console.error("Error fetching news:", err);
@@ -345,18 +321,15 @@ const metaDescription = getDescription(news.content);
 </style>
 
 <script>
+  import { NewsService } from "../../services/newsService";
+
   // Load related campaign for news
   async function loadRelatedCampaign() {
     try {
-      const API_URL = import.meta.env.PUBLIC_API_URL;
       const newsSlug = window.location.pathname.split("/").pop();
+      if (!newsSlug) return;
 
-      const response = await fetch(`${API_URL}/news/${newsSlug}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch news data");
-      }
-
-      const newsData = await response.json();
+      const newsData: any = await NewsService.getBySlug(newsSlug);
       const campaignInfo = document.getElementById("campaign-info");
 
       if (campaignInfo && newsData.relatedCampaign) {
