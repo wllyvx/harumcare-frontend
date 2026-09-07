@@ -13,11 +13,8 @@ const menus: MenuItem[] = [
     icon: "favorite",
     highlight: true,
   },
-  { href: "/news", label: "Baca Berita", icon: "newspaper" },
-  { href: "/blog", label: "Blog", icon: "article" },
-  { href: "/about-us", label: "Tentang Kami", icon: "info" },
-  { href: "/kalkulator-zakat", label: "Kalkulator Zakat", icon: "calculate" },
-  { href: "/pojok-konsultasi", label: "Pojok Konsultasi", icon: "help_center" },
+  { href: "/news", label: "Wawasan", icon: "auto_stories" },
+  { href: "/pojok-konsultasi", label: "Konsultasi", icon: "help_center" },
 ];
 ---
 
@@ -25,39 +22,24 @@ const menus: MenuItem[] = [
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@24,400,0" />
 </>
 
-<section class="w-full bg-white py-8 md:py-12">
-  <div class="max-w-6xl mx-auto px-4">
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+<section class="w-full bg-white py-8 md:py-10 border-y border-border/60">
+  <div class="max-w-3xl mx-auto px-4">
+    <div class="grid grid-cols-3 gap-3 md:gap-4">
       {
         menus.map((menu) => (
           <a
             href={menu.href}
-            class={`group flex flex-col items-center justify-center p-4 md:p-6 rounded-xl transition-all duration-300 ${
+            class={`group flex flex-col items-center justify-center p-5 md:p-7 rounded-2xl border transition-all duration-200 ${
               menu.highlight
-                ? "bg-gradient-to-br from-highlight-50 to-highlight-100/50 border-2 border-highlight-300 hover:shadow-lg hover:shadow-highlight-200 hover:scale-105"
-                : "bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-brand-300 hover:scale-105"
+                ? "bg-brand-600 border-brand-600 text-white hover:bg-[#1e3a8a] hover:border-[#1e3a8a] hover:-translate-y-0.5"
+                : "bg-white border-border hover:border-brand-300 hover:-translate-y-0.5 hover:shadow-sm"
             }`}
             aria-label={menu.label}
           >
-            <div
-              class={`mb-3 text-5xl md:text-6xl transition-colors ${
-                menu.highlight ? "text-highlight-600" : "text-brand-600"
-              } group-hover:scale-110 transition-transform`}
-            >
-              <span class="material-symbols-rounded">{menu.icon}</span>
-            </div>
-            <span
-              class={`text-sm md:text-base font-semibold text-center transition-colors ${
-                menu.highlight ? "text-gray-900" : "text-gray-700"
-              } group-hover:text-brand-600`}
-            >
+            <span class={`material-symbols-rounded text-4xl md:text-[2.5rem] mb-3 ${menu.highlight ? "text-white" : "text-brand-600"}`}>{menu.icon}</span>
+            <span class={`text-sm md:text-[0.95rem] font-semibold text-center leading-tight ${menu.highlight ? "text-white" : "text-foreground"}`}>
               {menu.label}
             </span>
-            {menu.highlight && (
-              <span class="mt-2 inline-block px-2 py-1 rounded-full text-xs font-bold bg-highlight-500 text-white">
-                Dianjurkan
-              </span>
-            )}
           </a>
         ))
       }

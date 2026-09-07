@@ -1,27 +1,20 @@
 ---
 import NewsCard from "./NewsCard.astro";
-import NewsCardLarge from "./NewsCardLarge.astro";
 
-// News interface
 interface News {
   _id: string;
   title: string;
   content: string;
   image: string;
   slug: string;
-  author?: {
-    nama: string;
-    username: string;
-  };
+  author?: { nama: string; username: string };
   category: string;
   createdAt: string;
   viewCount: number;
 }
 
-// Props interface
 interface Props {
   title?: string;
-  subtitle?: string;
   limit?: number;
   showViewAll?: boolean;
   viewAllLink?: string;
@@ -29,96 +22,49 @@ interface Props {
 
 const {
   title = "Berita Terbaru",
-  subtitle = "Dapatkan informasi terbaru seputar kegiatan dan pengumuman kami",
-  limit = 6,
+  limit = 4,
   showViewAll = true,
   viewAllLink = "/news",
 } = Astro.props;
 
-// Fetch latest news from API
 let latestNews: News[] = [];
 try {
   const response = await fetch(
     `${import.meta.env.PUBLIC_API_URL || "http://localhost:3000/api"}/news/latest?limit=${limit}`,
   );
-  if (response.ok) {
-    latestNews = await response.json();
-  }
-} catch (error) {
-  console.error("Error fetching latest news:", error);
-}
+  if (response.ok) latestNews = await response.json();
+} catch {}
 ---
 
-<section class="news-section px-4 py-8 md:py-16 bg-blue-50">
-  <div class="news-container max-w-7xl mx-auto">
-    <!-- Header Section -->
-    <h2
-      class="bg-blue-500 text-white text-lg rounded-t-lg w-fit px-3 py-1 font-semibold mb-4"
-    >
-      {title}
-    </h2>
-
-    <!-- News Cards -->
-    {
-      latestNews.length > 0 ? (
-        <div class="news-grid grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {latestNews.map((news: News) => (
-            <NewsCard
-              id={news._id}
-              title={news.title}
-              content={news.content}
-              image={news.image}
-              slug={news.slug}
-              author={news.author}
-              category={news.category}
-              createdAt={news.createdAt}
-              viewCount={news.viewCount}
-            />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center py-12">
-          <div class="mb-4">
-            <img
-              src="/images/empty-image-placeholder.webp"
-              alt="No news"
-              class="w-32 h-32 mx-auto opacity-50"
-            />
-          </div>
-          <h3 class="text-xl font-semibold text-gray-700 mb-2">
-            Belum Ada Berita
-          </h3>
-          <p class="text-gray-500">Berita terbaru akan muncul di sini</p>
-        </div>
-      )
-    }
-
-    <!-- View All Button -->
-    {
-      showViewAll && latestNews.length > 0 && (
-        <div class="text-center mt-12">
-          <a
-            href={viewAllLink}
-            class="inline-block px-8 py-3 text-brand-600 border border-brand-600 rounded-full hover:bg-brand-600 hover:text-white transition-colors duration-300 font-bold"
-          >
-            Lihat Semua Berita
-          </a>
-        </div>
-      )
-    }
+<section class="py-12 md:py-16 bg-muted border-t border-border/40">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex items-end justify-between gap-4 mb-8">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold tracking-tight text-foreground">{title}</h2>
+        <p class="text-sm text-muted-foreground mt-1.5">Cerita terbaru dari lapangan</p>
+      </div>
+      {showViewAll && latestNews.length > 0 && (
+        <a href={viewAllLink} class="text-sm font-medium text-[#1d4ed8] hover:text-[#1e3a8a] shrink-0 hidden sm:inline-flex items-center gap-1">Lihat semua <span aria-hidden="true">→</span></a>
+      )}
+    </div>
+    {latestNews.length > 0 ? (
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
+        {latestNews.map((news: News) => (
+          <NewsCard
+            id={news._id}
+            title={news.title}
+            content={news.content}
+            image={news.image}
+            slug={news.slug}
+            author={news.author}
+            category={news.category}
+            createdAt={news.createdAt}
+            viewCount={news.viewCount}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="text-center py-12 text-muted-foreground text-sm">Belum ada berita.</p>
+    )}
   </div>
 </section>
-
-<style>
-  .news-container {
-    position: relative;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .news-section {
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-  }
-</style>

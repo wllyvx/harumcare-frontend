@@ -4,8 +4,6 @@ import LatestCampaign from "../components/campaign/LatestCampaign.astro";
 import Hero from "../components/home/Hero.astro";
 import MenuIcons from "../components/home/MenuIcons.astro";
 import LatestNews from "../components/news/LatestNews.astro";
-import LatestBlog from "../components/blog/LatestBlog.astro";
-import LatestKajian from "../components/kajian/LatestKajian.astro";
 import { CampaignService } from "../services/campaignService";
 import { NewsService } from "../services/newsService";
 
@@ -18,8 +16,6 @@ const [campaignData, latestNews] = await Promise.all([
 <PrimaryLayout>
   <Hero news={latestNews} />
   <MenuIcons />
-  <LatestNews />
   <LatestCampaign campaigns={campaignData.campaigns} />
-  <LatestBlog />
-  <LatestKajian />
+  <LatestNews />
 </PrimaryLayout>

@@ -1,129 +1,28 @@
 ---
 const { news = [] } = Astro.props;
-const newsToShow = Array.isArray(news) ? news : [];
-const slideCount = newsToShow.length > 0 ? newsToShow.length : 3;
+const heroImage = news?.[0]?.image || "/images/slide1.jpg";
 ---
 
-<section class="relative w-full h-screen md:h-[80vh] lg:h-screen overflow-hidden">
-  <!-- background Slideshow -->
-  <div id="slideshow" aria-label="Galeri foto berita terbaru" class="absolute inset-0">
-    {
-      newsToShow.length > 0 &&
-        newsToShow.map((n) => (
-          <div
-            class="slide absolute inset-0 transition-opacity duration-1000 bg-cover bg-center"
-            style={`background-image: url('${n.image || "/images/slide1.jpg"}')`}
-          />
-        ))
-    }
-    {
-      newsToShow.length === 0 && (
-        <>
-          <div
-            class="slide absolute inset-0 transition-opacity duration-1000 bg-cover bg-center"
-            style="background-image: url('/images/slide1.jpg')"
-          />
-          <div
-            class="slide absolute inset-0 transition-opacity duration-1000 bg-cover bg-center"
-            style="background-image: url('/images/slide2.jpg')"
-          />
-          <div
-            class="slide absolute inset-0 transition-opacity duration-1000 bg-cover bg-center"
-            style="background-image: url('/images/slide3.jpg')"
-          />
-        </>
-      )
-    }
-  </div>
-
-  <!-- Gradient overlays for better text contrast -->
-  <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-5"></div>
-
-  <!-- teks dan buttons di atas slideshow -->
-  <div
-    class="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4 md:px-8"
-  >
+<section class="relative w-full h-[56vh] min-h-[420px] md:h-[58vh] md:min-h-[480px] overflow-hidden bg-foreground">
+  <img src={heroImage} alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager" aria-hidden="true" />
+  <div class="absolute inset-0 bg-foreground/55"></div>
+  <div class="absolute inset-0 bg-gradient-to-t from-foreground/30 via-transparent to-transparent"></div>
+  <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 py-12">
     <div class="max-w-3xl mx-auto">
-      <!-- Main Slogan H1 -->
-      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight text-white drop-shadow-lg">
+      <h1 class="text-[2rem] sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight text-white text-balance">
         Hadirkan Kebaikan di Hati Anda
       </h1>
-      
-      <!-- Subtitle/Tagline -->
-      <p class="text-lg sm:text-xl md:text-2xl text-brand-200 mb-8 md:mb-12 font-medium drop-shadow-md">
-        Bersama Harum Care, wujudkan dampak positif untuk masyarakat
+      <p class="text-[15px] sm:text-lg md:text-xl text-white/85 mt-5 max-w-2xl mx-auto leading-relaxed">
+        Bersama HarumCare, wujudkan dampak positif untuk masyarakat
       </p>
-
-      <!-- CTA Buttons -->
-      <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center mb-8">
-        <!-- Login Button -->
-        <a
-          href="/auth/login"
-          class="px-8 md:px-10 py-3 md:py-4 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-        >
-          Masuk Sekarang
+      <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+        <a href="/campaign" class="inline-flex items-center justify-center px-8 py-3.5 bg-[#1d4ed8] hover:bg-[#1e3a8a] text-white font-semibold rounded-lg transition-colors shadow-lg shadow-blue-900/20">
+          Mulai Berdonasi
         </a>
-        
-        <!-- About Us Button -->
-        <a
-          href="/about-us"
-          class="px-8 md:px-10 py-3 md:py-4 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-lg border-2 border-white/50 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm"
-        >
-          Tentang Kami
+        <a href="/kajian" class="inline-flex items-center justify-center px-8 py-3.5 bg-white text-foreground font-semibold rounded-lg hover:bg-white/90 transition-colors">
+          Jelajahi Kajian
         </a>
       </div>
     </div>
-
-    <!-- Slide indicators at bottom -->
-    <div
-      class="absolute bottom-8 md:bottom-12 left-0 right-0 flex justify-center gap-2"
-    >
-      {
-        Array.from({ length: slideCount }).map((_, i) => (
-          <button
-            class={`h-2 w-8 md:w-10 rounded-full transition-all duration-300 ${i === 0 ? "bg-white/80" : "bg-white/40"} indicator hover:bg-white/60`}
-            data-index={i}
-            aria-label={`Slide ${i + 1}`}
-          />
-        ))
-      }
-    </div>
   </div>
 </section>
-
-<script is:inline>
-  document.addEventListener("DOMContentLoaded", () => {
-    let current = 0;
-    const slides = document.querySelectorAll(".slide");
-    const indicator = document.querySelectorAll(".indicator");
-    const total = slides.length;
-
-    function showSlide(index) {
-      slides.forEach((slide, i) => {
-        slide.style.opacity = i === index ? "1" : "0";
-      });
-      indicator?.forEach((indicator, i) => {
-        indicator.classList.toggle("bg-white/60", i === index);
-        indicator.classList.toggle("bg-white/30", i !== index);
-      });
-    }
-
-    function nextSlide() {
-      current = (current + 1) % total;
-      showSlide(current);
-    }
-
-    indicator?.forEach((indicator, i) => {
-      indicator.addEventListener("click", () => {
-        current = i;
-        showSlide(current);
-        // Reset timer
-        slideInterval = setInterval(nextSlide, 5000);
-        clearInterval(slideInterval);
-      });
-    });
-
-    showSlide(current);
-    setInterval(nextSlide, 5000); // 5 detik
-  });
-</script>

@@ -62,19 +62,17 @@ function buildUrl(params: Record<string, string>): string {
 }
 ---
 
-<section class="campaign-section relative px-4 py-8 md:py-16">
-  <div class="campaign-container max-w-7xl mx-auto">
-    <!-- Header Section -->
-    <div class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-gray-800 mb-4">Semua Kampanye</h1>
-      <p class="text-gray-600 max-w-2xl mx-auto">
+<section class="campaign-section relative py-8 md:py-12 bg-gray-50">
+  <div class="campaign-container max-w-7xl mx-auto px-4">
+    <div class="text-center mb-8 md:mb-10">
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-3">Semua Kampanye</h1>
+      <p class="text-sm md:text-[15px] text-muted-foreground max-w-2xl mx-auto leading-relaxed">
         Temukan dan dukung berbagai kampanye yang membutuhkan bantuan Anda.
         Setiap donasi membawa perubahan berarti bagi mereka yang membutuhkan.
       </p>
     </div>
 
-    <!-- Filter Section -->
-    <div class="mb-8">
+    <div class="mb-8 rounded-2xl border border-border bg-white p-4 md:p-5 shadow-sm">
       <form id="filter-form" class="flex flex-col md:flex-row gap-4 items-end">
         <!-- Search Input -->
         <div class="flex-1">
