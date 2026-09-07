@@ -70,7 +70,7 @@ const socialImageURL = new URL(image, Astro.url);
       rel="stylesheet"
     />
   </head>
-  <body class="font-work-sans bg-gray-50 text-gray-800 pb-20 md:pb-0">
+  <body class="font-work-sans bg-background text-foreground antialiased pb-20 md:pb-0 selection:bg-brand-100 selection:text-brand-900">
     <Navbar />
     <main class="min-h-[calc(100vh-200px)]">
       <slot />

@@ -10,17 +10,13 @@ const menus: MenuItem[] = [
   {
     href: "/campaign",
     label: "Mulai Berdonasi",
-    icon: "favorite",
+    icon: "volunteer_activism",
     highlight: true,
   },
   { href: "/news", label: "Wawasan", icon: "auto_stories" },
-  { href: "/pojok-konsultasi", label: "Konsultasi", icon: "help_center" },
+  { href: "/pojok-konsultasi", label: "Konsultasi", icon: "forum" },
 ];
 ---
-
-<>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@24,400,0" />
-</>
 
 <section class="w-full bg-white py-8 md:py-10 border-y border-border/60">
   <div class="max-w-3xl mx-auto px-4">
@@ -29,14 +25,14 @@ const menus: MenuItem[] = [
         menus.map((menu) => (
           <a
             href={menu.href}
-            class={`group flex flex-col items-center justify-center p-5 md:p-7 rounded-2xl border transition-all duration-200 ${
+            class={`group flex flex-col items-center justify-center p-5 md:p-7 rounded-2xl border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 ${
               menu.highlight
-                ? "bg-brand-600 border-brand-600 text-white hover:bg-[#1e3a8a] hover:border-[#1e3a8a] hover:-translate-y-0.5"
+                ? "bg-brand-700 border-brand-700 text-white hover:bg-brand-800 hover:border-brand-800 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(29,78,216,0.18)]"
                 : "bg-white border-border hover:border-brand-300 hover:-translate-y-0.5 hover:shadow-sm"
             }`}
             aria-label={menu.label}
           >
-            <span class={`material-symbols-rounded text-4xl md:text-[2.5rem] mb-3 ${menu.highlight ? "text-white" : "text-brand-600"}`}>{menu.icon}</span>
+            <span class={`material-symbols-outlined text-4xl md:text-[2.5rem] mb-3 ${menu.highlight ? "text-white" : "text-brand-600"}`} aria-hidden="true">{menu.icon}</span>
             <span class={`text-sm md:text-[0.95rem] font-semibold text-center leading-tight ${menu.highlight ? "text-white" : "text-foreground"}`}>
               {menu.label}
             </span>

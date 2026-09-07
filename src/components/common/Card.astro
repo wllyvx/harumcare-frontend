@@ -60,14 +60,15 @@ import Button from "@/components/common/Button.astro";
 
 <a href={`/campaign/${id}`} class="block h-full">
   <ShadCard
-    className="w-full h-full group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden p-0 gap-0"
+    className="w-full h-full group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden p-0 gap-0 border-border rounded-[16px] shadow-sm"
   >
     <div class="relative shrink-0 aspect-video overflow-hidden">
       <img
         src={imageUrl}
         alt={title}
-        class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
+        onerror="this.src='/images/empty-image-placeholder.webp'"
       />
       <span
         class="absolute top-4 left-4 bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-medium"
@@ -79,18 +80,23 @@ import Button from "@/components/common/Button.astro";
     <CardContent className="p-5 flex flex-col grow">
       <div class="mb-4 grow">
         <h3
-          class="font-bold text-xl mb-2 text-gray-800 group-hover:text-brand-600 transition-colors duration-200 line-clamp-2"
+          class="font-semibold text-[1.125rem] leading-snug mb-2 text-foreground group-hover:text-brand-700 transition-colors duration-200 line-clamp-2"
         >
           {title}
         </h3>
-        <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+        <p class="text-muted-foreground text-sm mb-4 line-clamp-3 leading-relaxed">
           {trimmedDescription}
         </p>
 
-        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+        <div class="w-full bg-muted rounded-full h-2.5 mb-2 overflow-hidden">
           <div
-            class="bg-brand-600 h-2.5 rounded-full"
+            class="bg-brand-600 h-2.5 rounded-full transition-all duration-500"
             style={`width: ${percentageFunded}%`}
+            role="progressbar"
+            aria-valuenow={percentageFunded}
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-label={`Terkumpul ${percentageFunded}%`}
           >
           </div>
         </div>
@@ -99,42 +105,44 @@ import Button from "@/components/common/Button.astro";
           <span class="font-semibold text-brand-700"
             >{formatCurrency(currentAmount)}</span
           >
-          <span class="text-gray-500">dari {formatCurrency(targetAmount)}</span>
+          <span class="text-muted-foreground">dari {formatCurrency(targetAmount)}</span>
         </div>
       </div>
 
       <div class="grid grid-cols-3 gap-2 mb-4 text-center shrink-0">
-        <div class="bg-gray-50 p-2 rounded">
-          <p class="text-xs text-gray-500">Terkumpul</p>
-          <p class="font-semibold text-gray-800">{percentageFunded}%</p>
+        <div class="bg-muted p-2.5 rounded-lg">
+          <p class="text-xs text-muted-foreground">Terkumpul</p>
+          <p class="font-semibold text-foreground text-sm mt-0.5">{percentageFunded}%</p>
         </div>
-        <div class="bg-gray-50 p-2 rounded">
-          <p class="text-xs text-gray-500">Donatur</p>
-          <p class="font-semibold text-gray-800">{donorCount}</p>
+        <div class="bg-muted p-2.5 rounded-lg">
+          <p class="text-xs text-muted-foreground">Donatur</p>
+          <p class="font-semibold text-foreground text-sm mt-0.5">{donorCount}</p>
         </div>
-        <div class="bg-gray-50 p-2 rounded">
-          <p class="text-xs text-gray-500">Sisa Hari</p>
-          <p class="font-semibold text-gray-800">{daysLeft}</p>
+        <div class="bg-muted p-2.5 rounded-lg">
+          <p class="text-xs text-muted-foreground">Sisa Hari</p>
+          <p class="font-semibold text-foreground text-sm mt-0.5">{daysLeft}</p>
         </div>
       </div>
     </CardContent>
 
     <CardFooter className="flex flex-col items-center justify-between p-5 pt-0">
-      <div class="flex items-left align-middle w-full">
+      <div class="flex items-center w-full">
         <img
           src={organizationLogo
             ? organizationLogo
             : "/images/icons/user-default.svg"}
-          alt={organizationName}
-          class="w-8 h-8 rounded-full mr-2 object-cover"
+          alt=""
+          aria-hidden="true"
+          class="w-8 h-8 rounded-full mr-2 object-cover shrink-0"
+          onerror="this.src='/images/icons/user-default.svg'"
         />
-        <span class="text-sm align-middle text-gray-600"
-          >Oleh <span class="font-medium">{organizationName}</span></span
+        <span class="text-sm text-muted-foreground truncate"
+          >Oleh <span class="font-medium text-foreground">{organizationName}</span></span
         >
       </div>
 
       <div class="shrink-0 w-full mt-4">
-        <Button className="w-full" variant="default">Donasi Sekarang</Button>
+        <Button className="w-full bg-brand-700 hover:bg-brand-800 text-white rounded-button font-semibold shadow-sm">Donasi Sekarang</Button>
       </div>
     </CardFooter>
   </ShadCard>
