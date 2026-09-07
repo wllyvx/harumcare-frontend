@@ -7,7 +7,7 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
     <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30">
       <div class="container mx-auto px-4 py-3.5">
         <div class="flex items-center gap-3">
-          <a href="/profile" class="inline-flex items-center justify-center w-9 h-9 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600" aria-label="Kembali ke profil">
+          <a href="/profile" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke profil">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           </a>
           <div>
@@ -26,7 +26,7 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             <p class="text-sm text-muted-foreground mt-1">Kelola bukti donasi dan status pembayaran</p>
           </div>
           <div class="p-6 md:p-7">
-            <div id="donations-list" class="space-y-3" aria-live="polite">
+            <div id="donations-list" class="space-y-3 [content-visibility:auto] [contain-intrinsic-size:1px_500px]" aria-live="polite" style="contain: content">
               <div class="flex flex-col items-center justify-center py-12 gap-4">
                 <div class="animate-spin rounded-full h-8 w-8 border-[3px] border-brand-100 border-t-brand-600" aria-hidden="true"></div>
                 <p class="text-sm font-medium text-muted-foreground">Memuat riwayat donasi...</p>
@@ -40,119 +40,180 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
   </div>
 
   <script>
-    import { generateReceipt } from "../../utils/receiptGenerator";
     const API_URL = import.meta.env.PUBLIC_API_URL;
-
     let currentPage = 1;
     const LIMIT = 10;
+    let isLoading = false;
+    let cachedDonations = [];
+    let totalPages = 1;
 
+    const escMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    function escapeHtml(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => escMap[c]);
+    }
+
+    const amountFmt = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
+    const dateFmt = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" });
+
+    function formatDateSafe(v) {
+      try {
+        const d = new Date(v);
+        if (isNaN(d.getTime())) return "-";
+        return dateFmt.format(d);
+      } catch { return "-"; }
+    }
+    function formatAmountSafe(v) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return "Rp -";
+      try { return amountFmt.format(n); } catch { return `Rp ${n.toLocaleString("id-ID")}`; }
+    }
+    function isOnline() { return typeof navigator === "undefined" ? true : navigator.onLine; }
+    function apiErrorMessage(status, fallback) {
+      if (status === 400) return "Data tidak valid.";
+      if (status === 401 || status === 403) return "Sesi berakhir. Silakan masuk kembali.";
+      if (status === 404) return "Data tidak ditemukan.";
+      if (status === 429) return "Terlalu banyak permintaan. Coba lagi nanti.";
+      if (status >= 500) return "Layanan bermasalah. Coba lagi nanti.";
+      return fallback;
+    }
+    function fetchWithTimeout(url, opts={}, ms=12000) {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), ms);
+      const s = opts.signal;
+      if (s) s.addEventListener("abort", () => c.abort(), { once: true });
+      return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(t));
+    }
     function statusMeta(status) {
       if (status === "completed") return { label: "Berhasil", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
       if (status === "pending") return { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" };
-      return { label: "Gagal", cls: "bg-red-50 text-red-600 border-red-200" };
+      if (status === "failed" || status === "cancelled" || status === "expired") return { label: "Gagal", cls: "bg-red-50 text-red-600 border-red-200" };
+      return { label: escapeHtml(String(status || "Tidak diketahui")), cls: "bg-gray-50 text-muted-foreground border-border" };
+    }
+
+    function renderSkeleton() {
+      return `<div class="space-y-3" role="status" aria-live="polite">${Array.from({ length: 3 }).map(() => `<div class="animate-pulse bg-white border border-border rounded-xl p-4 md:p-5"><div class="flex flex-col md:flex-row gap-4"><div class="flex-1 space-y-3"><div class="h-3 bg-gray-100 rounded w-1/3"></div><div class="h-4 bg-gray-100 rounded w-3/4"></div><div class="h-4 bg-gray-100 rounded w-1/4"></div></div><div class="flex gap-2 shrink-0"><div class="h-6 w-16 bg-gray-100 rounded-full"></div><div class="h-9 w-24 bg-gray-100 rounded-button"></div></div></div></div>`).join("")}</div>`;
     }
 
     async function loadDonations(page = 1) {
       const container = document.getElementById("donations-list");
       const pagination = document.getElementById("donations-pagination");
+      if (!container || isLoading) return;
       const token = localStorage.getItem("token");
-      if (!container) return;
       if (!token) {
-        container.innerHTML = `
-          <div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border">
-            <div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3">
-              <svg class="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            </div>
-            <p class="text-sm font-medium text-foreground">Silakan masuk untuk melihat riwayat donasi</p>
-            <p class="text-sm text-muted-foreground mt-1">Masuk ke akun Anda untuk mengakses data ini</p>
-            <a href="/auth/login" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke Akun</a>
-          </div>`;
+        container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><p class="text-sm font-medium text-foreground">Silakan masuk untuk melihat riwayat donasi</p><p class="text-sm text-muted-foreground mt-1">Masuk ke akun Anda untuk mengakses data ini</p><a href="/auth/login" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke Akun</a></div>`;
         if (pagination) pagination.innerHTML = "";
         return;
       }
-
+      if (!API_URL) {
+        container.innerHTML = `<div class="text-center py-10 bg-red-50/60 rounded-xl border border-red-200"><p class="text-sm font-medium text-red-700">Konfigurasi API belum diatur.</p><p class="text-xs text-red-600 mt-1">Hubungi admin.</p></div>`;
+        return;
+      }
+      if (!isOnline()) {
+        container.innerHTML = `<div class="text-center py-10 bg-amber-50/60 rounded-xl border border-amber-200"><p class="text-sm font-medium text-amber-800">Anda sedang offline</p><p class="text-sm text-amber-700 mt-1">Periksa koneksi lalu coba lagi.</p><button type="button" data-retry class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">Coba Lagi</button></div>`;
+        return;
+      }
+      isLoading = true;
       try {
-        container.innerHTML = `<div class="flex flex-col items-center justify-center py-12 gap-4"><div class="animate-spin rounded-full h-8 w-8 border-[3px] border-brand-100 border-t-brand-600"></div><p class="text-sm font-medium text-muted-foreground">Memuat riwayat donasi...</p></div>`;
-        if (pagination) pagination.innerHTML = "";
-        const res = await fetch(`${API_URL}/donations/my-donations?limit=${LIMIT}&page=${page}`, { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok) throw new Error("Gagal memuat riwayat donasi");
-        const data = await res.json();
-        const donations = data.donations || [];
-
+        container.innerHTML = renderSkeleton();
+        if (pagination) pagination.innerHTML = `<span class="text-sm text-muted-foreground tabular-nums">Memuat...</span>`;
+        const safePage = Math.max(1, Math.floor(Number(page) || 1));
+        const res = await fetchWithTimeout(`${API_URL}/donations/my-donations?limit=${LIMIT}&page=${safePage}`, { headers: { Authorization: `Bearer ${token}` } }, 12000);
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            container.innerHTML = `<div class="text-center py-10 bg-amber-50/60 rounded-xl border border-amber-200"><p class="text-sm font-medium text-amber-800">Sesi berakhir</p><p class="text-sm text-amber-700 mt-1">Silakan masuk kembali untuk melihat donasi.</p><a href="/auth/login" class="mt-4 inline-flex items-center justify-center px-5 py-2.5 rounded-button bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700">Masuk Kembali</a></div>`;
+            if (pagination) pagination.innerHTML = "";
+            return;
+          }
+          throw new Error(apiErrorMessage(res.status, "Gagal memuat riwayat donasi"));
+        }
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = { donations: [] }; }
+        const donations = Array.isArray(data.donations) ? data.donations : [];
+        cachedDonations = donations;
         if (donations.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border">
-              <div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3">
-                <span class="material-symbols-outlined text-muted-foreground">volunteer_activism</span>
-              </div>
-              <p class="text-sm font-medium text-foreground">Belum ada riwayat donasi</p>
-              <p class="text-sm text-muted-foreground mt-1">Donasi Anda akan tampil di sini setelah bertransaksi</p>
-              <a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Mulai Donasi</a>
-            </div>`;
+          container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><span class="material-symbols-outlined text-muted-foreground" aria-hidden="true">volunteer_activism</span></div><p class="text-sm font-medium text-foreground">Belum ada riwayat donasi</p><p class="text-sm text-muted-foreground mt-1 text-balance">Donasi Anda akan tampil di sini setelah bertransaksi</p><a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Mulai Donasi</a></div>`;
           if (pagination) pagination.innerHTML = "";
           return;
         }
-
-        const html = donations.map((donation) => {
-            const date = new Date(donation.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-            const amount = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(donation.amount);
-            const meta = statusMeta(donation.paymentStatus);
-            const campaignTitle = donation.campaignId?.title || "Campaign tidak tersedia";
-            const donationData = encodeURIComponent(JSON.stringify(donation));
-            return `
-            <div class="group bg-white border border-border rounded-xl p-4 md:p-5 hover:border-brand-200 hover:shadow-[0_4px_16px_rgba(37,99,235,0.06)] transition-all">
-              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex-1 min-w-0">
-                  <p class="text-xs text-muted-foreground truncate">${date} · <span class="font-mono text-[11px] tracking-wide">${donation.transactionId || "-"}</span></p>
-                  <h4 class="font-semibold text-sm leading-snug text-foreground line-clamp-1 mt-1">${campaignTitle}</h4>
-                  <p class="text-[15px] font-semibold tracking-tight text-brand-600 mt-1">${amount}</p>
-                </div>
-                <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 w-full md:w-auto shrink-0">
-                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${meta.cls}">${meta.label}</span>
-                  <button type="button" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground bg-white border border-input px-3.5 py-2 rounded-button hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 btn-download-receipt" data-donation="${donationData}" aria-label="Unduh kwitansi">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    Kwitansi
-                  </button>
-                </div>
-              </div>
-            </div>`;
+        const frag = document.createDocumentFragment();
+        const tmp = document.createElement("div");
+        tmp.innerHTML = donations.map((d, i) => {
+            const date = formatDateSafe(d.createdAt);
+            const amount = formatAmountSafe(d.amount);
+            const meta = statusMeta(d.paymentStatus);
+            const campaignTitle = escapeHtml((d.campaignId?.title || "Campaign tidak tersedia").toString().slice(0, 120));
+            const tx = escapeHtml((d.transactionId || "-").toString().slice(0, 64));
+            const safeAmount = escapeHtml(amount);
+            return `<div class="group bg-white border border-border rounded-xl p-4 md:p-5 hover:border-brand-200 hover:shadow-[0_4px_16px_rgba(37,99,235,0.06)] transition-all" style="contain:content;content-visibility:auto;contain-intrinsic-size:0 120px"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex-1 min-w-0"><p class="text-xs text-muted-foreground truncate">${escapeHtml(date)} · <span class="font-mono text-[11px] tracking-wide break-all">${tx}</span></p><h4 class="font-semibold text-sm leading-snug text-foreground break-words line-clamp-2 mt-1" title="${campaignTitle}">${campaignTitle}</h4><p class="text-[15px] font-semibold tracking-tight text-brand-600 mt-1 break-all tabular-nums">${safeAmount}</p></div><div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 w-full md:w-auto shrink-0"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${meta.cls}">${meta.label}</span><button type="button" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground bg-white border border-input px-3.5 py-2 rounded-button hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 btn-download-receipt disabled:opacity-40 disabled:cursor-not-allowed" data-idx="${i}" aria-label="Unduh kwitansi untuk ${campaignTitle}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Kwitansi</button></div></div></div>`;
           }).join("");
-
-        container.innerHTML = html;
+        while (tmp.firstChild) frag.appendChild(tmp.firstChild);
+        container.replaceChildren(frag);
 
         if (pagination) {
-          const totalPages = data.totalPages || 1;
-          currentPage = data.currentPage || page;
-          let pagHtml = "";
-          pagHtml += `<button id="page-prev" type="button" class="inline-flex items-center justify-center px-3.5 py-2 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600" ${currentPage <= 1 ? "disabled aria-disabled='true'" : ""}>Prev</button>`;
-          pagHtml += `<span class="text-sm text-muted-foreground px-3 tabular-nums">Halaman ${currentPage} / ${totalPages}</span>`;
-          pagHtml += `<button id="page-next" type="button" class="inline-flex items-center justify-center px-3.5 py-2 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600" ${currentPage >= totalPages ? "disabled aria-disabled='true'" : ""}>Next</button>`;
-          pagination.innerHTML = pagHtml;
-          document.getElementById("page-prev")?.addEventListener("click", () => { if (currentPage > 1) loadDonations(currentPage - 1); });
-          document.getElementById("page-next")?.addEventListener("click", () => { if (currentPage < totalPages) loadDonations(currentPage + 1); });
+          totalPages = Math.max(1, Math.floor(Number(data.totalPages) || 1));
+          currentPage = Math.min(totalPages, Math.max(1, Math.floor(Number(data.currentPage) || safePage)));
+          pagination.innerHTML = `<button type="button" data-page="prev" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage <= 1 ? "disabled aria-disabled='true'" : ""} aria-label="Halaman sebelumnya">Prev</button><span class="text-sm text-muted-foreground px-3 tabular-nums" aria-live="polite">Halaman ${currentPage} / ${totalPages}</span><button type="button" data-page="next" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage >= totalPages ? "disabled aria-disabled='true'" : ""} aria-label="Halaman berikutnya">Next</button>`;
         }
-
-        document.querySelectorAll(".btn-download-receipt").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            const btnEl = e.currentTarget;
-            if (btnEl instanceof HTMLElement) {
-              const d = btnEl.getAttribute("data-donation");
-              if (d) {
-                const donation = JSON.parse(decodeURIComponent(d));
-                const user = { nama: localStorage.getItem("userName"), email: localStorage.getItem("userEmail") };
-                generateReceipt(donation, user);
-              }
-            }
-          });
-        });
       } catch (err) {
-        console.error(err);
-        if (window.showToast) window.showToast("Gagal memuat data riwayat donasi", "error");
-        container.innerHTML = `<div class="text-center py-10 bg-red-50/60 rounded-xl border border-red-200"><p class="text-sm font-medium text-red-700">Gagal memuat data.</p><button onclick="location.reload()" class="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-red-200 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors">Coba Lagi</button></div>`;
+        if (err?.name === "AbortError") {
+          container.innerHTML = `<div class="text-center py-10 bg-amber-50/60 rounded-xl border border-amber-200"><p class="text-sm font-medium text-amber-800">Koneksi timeout</p><p class="text-sm text-amber-700 mt-1">Coba lagi dengan koneksi lebih stabil.</p><button type="button" data-retry class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 transition-colors">Coba Lagi</button></div>`;
+          if (pagination) pagination.innerHTML = "";
+          return;
+        }
+        if (!isOnline()) {
+          container.innerHTML = `<div class="text-center py-10 bg-amber-50/60 rounded-xl border border-amber-200"><p class="text-sm font-medium text-amber-800">Offline</p><p class="text-sm text-amber-700 mt-1">Periksa koneksi lalu coba lagi.</p><button type="button" data-retry class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 transition-colors">Coba Lagi</button></div>`;
+          if (pagination) pagination.innerHTML = "";
+          return;
+        }
+        const msg = err instanceof Error ? err.message : "Gagal memuat data riwayat donasi";
+        if (window.showToast) window.showToast(msg, "error");
+        container.innerHTML = `<div class="text-center py-10 bg-red-50/60 rounded-xl border border-red-200"><p class="text-sm font-medium text-red-700">${escapeHtml(msg)}</p><button type="button" data-retry class="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-red-200 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500">Coba Lagi</button></div>`;
         if (pagination) pagination.innerHTML = "";
+      } finally {
+        isLoading = false;
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => loadDonations(1));
+    function bindDelegation() {
+      const list = document.getElementById("donations-list");
+      const pag = document.getElementById("donations-pagination");
+      list?.addEventListener("click", async (e) => {
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        const retry = t.closest("[data-retry]");
+        if (retry) { loadDonations(currentPage); return; }
+        const btn = t.closest(".btn-download-receipt");
+        if (!btn || !(btn instanceof HTMLElement)) return;
+        if (btn.getAttribute("aria-busy") === "true") return;
+        const idx = Number(btn.getAttribute("data-idx"));
+        const donation = cachedDonations[idx];
+        if (!donation) return;
+        try {
+          btn.setAttribute("aria-busy", "true");
+          btn.setAttribute("disabled", "true");
+          btn.style.pointerEvents = "none";
+          const { generateReceipt } = await import("../../utils/receiptGenerator.js");
+          const user = { nama: localStorage.getItem("userName"), email: localStorage.getItem("userEmail") };
+          await generateReceipt(donation, user);
+        } catch (err) {
+          if (window.showToast) window.showToast("Gagal mengunduh kwitansi.", "error");
+        } finally {
+          btn.removeAttribute("aria-busy");
+          btn.removeAttribute("disabled");
+          btn.style.pointerEvents = "";
+        }
+      });
+      pag?.addEventListener("click", (e) => {
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        const prev = t.closest('[data-page="prev"]');
+        const next = t.closest('[data-page="next"]');
+        if (prev && currentPage > 1 && !isLoading) loadDonations(currentPage - 1);
+        if (next && currentPage < totalPages && !isLoading) loadDonations(currentPage + 1);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => { bindDelegation(); loadDonations(1); });
   </script>
 </PrimaryLayout>

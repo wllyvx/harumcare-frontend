@@ -1,25 +1,69 @@
 ---
-// Layout untuk halaman profil
 import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
 import Button from "../../components/common/Button.astro";
 ---
 
 <PrimaryLayout title="Profil - Harum Care Indonesia">
+  <style>
+    @keyframes hc-check-draw { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+    @keyframes hc-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes hc-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes hc-soft-pop { 0% { transform: scale(0.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .hc-enter { animation: hc-enter 420ms cubic-bezier(0.16,1,0.3,1) both; }
+    .hc-pop { animation: hc-soft-pop 360ms cubic-bezier(0.16,1,0.3,1) both; }
+    .hc-check-path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: hc-check-draw 520ms 120ms cubic-bezier(0.16,1,0.3,1) forwards; }
+    .hc-skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%); background-size: 400% 100%; animation: hc-shimmer 1.4s ease infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .hc-enter, .hc-pop, .hc-check-path, .hc-skeleton { animation: none !important; }
+      .hc-enter { opacity: 1; transform: none; }
+    }
+  </style>
+
   <div id="profile-container" class="min-h-screen bg-[#f8fafc]">
     <div
       id="loading-state"
-      class="flex items-center justify-center min-h-[calc(100vh-200px)]"
+      class="container mx-auto px-4 py-6 md:py-8"
       role="status"
       aria-live="polite"
+      aria-busy="true"
     >
-      <div class="text-center">
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-[3px] border-brand-100 border-t-brand-600 mx-auto mb-4"
-          aria-hidden="true"
-        >
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white rounded-card border border-border p-6">
+            <div class="flex gap-4">
+              <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-brand-50 border border-brand-100 shrink-0 hc-skeleton"></div>
+              <div class="flex-1 space-y-3 py-1">
+                <div class="h-4 w-32 rounded-full hc-skeleton"></div>
+                <div class="h-3 w-20 rounded-full hc-skeleton"></div>
+              </div>
+            </div>
+            <div class="mt-6 space-y-3">
+              <div class="h-3 w-24 rounded-full hc-skeleton"></div>
+              <div class="h-4 w-full rounded-lg hc-skeleton"></div>
+              <div class="h-3 w-24 rounded-full hc-skeleton"></div>
+              <div class="h-4 w-3/4 rounded-lg hc-skeleton"></div>
+            </div>
+          </div>
+          <div class="bg-white rounded-card border border-border p-5">
+            <div class="h-4 w-20 rounded-full hc-skeleton mb-4"></div>
+            <div class="space-y-2.5">
+              <div class="h-10 rounded-button hc-skeleton border border-border"></div>
+              <div class="h-10 rounded-button hc-skeleton border border-border"></div>
+            </div>
+          </div>
         </div>
-        <p class="text-sm font-medium text-muted-foreground tracking-wide">Memuat profil...</p>
+        <div class="lg:col-span-8 space-y-6">
+          <div class="bg-white rounded-card border border-border p-6 md:p-7">
+            <div class="h-4 w-32 rounded-full hc-skeleton mb-5"></div>
+            <div class="bg-gray-50/80 rounded-xl border border-border p-6 flex flex-col items-center gap-3">
+              <div class="h-8 w-8 rounded-full border-[3px] border-brand-100 border-t-brand-600 animate-spin" aria-hidden="true"></div>
+              <p class="text-sm font-medium text-muted-foreground tracking-wide">Menyiapkan data amanah Anda…</p>
+              <p class="text-xs text-muted-foreground hidden sm:block">Mengambil profil dan jejak donasi terbaru</p>
+            </div>
+          </div>
+        </div>
       </div>
+      <span class="sr-only">Memuat data profil…</span>
     </div>
 
     <div
@@ -27,26 +71,15 @@ import Button from "../../components/common/Button.astro";
       class="hidden flex items-center justify-center min-h-[calc(100vh-200px)] p-4"
       role="alert"
     >
-      <div
-        class="max-w-md w-full bg-white rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.08)] border border-border p-8 text-center"
-      >
-        <div
-          class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5 ring-1 ring-red-100"
-          aria-hidden="true"
-        >
-          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-          </svg>
+      <div class="max-w-md w-full bg-white rounded-2xl shadow-[0_8px_32px_rgba(15,23,42,0.08)] border border-border p-8 text-center">
+        <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5 ring-1 ring-red-100" aria-hidden="true">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         </div>
-        <h3 id="error-title" class="text-xl font-semibold tracking-tight text-foreground mb-2">Terjadi Kesalahan</h3>
-        <p id="error-message" class="text-[15px] leading-relaxed text-muted-foreground mb-8 text-balance">
-          Maaf, kami gagal memuat data profil Anda. Ini mungkin karena sesi Anda telah berakhir atau masalah koneksi.
-        </p>
+        <h3 id="error-title" class="text-xl font-semibold tracking-tight text-foreground mb-2">Gagal memuat profil</h3>
+        <p id="error-message" class="text-[15px] leading-relaxed text-muted-foreground mb-2 text-balance">Profil tidak dapat dimuat. Sesi Anda mungkin berakhir atau koneksi terputus.</p>
+        <p class="text-xs text-muted-foreground mb-8">Data amanah tetap tersimpan — coba muat ulang untuk melanjutkan.</p>
         <div id="error-actions" class="space-y-3">
-          <button
-            onclick="window.location.reload()"
-            class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
-          >Coba Lagi</button>
+          <button onclick="window.location.reload()" class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Muat ulang halaman</button>
         </div>
       </div>
     </div>
@@ -55,36 +88,56 @@ import Button from "../../components/common/Button.astro";
       <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30">
         <div class="container mx-auto px-4 py-3.5">
           <div class="flex items-center gap-3">
-            <a href="/" class="inline-flex items-center justify-center w-9 h-9 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600" aria-label="Kembali ke beranda">
+            <a href="/" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke beranda">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </a>
             <div>
-              <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none">Profil Saya</h1>
-              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Kelola informasi akun dan riwayat donasi</p>
+              <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none">Profil saya</h1>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Kelola data akun dan jejak kebaikan Anda</p>
             </div>
+            <span id="profile-updated-badge" class="hidden ml-auto sm:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span>
+              <span id="profile-updated-text">Tersimpan</span>
+            </span>
           </div>
         </div>
       </div>
 
       <div class="container mx-auto px-4 py-6 md:py-8">
+        <div id="profile-success" class="hidden mb-6 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 items-center gap-3 hc-pop" role="status" aria-live="polite">
+          <div class="w-8 h-8 rounded-full bg-white border border-emerald-200 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2"><path class="hc-check-path" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M6 12.5l4 4 8-9"></path></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-emerald-900">Perubahan tersimpan — amanah terjaga.</p>
+            <p id="profile-success-detail" class="text-xs text-emerald-700">Data profil Anda telah diperbarui.</p>
+          </div>
+          <button type="button" id="dismiss-success" class="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full hover:bg-emerald-100 text-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2" aria-label="Tutup notifikasi">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[88px]">
-            <div class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border overflow-hidden">
+            <div id="profile-card" class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border overflow-hidden opacity-0">
+              <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-highlight-500"></div>
               <div class="p-6">
                 <div class="flex items-start gap-4">
-                  <div class="w-16 h-16 md:w-20 md:h-20 bg-brand-50 border border-brand-100 rounded-2xl flex items-center justify-center shrink-0" aria-hidden="true">
-                    <svg class="w-8 h-8 md:w-10 md:h-10 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                  <div id="avatar-wrap" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center shrink-0 border overflow-hidden relative bg-brand-50 border-brand-100" aria-hidden="true">
+                    <span id="avatar-initials" class="text-lg md:text-xl font-semibold tracking-tight text-brand-700">—</span>
+                    <svg id="avatar-icon" class="w-8 h-8 md:w-10 md:h-10 text-brand-600 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-start justify-between gap-2">
                       <div class="min-w-0">
-                        <h2 id="user-name" class="text-lg font-semibold tracking-tight text-foreground leading-tight truncate">Loading...</h2>
-                        <p id="user-role" class="inline-flex items-center mt-1.5 text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-muted-foreground border border-border">Loading...</p>
+                        <h2 id="user-name" class="text-lg font-semibold tracking-tight text-foreground leading-tight truncate">Memuat...</h2>
+                        <p id="user-role" class="inline-flex items-center mt-1.5 text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-muted-foreground border border-border">Memuat...</p>
+                        <p id="profile-meta" class="text-xs text-muted-foreground mt-2 hidden">—</p>
                       </div>
                       <button
                         id="edit-profile-inline"
-                        class="hidden shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-button border border-border bg-white hover:bg-gray-50 text-brand-600 hover:text-brand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
-                        aria-label="Edit profil"
+                        class="hidden shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-brand-600 hover:text-brand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+                        aria-label="Ubah data profil"
                         type="button"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6"></path></svg>
@@ -93,9 +146,20 @@ import Button from "../../components/common/Button.astro";
                   </div>
                 </div>
 
+                <div id="completeness-wrap" class="mt-5 hidden">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-medium text-muted-foreground">Kelengkapan profil</span>
+                    <span id="completeness-pct" class="text-xs font-semibold text-foreground tabular-nums">0%</span>
+                  </div>
+                  <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden border border-border">
+                    <div id="completeness-bar" class="h-full bg-brand-600 rounded-full transition-all duration-700 ease-out" style="width:0%"></div>
+                  </div>
+                  <p id="completeness-hint" class="text-xs text-muted-foreground mt-1.5 leading-relaxed"></p>
+                </div>
+
                 <dl class="mt-6 space-y-4">
                   <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Nama</dt>
+                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Nama lengkap</dt>
                     <dd id="user-fullname" class="text-sm font-medium text-foreground break-words">-</dd>
                   </div>
                   <div class="flex flex-col gap-1">
@@ -107,32 +171,41 @@ import Button from "../../components/common/Button.astro";
                     <dd id="user-email" class="text-sm font-medium text-foreground break-all">-</dd>
                   </div>
                   <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Nomor HP</dt>
+                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Nomor HP · opsional</dt>
                     <dd id="user-phone" class="text-sm font-medium text-foreground">-</dd>
                   </div>
                   <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Alamat</dt>
+                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Alamat · opsional</dt>
                     <dd id="user-address" class="text-sm leading-relaxed text-foreground break-words">-</dd>
                   </div>
                 </dl>
               </div>
             </div>
 
-            <div id="action-buttons" class="space-y-3">
+            <div id="action-buttons" class="space-y-3"></div>
+
+            <div class="hidden lg:block bg-brand-600 rounded-card p-5 text-white overflow-hidden relative">
+              <div class="absolute -right-8 -top-8 w-24 h-24 bg-white/10 rounded-full blur-2xl" aria-hidden="true"></div>
+              <p class="text-sm font-medium leading-relaxed relative">“Kebaikan kecil yang istiqomah lebih dicintai.”</p>
+              <p class="text-xs text-white/80 mt-1.5 relative">Jejak donasi Anda adalah amanah yang kami jaga.</p>
+              <a href="/campaign" class="relative mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-brand-700 px-3.5 py-2 rounded-button hover:bg-brand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">Lihat kampanye <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
             </div>
           </div>
 
           <div class="lg:col-span-8 space-y-6">
-            <div class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-6 md:p-7">
+            <div id="donation-card" class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-6 md:p-7 opacity-0">
               <div class="flex items-center justify-between gap-4 mb-5">
-                <h3 class="text-base font-semibold tracking-tight text-foreground">Riwayat Donasi</h3>
-                <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Sinkron otomatis</span>
+                <div>
+                  <h3 class="text-base font-semibold tracking-tight text-foreground">Jejak kebaikan</h3>
+                  <p class="text-xs text-muted-foreground mt-0.5">Riwayat donasi dan bukti amanah Anda</p>
+                </div>
+                <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Terbaru dari donasi Anda</span>
               </div>
               <div id="donation-summary-container">
                 <div class="bg-gray-50/80 rounded-xl border border-border p-6 text-center">
-                  <p id="donation-summary-text" class="text-sm leading-relaxed text-muted-foreground mb-4">Memuat ringkasan riwayat donasi...</p>
-                  <Button asChild variant="default">
-                    <a href="/profile/donations" class="inline-flex w-full md:w-auto justify-center">Lihat Semua Riwayat Donasi</a>
+                  <p id="donation-summary-text" class="text-sm leading-relaxed text-muted-foreground mb-4">Memuat ringkasan donasi Anda...</p>
+                  <Button asChild variant="default" className="bg-brand-600 hover:bg-brand-700 text-white w-full md:w-auto">
+                    <a href="/profile/donations" class="inline-flex w-full md:w-auto justify-center">Lihat semua riwayat donasi</a>
                   </Button>
                 </div>
               </div>
@@ -140,14 +213,14 @@ import Button from "../../components/common/Button.astro";
 
             <div id="login-prompt" class="hidden bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-8">
               <div class="text-center max-w-sm mx-auto">
-                <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-border" aria-hidden="true">
-                  <svg class="w-7 h-7 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <div class="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-brand-100" aria-hidden="true">
+                  <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                <h3 class="text-base font-semibold tracking-tight text-foreground mb-1.5">Anda Belum Masuk</h3>
-                <p class="text-sm leading-relaxed text-muted-foreground mb-6 text-balance">Silakan masuk ke akun Anda untuk melihat profil lengkap dan mengakses fitur lainnya.</p>
+                <h3 class="text-base font-semibold tracking-tight text-foreground mb-1.5">Anda belum masuk</h3>
+                <p class="text-sm leading-relaxed text-muted-foreground mb-6 text-balance">Masuk untuk melihat data profil dan mengelola jejak donasi Anda. Amanah Anda menunggu.</p>
                 <div class="space-y-3">
-                  <a href="/auth/login" class="w-full bg-brand-600 text-white py-3 px-4 rounded-button hover:bg-brand-700 transition-colors duration-200 font-medium text-center block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke Akun</a>
-                  <p class="text-sm text-muted-foreground">Belum punya akun? <a href="/auth/signup" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Daftar di sini</a></p>
+                  <a href="/auth/login" class="w-full bg-brand-600 text-white py-3 px-4 rounded-button hover:bg-brand-700 transition-colors duration-200 font-medium text-center block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke akun</a>
+                  <p class="text-sm text-muted-foreground">Belum punya akun? <a href="/auth/signup" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Daftar sekarang</a></p>
                 </div>
               </div>
             </div>
@@ -156,28 +229,38 @@ import Button from "../../components/common/Button.astro";
 
         <div id="edit-modal" class="fixed inset-0 hidden items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
           <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" id="edit-modal-backdrop"></div>
-          <div class="bg-white rounded-card shadow-[0_16px_48px_rgba(15,23,42,0.16)] max-w-lg w-full p-6 md:p-7 z-10 border border-border max-h-[90vh] overflow-auto">
-            <h3 id="edit-modal-title" class="text-lg font-semibold tracking-tight text-foreground mb-5">Edit Profil</h3>
+          <div id="edit-modal-panel" class="bg-white rounded-card shadow-[0_16px_48px_rgba(15,23,42,0.16)] max-w-lg w-full p-6 md:p-7 z-10 border border-border max-h-[90vh] overflow-auto">
+            <h3 id="edit-modal-title" class="text-lg font-semibold tracking-tight text-foreground mb-1">Ubah data profil</h3>
+            <p class="text-sm text-muted-foreground mb-5">Perbarui informasi yang tampil di profil Anda. Perubahan tersimpan sebagai amanah.</p>
             <form id="edit-profile-form" class="space-y-4" novalidate>
               <div>
-                <label for="input-nama" class="block text-sm font-medium text-foreground mb-1.5">Nama</label>
-                <input id="input-nama" name="nama" type="text" autocomplete="name" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors" placeholder="Nama lengkap" />
+                <label for="input-nama" class="block text-sm font-medium text-foreground mb-1.5">Nama lengkap <span class="text-muted-foreground font-normal">· wajib, maks. 100 karakter</span></label>
+                <input id="input-nama" name="nama" type="text" autocomplete="name" maxlength="100" required aria-describedby="err-nama hint-nama" aria-invalid="false" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors aria-[invalid=true]:border-red-300 aria-[invalid=true]:focus:ring-red-500" placeholder="Contoh: Siti Rahayu" />
+                <p id="hint-nama" class="mt-1 text-xs text-muted-foreground">Gunakan huruf, angka, dan spasi. Minimal 2 karakter.</p>
+                <p id="err-nama" class="hidden mt-1 text-xs font-medium text-red-600" role="alert"></p>
               </div>
               <div>
-                <label for="input-email" class="block text-sm font-medium text-foreground mb-1.5">Email</label>
-                <input id="input-email" name="email" type="email" autocomplete="email" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors" placeholder="nama@email.com" />
+                <label for="input-email" class="block text-sm font-medium text-foreground mb-1.5">Email <span class="text-muted-foreground font-normal">· wajib</span></label>
+                <input id="input-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="err-email hint-email" aria-invalid="false" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors aria-[invalid=true]:border-red-300 aria-[invalid=true]:focus:ring-red-500" placeholder="nama@email.com" />
+                <p id="hint-email" class="mt-1 text-xs text-muted-foreground">Email dipakai untuk masuk dan notifikasi donasi.</p>
+                <p id="err-email" class="hidden mt-1 text-xs font-medium text-red-600" role="alert"></p>
               </div>
               <div>
-                <label for="input-phone" class="block text-sm font-medium text-foreground mb-1.5">Nomor HP</label>
-                <input id="input-phone" name="nomorHp" type="tel" autocomplete="tel" inputmode="numeric" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors" placeholder="08xxxxxxxxxx" />
+                <label for="input-phone" class="block text-sm font-medium text-foreground mb-1.5">Nomor HP <span class="text-muted-foreground font-normal">· opsional</span></label>
+                <input id="input-phone" name="nomorHp" type="tel" autocomplete="tel" inputmode="numeric" pattern="^08[0-9]{8,11}$" maxlength="15" aria-describedby="err-phone hint-phone" aria-invalid="false" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors aria-[invalid=true]:border-red-300 aria-[invalid=true]:focus:ring-red-500" placeholder="08xxxxxxxxxx" />
+                <p id="hint-phone" class="mt-1 text-xs text-muted-foreground">Awali dengan 08, total 10–13 digit angka.</p>
+                <p id="err-phone" class="hidden mt-1 text-xs font-medium text-red-600" role="alert"></p>
               </div>
               <div>
-                <label for="input-address" class="block text-sm font-medium text-foreground mb-1.5">Alamat</label>
-                <textarea id="input-address" name="alamat" autocomplete="street-address" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors resize-none" rows="3" placeholder="Alamat lengkap"></textarea>
+                <label for="input-address" class="block text-sm font-medium text-foreground mb-1.5">Alamat <span class="text-muted-foreground font-normal">· opsional, maks. 500 karakter</span></label>
+                <textarea id="input-address" name="alamat" autocomplete="street-address" maxlength="500" aria-describedby="err-address hint-address" aria-invalid="false" class="w-full border border-input bg-white p-3 rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition-colors resize-none aria-[invalid=true]:border-red-300 aria-[invalid=true]:focus:ring-red-500" rows="3" placeholder="Jalan, kelurahan, kecamatan, kota"></textarea>
+                <p id="hint-address" class="mt-1 flex justify-between text-xs text-muted-foreground"><span>Alamat lengkap untuk pengiriman atau identitas</span><span id="address-count">0/500</span></p>
+                <p id="err-address" class="hidden mt-1 text-xs font-medium text-red-600" role="alert"></p>
               </div>
+              <p id="form-global-error" class="hidden rounded-xl bg-red-50 border border-red-200 px-3 py-2.5 text-sm leading-relaxed text-red-700" role="alert"></p>
               <div class="flex justify-end items-center gap-3 pt-2">
-                <Button id="cancel-edit" variant="outline" type="button">Batal</Button>
-                <Button type="submit" id="save-edit" variant="default">Simpan</Button>
+                <Button id="cancel-edit" variant="outline" type="button">Batalkan</Button>
+                <Button type="submit" id="save-edit" variant="default"><span id="save-edit-label">Simpan perubahan</span><span id="save-edit-spinner" class="hidden ml-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white align-middle" aria-hidden="true"></span></Button>
               </div>
             </form>
           </div>
@@ -189,18 +272,152 @@ import Button from "../../components/common/Button.astro";
   <script>
     const API_URL = import.meta.env.PUBLIC_API_URL;
 
-    function showElement(el) {
-      if (el) el.classList.remove("hidden");
+    function showElement(el) { if (el) el.classList.remove("hidden"); }
+    function hideElement(el) { if (el) el.classList.add("hidden"); }
+    function escapeHtml(s) {
+      const d = document.createElement("div");
+      d.textContent = s ?? "";
+      return d.innerHTML;
     }
-    function hideElement(el) {
-      if (el) el.classList.add("hidden");
+    function isOnline() { return typeof navigator === "undefined" ? true : navigator.onLine; }
+    function apiErrorMessage(status, fallback) {
+      if (status === 400) return "Data tidak valid. Periksa kembali isian Anda dan coba lagi.";
+      if (status === 401 || status === 403) return "Sesi Anda berakhir. Silakan masuk kembali.";
+      if (status === 404) return "Data tidak ditemukan. Mungkin sudah dihapus atau dipindahkan.";
+      if (status === 429) return "Terlalu banyak permintaan. Tunggu sebentar lalu coba lagi.";
+      if (status >= 500) return "Layanan sedang bermasalah. Coba lagi nanti atau hubungi dukungan jika berlanjut.";
+      return fallback;
+    }
+    function fetchWithTimeout(url, opts = {}, ms = 12000) {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), ms);
+      const s = opts.signal;
+      if (s) s.addEventListener("abort", () => c.abort());
+      return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(t));
+    }
+    function setFieldError(id, msg) {
+      const e = document.getElementById(id);
+      const inputMap = { "err-nama": "input-nama", "err-email": "input-email", "err-phone": "input-phone", "err-address": "input-address" };
+      const inp = document.getElementById(inputMap[id] || "");
+      if (!e) return;
+      if (msg) { e.textContent = msg; e.classList.remove("hidden"); inp?.setAttribute("aria-invalid", "true"); }
+      else { e.textContent = ""; e.classList.add("hidden"); inp?.setAttribute("aria-invalid", "false"); }
+    }
+    function clearFieldErrors() {
+      ["err-nama","err-email","err-phone","err-address"].forEach((k) => setFieldError(k, ""));
+      const g = document.getElementById("form-global-error");
+      if (g) { g.textContent=""; g.classList.add("hidden"); }
+    }
+    function setGlobalFormError(msg) {
+      const g = document.getElementById("form-global-error");
+      if (!g) return;
+      if (msg) { g.textContent = msg; g.classList.remove("hidden"); }
+      else { g.textContent=""; g.classList.add("hidden"); }
+    }
+    function setSaving(isSaving) {
+      const btn = document.getElementById("save-edit");
+      const label = document.getElementById("save-edit-label");
+      const spin = document.getElementById("save-edit-spinner");
+      const cancel = document.getElementById("cancel-edit");
+      if (btn) { btn.disabled = isSaving; btn.setAttribute("aria-busy", String(isSaving)); btn.classList.toggle("opacity-60", isSaving); btn.classList.toggle("cursor-not-allowed", isSaving); }
+      if (cancel) cancel.disabled = isSaving;
+      if (label) label.textContent = isSaving ? "Menyimpan amanah…" : "Simpan perubahan";
+      if (spin) spin.classList.toggle("hidden", !isSaving);
+    }
+    function formatPhoneForDisplay(v) { return (v || "-").toString().trim() || "-"; }
+    function getInitials(name) {
+      const parts = (name || "").trim().split(/\s+/).filter(Boolean).slice(0,2);
+      if (parts.length === 0) return "—";
+      if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    function updateAvatar(name) {
+      const initials = document.getElementById("avatar-initials");
+      const icon = document.getElementById("avatar-icon");
+      const wrap = document.getElementById("avatar-wrap");
+      const text = (name || "").trim();
+      if (!initials || !icon || !wrap) return;
+      if (text && text !== "-" && text.toLowerCase() !== "user") {
+        initials.textContent = getInitials(text);
+        initials.classList.remove("hidden");
+        icon.classList.add("hidden");
+        wrap.classList.remove("bg-brand-50");
+        wrap.classList.add("bg-brand-600", "border-brand-600");
+        initials.classList.remove("text-brand-700");
+        initials.classList.add("text-white");
+      } else {
+        initials.textContent = "—";
+        initials.classList.add("hidden");
+        icon.classList.remove("hidden");
+        wrap.classList.add("bg-brand-50");
+        wrap.classList.remove("bg-brand-600", "border-brand-600");
+      }
+    }
+    function updateCompleteness(user) {
+      const wrap = document.getElementById("completeness-wrap");
+      const bar = document.getElementById("completeness-bar");
+      const pctEl = document.getElementById("completeness-pct");
+      const hint = document.getElementById("completeness-hint");
+      if (!wrap || !bar || !pctEl || !hint) return;
+      const hasNama = !!(user.nama && user.nama.trim().length >= 2);
+      const hasEmail = !!(user.email && user.email.includes("@"));
+      const hasPhone = !!(user.nomorHp && /^08[0-9]{8,11}$/.test(user.nomorHp.trim()));
+      const hasAddress = !!(user.alamat && user.alamat.trim().length > 10);
+      let filled = 0;
+      if (hasNama) filled++;
+      if (hasEmail) filled++;
+      if (hasPhone) filled++;
+      if (hasAddress) filled++;
+      const pct = Math.round((filled / 4) * 100);
+      wrap.classList.remove("hidden");
+      requestAnimationFrame(() => { bar.style.width = pct + "%"; });
+      pctEl.textContent = pct + "%";
+      if (pct === 100) {
+        bar.className = "h-full bg-emerald-500 rounded-full transition-all duration-700 ease-out";
+        hint.textContent = "Lengkap — profil siap untuk amanah berikutnya.";
+      } else if (pct >= 50) {
+        bar.className = "h-full bg-brand-600 rounded-full transition-all duration-700 ease-out";
+        hint.textContent = !hasPhone || !hasAddress ? "Tambah nomor HP dan alamat agar donasi lebih mudah diverifikasi." : "Hampir lengkap.";
+      } else {
+        bar.className = "h-full bg-amber-500 rounded-full transition-all duration-700 ease-out";
+        hint.textContent = "Lengkapi nomor HP dan alamat untuk pengalaman yang lebih personal.";
+      }
+    }
+    function showInlineSuccess(detail) {
+      const banner = document.getElementById("profile-success");
+      const detailEl = document.getElementById("profile-success-detail");
+      const badge = document.getElementById("profile-updated-badge");
+      const badgeText = document.getElementById("profile-updated-text");
+      if (detailEl && detail) detailEl.textContent = detail;
+      if (banner) {
+        banner.classList.remove("hidden");
+        banner.classList.add("flex");
+        const path = banner.querySelector(".hc-check-path");
+        if (path) { path.style.animation = "none"; void path.offsetWidth; path.style.animation = ""; }
+      }
+      if (badge && badgeText) {
+        badge.classList.remove("hidden");
+        badgeText.textContent = "Diperbarui barusan";
+        setTimeout(() => { badgeText.textContent = "Tersimpan"; }, 4000);
+      }
+      setTimeout(() => {
+        if (banner && !banner.matches(":hover")) {
+          banner.classList.add("hidden");
+          banner.classList.remove("flex");
+        }
+      }, 6000);
+    }
+    function revealProfile() {
+      const card = document.getElementById("profile-card");
+      const donationCard = document.getElementById("donation-card");
+      if (card) { card.classList.remove("opacity-0"); card.classList.add("hc-enter"); }
+      if (donationCard) {
+        donationCard.classList.remove("opacity-0");
+        donationCard.classList.add("hc-enter");
+        donationCard.style.animationDelay = "90ms";
+      }
     }
 
-    /**
-     * @param {string} title
-     * @param {string} message
-     * @param {boolean} isSessionError
-     */
     function showError(title, message, isSessionError = false) {
       const loadingState = document.querySelector("#loading-state");
       const profileContent = document.querySelector("#profile-content");
@@ -208,128 +425,77 @@ import Button from "../../components/common/Button.astro";
       const errorTitle = document.querySelector("#error-title");
       const errorMessage = document.querySelector("#error-message");
       const errorActions = document.querySelector("#error-actions");
-
       hideElement(loadingState);
       hideElement(profileContent);
       showElement(errorState);
-
       if (errorTitle) errorTitle.textContent = title;
       if (errorMessage) errorMessage.textContent = message;
-
       if (isSessionError && errorActions) {
         errorActions.innerHTML = `
-          <a
-            href="/auth/login"
-            class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
-          >
-            Masuk Kembali
-          </a>
-          <button
-            onclick="window.location.reload()"
-            class="block w-full bg-white hover:bg-gray-50 text-foreground font-medium py-3 px-6 rounded-button border border-input transition-colors duration-200 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
-          >
-            Coba Lagi
-          </button>
+          <a href="/auth/login" class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk kembali</a>
+          <button onclick="window.location.reload()" class="block w-full bg-white hover:bg-gray-50 text-foreground font-medium py-3 px-6 rounded-button border border-input transition-colors duration-200 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Muat ulang halaman</button>
         `;
       }
     }
 
-    // Cek status login dan load profil ringkas
     function checkAuthStatus() {
       const token = localStorage.getItem("token");
-      const role = localStorage.getItem("role");
-
       const loadingState = document.querySelector("#loading-state");
       const profileContent = document.querySelector("#profile-content");
       const actionButtons = document.querySelector("#action-buttons");
       const loginPrompt = document.querySelector("#login-prompt");
       const errorState = document.querySelector("#error-state");
-
-      if (
-        !loadingState ||
-        !profileContent ||
-        !actionButtons ||
-        !loginPrompt ||
-        !errorState
-      ) {
-        console.error("Required elements not found");
-        return;
-      }
-
+      if (!loadingState || !profileContent || !actionButtons || !loginPrompt || !errorState) { console.error("Required elements not found"); return; }
       if (token) {
         hideElement(loadingState);
         showElement(profileContent);
         hideElement(loginPrompt);
         hideElement(errorState);
-
-        // Fetch full profile from server
+        revealProfile();
         fetchUserProfile(token).catch((e) => {
           console.error(e);
-          showError(
-            "Gagal Memuat Profil",
-            e.message || "Terjadi kesalahan saat mengambil data profil.",
-          );
+          showError("Gagal memuat profil", e.message || "Terjadi kesalahan saat memuat data profil. Periksa koneksi lalu muat ulang halaman.");
         });
-
-        // Fetch donation summary (compact)
         fetchDonationSummary(token).catch((e) => console.error(e));
       } else {
         hideElement(loadingState);
         showElement(profileContent);
         showElement(loginPrompt);
         hideElement(errorState);
-
+        revealProfile();
         const userNameElement = document.querySelector("#user-name");
         const userRoleElement = document.querySelector("#user-role");
         const userEmailElement = document.querySelector("#user-email");
-
         if (userNameElement) userNameElement.textContent = "Pengunjung";
-        if (userRoleElement)
-          userRoleElement.textContent = "Belum masuk ke akun";
-        if (userEmailElement)
-          userEmailElement.textContent =
-            "Silakan masuk untuk melihat profil lengkap";
-
+        if (userRoleElement) userRoleElement.textContent = "Belum masuk";
+        if (userEmailElement) userEmailElement.textContent = "Masuk untuk melihat data profil Anda";
+        const meta = document.getElementById("profile-meta");
+        if (meta) { meta.textContent = "Masuk untuk menjaga amanah tetap tercatat"; meta.classList.remove("hidden"); }
+        updateAvatar("");
+        const cw = document.getElementById("completeness-wrap");
+        if (cw) cw.classList.add("hidden");
         actionButtons.innerHTML = "";
       }
     }
 
     async function fetchUserProfile(token) {
+      if (!isOnline()) { showError("Koneksi terputus", "Anda sedang offline. Periksa koneksi internet lalu muat ulang halaman."); return; }
+      if (!API_URL) { showError("Konfigurasi tidak tersedia", "Pengaturan aplikasi belum lengkap. Hubungi dukungan."); return; }
       try {
-        const res = await fetch(`${API_URL}/auth/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
+        const res = await fetchWithTimeout(`${API_URL}/auth/profile`, { headers: { Authorization: `Bearer ${token}` } }, 12000);
         const text = await res.text();
         let parsed;
-        try {
-          parsed = JSON.parse(text);
-        } catch (e) {
-          parsed = text;
-        }
-
+        try { parsed = JSON.parse(text); } catch (e) { parsed = text; }
         if (!res.ok) {
-          // Special handling for auth errors
           if (res.status === 401 || res.status === 403) {
-            // clear token to force re-login
-            console.warn(
-              "Authentication failed when fetching profile. Clearing token.",
-            );
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            showError(
-              "Sesi Berakhir",
-              "Sesi Anda telah berakhir. Silakan masuk kembali untuk mengakses halaman profil.",
-              true,
-            );
+            localStorage.removeItem("token"); localStorage.removeItem("role");
+            showError("Sesi berakhir", "Sesi Anda telah berakhir. Silakan masuk kembali untuk melanjutkan.", true);
             return;
           }
-          throw new Error(parsed?.error || "Gagal mengambil profil");
+          const msg = typeof parsed === "object" ? (parsed?.error || parsed?.message) : parsed;
+          throw new Error(apiErrorMessage(res.status, msg || "Gagal mengambil profil"));
         }
-
         const user = typeof parsed === "object" ? parsed : JSON.parse(text);
-
-        // Update DOM
         const nameHeading = document.querySelector("#user-name");
         const roleEl = document.querySelector("#user-role");
         const fullName = document.querySelector("#user-fullname");
@@ -338,32 +504,32 @@ import Button from "../../components/common/Button.astro";
         const phoneEl = document.querySelector("#user-phone");
         const addressEl = document.querySelector("#user-address");
         const editInlineBtn = document.querySelector("#edit-profile-inline");
-
-        if (nameHeading) nameHeading.textContent = user.nama || "User";
-        if (roleEl)
-          roleEl.textContent = user.role === "admin" ? "Administrator" : "User";
-        if (fullName) fullName.textContent = user.nama || "-";
-        if (usernameEl) usernameEl.textContent = user.username || "-";
-        if (emailEl) emailEl.textContent = user.email || "-";
-        if (phoneEl) phoneEl.textContent = user.nomorHp || "-";
-        if (addressEl) addressEl.textContent = user.alamat || "-";
-
-        // Save for receipt generator if needed
-        if (user.nama) localStorage.setItem("userName", user.nama);
-        if (user.email) localStorage.setItem("userEmail", user.email);
-
-        // Show inline edit button
+        const safeNama = (user.nama || "User").toString().slice(0, 100);
+        if (nameHeading) { nameHeading.textContent = safeNama; nameHeading.title = safeNama; }
+        if (roleEl) roleEl.textContent = user.role === "admin" ? "Administrator" : "User";
+        if (fullName) fullName.textContent = (user.nama || "-").toString().slice(0, 100) || "-";
+        if (usernameEl) usernameEl.textContent = (user.username || "-").toString().slice(0, 50) || "-";
+        if (emailEl) emailEl.textContent = (user.email || "-").toString().slice(0, 254) || "-";
+        if (phoneEl) phoneEl.textContent = formatPhoneForDisplay(user.nomorHp);
+        if (addressEl) addressEl.textContent = (user.alamat || "-").toString().slice(0, 500) || "-";
+        const meta = document.getElementById("profile-meta");
+        if (meta) {
+          const last = user.updatedAt || user.createdAt;
+          let label = "Amanah tercatat";
+          try { if (last) label = "Diperbarui " + new Date(last).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }); } catch {}
+          meta.textContent = label + " · " + (user.role === "admin" ? "Administrator" : "Donatur");
+          meta.classList.remove("hidden");
+        }
+        updateAvatar(safeNama);
+        updateCompleteness(user);
+        if (user.nama) localStorage.setItem("userName", safeNama);
+        if (user.email) localStorage.setItem("userEmail", user.email.toString().slice(0, 254));
         if (editInlineBtn) editInlineBtn.classList.remove("hidden");
-
-        // Render action buttons (logout/admin/edit)
         renderActionButtons(user.role || "user");
       } catch (err) {
-        console.error("fetchUserProfile error:", err);
-        showError(
-          "Gagal Memuat Profil",
-          err.message ||
-            "Terjadi kesalahan yang tidak terduga saat mengambil data profil.",
-        );
+        if (err?.name === "AbortError") { showError("Koneksi lambat", "Permintaan memakan waktu terlalu lama. Periksa koneksi internet lalu muat ulang halaman."); return; }
+        if (!isOnline()) { showError("Koneksi terputus", "Anda sedang offline. Periksa koneksi internet lalu muat ulang halaman."); return; }
+        showError("Gagal memuat profil", err.message || "Terjadi kesalahan saat memuat profil. Periksa koneksi lalu muat ulang halaman.");
       }
     }
 
@@ -371,57 +537,57 @@ import Button from "../../components/common/Button.astro";
       const actionButtons = document.querySelector("#action-buttons");
       if (!actionButtons) return;
       actionButtons.innerHTML = "";
-
       const box = document.createElement("div");
       box.className = "bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-5";
-
       const title = document.createElement("h3");
       title.className = "text-sm font-semibold tracking-tight text-foreground mb-3";
-      title.textContent = "Aksi Cepat";
+      title.textContent = "Aksi";
       box.appendChild(title);
-
       const list = document.createElement("div");
       list.className = "space-y-2.5";
-
       const editBtn = document.createElement("button");
       editBtn.id = "open-edit-btn";
       editBtn.type = "button";
-      editBtn.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-input text-foreground py-2.5 px-4 rounded-button hover:bg-gray-50 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2";
-      editBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6" /></svg> Edit Profil';
+       editBtn.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-input text-foreground min-h-11 py-3 px-4 rounded-button hover:bg-gray-50 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2";
+      editBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6" /></svg> Ubah profil';
       list.appendChild(editBtn);
-
       if (role === "admin") {
         const adminLink = document.createElement("a");
         adminLink.href = "/admin/";
-        adminLink.className = "w-full inline-flex items-center justify-center gap-2 bg-brand-600 text-white py-2.5 px-4 rounded-button hover:bg-brand-700 transition-colors text-sm font-semibold text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2";
-        adminLink.textContent = "Panel Administrator";
+        adminLink.className = "w-full inline-flex items-center justify-center gap-2 bg-brand-600 text-white min-h-11 py-3 px-4 rounded-button hover:bg-brand-700 transition-colors text-sm font-semibold text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2";
+        adminLink.textContent = "Buka panel admin";
         list.appendChild(adminLink);
       }
-
       const logoutLink = document.createElement("a");
       logoutLink.id = "logout-btn";
       logoutLink.href = "/auth/logout";
-      logoutLink.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 py-2.5 px-4 rounded-button hover:bg-red-50 transition-colors text-sm font-medium text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2";
-      logoutLink.textContent = "Keluar dari Akun";
+      logoutLink.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 min-h-11 py-3 px-4 rounded-button hover:bg-red-50 transition-colors text-sm font-medium text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2";
+      logoutLink.textContent = "Keluar dari akun";
       list.appendChild(logoutLink);
-
       box.appendChild(list);
       actionButtons.appendChild(box);
-
       logoutLink.addEventListener("click", (e) => {
         e.preventDefault();
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("userName");
-        localStorage.removeItem("userEmail");
+        localStorage.removeItem("token"); localStorage.removeItem("role"); localStorage.removeItem("userName"); localStorage.removeItem("userEmail");
         window.location.href = "/";
       });
-
       editBtn.addEventListener("click", openEditModal);
       document.querySelector("#edit-profile-inline")?.addEventListener("click", openEditModal);
     }
 
     let modalBound = false;
+    let lastFocusEl = null;
+    function trapFocus(e) {
+      const modal = document.querySelector("#edit-modal");
+      if (!modal || modal.classList.contains("hidden")) return;
+      if (e.key !== "Tab") return;
+      const focusable = modal.querySelectorAll('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
     function bindModalEvents() {
       if (modalBound) return;
       modalBound = true;
@@ -434,11 +600,31 @@ import Button from "../../components/common/Button.astro";
           if (modal && !modal.classList.contains("hidden")) closeEditModal();
         }
       });
+      document.addEventListener("keydown", trapFocus);
+      document.querySelector("#input-nama")?.addEventListener("input", () => setFieldError("err-nama",""));
+      document.querySelector("#input-email")?.addEventListener("input", () => setFieldError("err-email",""));
+      document.querySelector("#input-phone")?.addEventListener("input", () => {
+        const inp = document.querySelector("#input-phone");
+        if (inp) inp.value = inp.value.replace(/[^0-9+]/g, "").slice(0,15);
+        setFieldError("err-phone","");
+      });
+      const addr = document.querySelector("#input-address");
+      const cnt = document.getElementById("address-count");
+      addr?.addEventListener("input", () => {
+        setFieldError("err-address","");
+        if (cnt && addr instanceof HTMLTextAreaElement) cnt.textContent = `${addr.value.length}/500`;
+      });
+      document.getElementById("dismiss-success")?.addEventListener("click", () => {
+        const b = document.getElementById("profile-success");
+        if (b) { b.classList.add("hidden"); b.classList.remove("flex"); }
+      });
     }
 
     function openEditModal() {
       const modal = document.querySelector("#edit-modal");
+      const panel = document.getElementById("edit-modal-panel");
       if (!modal) return;
+      lastFocusEl = document.activeElement;
       const inputNama = document.querySelector("#input-nama");
       const inputEmail = document.querySelector("#input-email");
       const inputPhone = document.querySelector("#input-phone");
@@ -451,8 +637,12 @@ import Button from "../../components/common/Button.astro";
       if (inputEmail) inputEmail.value = email === "-" ? "" : email;
       if (inputPhone) inputPhone.value = phone === "-" ? "" : phone;
       if (inputAddress) inputAddress.value = address === "-" ? "" : address;
+      const cnt = document.getElementById("address-count");
+      if (cnt && inputAddress instanceof HTMLTextAreaElement) cnt.textContent = `${inputAddress.value.length}/500`;
+      clearFieldErrors();
       modal.classList.remove("hidden");
       modal.classList.add("flex");
+      if (panel) { panel.classList.remove("hc-pop"); void panel.offsetWidth; panel.classList.add("hc-pop"); }
       document.body.style.overflow = "hidden";
       setTimeout(() => inputNama?.focus(), 50);
     }
@@ -460,95 +650,165 @@ import Button from "../../components/common/Button.astro";
     function closeEditModal() {
       const modal = document.querySelector("#edit-modal");
       if (!modal) return;
+      const isSaving = document.getElementById("save-edit")?.disabled;
+      if (isSaving) return;
       modal.classList.add("hidden");
       modal.classList.remove("flex");
       document.body.style.overflow = "";
+      clearFieldErrors();
+      if (lastFocusEl instanceof HTMLElement) lastFocusEl.focus();
+    }
+
+    function validateEditForm(nama, email, nomorHp, alamat) {
+      let ok = true;
+      clearFieldErrors();
+      const n = nama.trim();
+      if (!n) { setFieldError("err-nama", "Nama lengkap wajib diisi."); ok = false; }
+      else if (n.length < 2) { setFieldError("err-nama", "Nama minimal 2 karakter."); ok = false; }
+      else if (n.length > 100) { setFieldError("err-nama", "Nama maksimal 100 karakter."); ok = false; }
+      const em = email.trim();
+      if (!em) { setFieldError("err-email", "Email wajib diisi."); ok = false; }
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { setFieldError("err-email", "Gunakan format email yang valid, contoh: nama@email.com"); ok = false; }
+      else if (em.length > 254) { setFieldError("err-email", "Email terlalu panjang (maks. 254 karakter)."); ok = false; }
+      const ph = nomorHp.trim();
+      if (ph && !/^08[0-9]{8,11}$/.test(ph)) { setFieldError("err-phone", "Gunakan format 08xxxxxxxxxx (10–13 digit angka)."); ok = false; }
+      if (alamat.length > 500) { setFieldError("err-address", "Alamat maksimal 500 karakter."); ok = false; }
+      if (!ok) {
+        const firstErr = document.querySelector('[aria-invalid="true"]');
+        if (firstErr instanceof HTMLElement) firstErr.focus();
+      }
+      return ok;
     }
 
     async function submitEditForm(e) {
       e.preventDefault();
+      if (document.getElementById("save-edit")?.disabled) return;
       const token = localStorage.getItem("token");
-      if (!token) {
-        if (window.showToast)
-          window.showToast("Anda harus masuk untuk mengedit profil", "warning");
-        return;
-      }
-
-      const nama = document.querySelector("#input-nama")?.value || "";
-      const email = document.querySelector("#input-email")?.value || "";
-      const nomorHp = document.querySelector("#input-phone")?.value || "";
-      const alamat = document.querySelector("#input-address")?.value || "";
-
+      if (!token) { if (window.showToast) window.showToast("Anda harus masuk untuk mengubah profil", "warning"); return; }
+      if (!isOnline()) { setGlobalFormError("Koneksi terputus. Periksa internet lalu coba simpan kembali."); if (window.showToast) window.showToast("Koneksi terputus — perubahan belum disimpan.", "error"); return; }
+      const nama = (document.querySelector("#input-nama")?.value || "").trim();
+      const email = (document.querySelector("#input-email")?.value || "").trim();
+      const nomorHp = (document.querySelector("#input-phone")?.value || "").trim();
+      const alamat = (document.querySelector("#input-address")?.value || "").trim();
+      if (!validateEditForm(nama, email, nomorHp, alamat)) return;
       try {
-        const res = await fetch(`${API_URL}/auth/profile`, {
+        setSaving(true);
+        setGlobalFormError("");
+        if (!API_URL) throw new Error("Pengaturan aplikasi belum lengkap. Hubungi dukungan.");
+        const res = await fetchWithTimeout(`${API_URL}/auth/profile`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ nama, email, nomorHp, alamat }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Gagal mengupdate profil");
-
-        // Update DOM with new data
-        document.querySelector("#user-name").textContent =
-          data.user.nama || nama;
-        document.querySelector("#user-fullname").textContent =
-          data.user.nama || nama;
-        document.querySelector("#user-email").textContent =
-          data.user.email || email;
-        document.querySelector("#user-phone").textContent =
-          data.user.nomorHp || nomorHp;
-        document.querySelector("#user-address").textContent =
-          data.user.alamat || alamat;
-
-        // Update localStorage
-        if (data.user.nama) localStorage.setItem("userName", data.user.nama);
-        if (data.user.email) localStorage.setItem("userEmail", data.user.email);
-
+        }, 12000);
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = { error: text }; }
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem("token"); localStorage.removeItem("role");
+            closeEditModal();
+            showError("Sesi berakhir", "Sesi Anda telah berakhir. Silakan masuk kembali untuk melanjutkan.", true);
+            return;
+          }
+          if (res.status === 400 && data?.details) {
+            if (Array.isArray(data.details)) data.details.forEach((d) => {
+              const f = (d.field || "").toLowerCase();
+              if (f.includes("nama")) setFieldError("err-nama", d.message || "Nama tidak valid");
+              else if (f.includes("email")) setFieldError("err-email", d.message || "Email tidak valid");
+              else if (f.includes("hp") || f.includes("phone") || f.includes("nomor")) setFieldError("err-phone", d.message || "Nomor HP tidak valid");
+              else if (f.includes("alamat") || f.includes("address")) setFieldError("err-address", d.message || "Alamat tidak valid");
+            });
+            throw new Error(data.error || "Periksa kembali isian Anda.");
+          }
+          throw new Error(apiErrorMessage(res.status, data.error || data.message || "Gagal menyimpan perubahan profil"));
+        }
+        const u = data.user || {};
+        const safeNama = (u.nama || nama).toString().slice(0,100);
+        document.querySelector("#user-name").textContent = safeNama;
+        document.querySelector("#user-name").title = safeNama;
+        document.querySelector("#user-fullname").textContent = safeNama;
+        document.querySelector("#user-email").textContent = (u.email || email).toString().slice(0,254);
+        document.querySelector("#user-phone").textContent = formatPhoneForDisplay(u.nomorHp || nomorHp);
+        document.querySelector("#user-address").textContent = (u.alamat || alamat).toString().slice(0,500) || "-";
+        const meta = document.getElementById("profile-meta");
+        if (meta) { meta.textContent = "Diperbarui barusan · " + (u.role === "admin" ? "Administrator" : "Donatur"); meta.classList.remove("hidden"); }
+        updateAvatar(safeNama);
+        updateCompleteness({ nama: safeNama, email: u.email || email, nomorHp: u.nomorHp || nomorHp, alamat: u.alamat || alamat });
+        if (u.nama) localStorage.setItem("userName", safeNama);
+        if (u.email) localStorage.setItem("userEmail", u.email.toString().slice(0,254));
         closeEditModal();
-        if (window.showToast)
-          window.showToast("Profil berhasil diperbarui", "success");
+        showInlineSuccess("Profil diperbarui — " + safeNama);
+        if (window.showToast) window.showToast("Perubahan profil disimpan — amanah terjaga.", "success");
       } catch (err) {
-        console.error(err);
-        const msg =
-          err instanceof Error ? err.message : "Gagal mengupdate profil";
+        if (err?.name === "AbortError") { setGlobalFormError("Permintaan terlalu lama. Periksa koneksi lalu coba simpan kembali."); if (window.showToast) window.showToast("Koneksi lambat — coba simpan kembali.", "error"); return; }
+        const msg = err instanceof Error ? err.message : "Gagal menyimpan perubahan profil";
+        setGlobalFormError(msg);
         if (window.showToast) window.showToast(msg, "error");
-      }
+      } finally { setSaving(false); }
     }
 
-    // Ringkasan riwayat donasi: gunakan endpoint yang sama tapi tampilkan ringkasan + tombol ke subhalaman
     async function fetchDonationSummary(token) {
       const container = document.querySelector("#donation-summary-container");
       const textEl = document.querySelector("#donation-summary-text");
       if (!container || !textEl) return;
-
       try {
-        textEl.textContent = "Memuat ringkasan riwayat donasi...";
-        const res = await fetch(`${API_URL}/donations/my-donations?limit=50`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Gagal memuat riwayat donasi");
+        textEl.textContent = "Memuat ringkasan donasi...";
+        if (!API_URL) throw new Error("Pengaturan aplikasi belum lengkap.");
+        if (!isOnline()) throw new Error("Offline");
+        const res = await fetchWithTimeout(`${API_URL}/donations/my-donations?limit=50`, { headers: { Authorization: `Bearer ${token}` } }, 12000);
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) { textEl.innerHTML = `Sesi berakhir. <a href="/auth/login" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Masuk kembali</a> untuk melihat ringkasan.`; return; }
+          throw new Error(apiErrorMessage(res.status, "Gagal memuat ringkasan donasi"));
+        }
         const data = await res.json();
         const donations = data.donations || [];
         if (donations.length === 0) {
-          textEl.innerHTML = `Belum ada riwayat donasi. <a href="/campaign" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Mulai Donasi</a>`;
+          container.innerHTML = `
+            <div class="rounded-xl border border-dashed border-brand-200 bg-brand-50/50 p-6 text-center">
+              <div class="w-12 h-12 bg-white border border-brand-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <span class="material-symbols-outlined text-brand-600" aria-hidden="true">volunteer_activism</span>
+              </div>
+              <p class="text-sm font-semibold text-foreground">Belum ada jejak kebaikan</p>
+              <p class="text-sm text-muted-foreground mt-1 text-balance leading-relaxed">Setiap donasi tercatat sebagai amanah. Mulai kebaikan pertama Anda — kami jaga transparansinya.</p>
+              <a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors shadow-[0_4px_16px_rgba(37,99,235,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Jelajahi kampanye</a>
+            </div>`;
         } else {
           const count = donations.length;
           const last = donations[0];
-          const date = new Date(last.createdAt).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          });
-          textEl.innerHTML = `Anda memiliki <strong class="font-semibold text-foreground">${count}</strong> donasi. Terakhir: <span class="font-medium text-foreground">${date}</span> · <a href="/profile/donations" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Lihat semua</a>`;
+          let date = "-";
+          try { date = new Date(last.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }); } catch {}
+          const safeCount = Number.isFinite(count) ? count : donations.length;
+          let totalLabel = "";
+          try {
+            const total = donations.reduce((s, d) => s + (Number(d.amount) || 0), 0);
+            if (total > 0) totalLabel = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(total);
+          } catch {}
+          container.innerHTML = `
+            <div class="rounded-xl border border-border bg-white p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-emerald-600 text-[20px]" aria-hidden="true">favorite</span>
+                  </div>
+                  <div>
+                    <p class="text-xs tracking-wide uppercase font-medium text-muted-foreground">Jejak kebaikan Anda</p>
+                    <p class="text-2xl font-semibold tracking-tight text-foreground tabular-nums leading-none mt-1">${escapeHtml(String(safeCount))} <span class="text-sm font-medium text-muted-foreground">donasi</span></p>
+                    ${totalLabel ? `<p class="text-xs text-muted-foreground mt-1 tabular-nums">Total tercatat ${escapeHtml(totalLabel)}</p>` : ``}
+                  </div>
+                </div>
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Terakhir ${escapeHtml(date)}</span>
+              </div>
+              <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                <a href="/profile/donations" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Lihat semua jejak <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+                <a href="/campaign" class="inline-flex items-center justify-center bg-white border border-input text-foreground text-sm font-medium px-4 py-2.5 rounded-button hover:bg-gray-50 transition-colors">Donasi lagi</a>
+              </div>
+              <p class="text-xs text-muted-foreground mt-3 leading-relaxed">Terima kasih — setiap rupiah adalah amanah yang kami jaga.</p>
+            </div>`;
         }
       } catch (err) {
-        console.error(err);
-        if (window.showToast)
-          window.showToast("Gagal memuat ringkasan riwayat donasi", "error");
-        textEl.textContent = "Gagal memuat ringkasan riwayat donasi.";
+        if (err?.name === "AbortError") { textEl.textContent = "Koneksi lambat. Periksa internet lalu coba lagi."; return; }
+        if (!isOnline() || err.message === "Offline" || err.message === "Pengaturan aplikasi belum lengkap.") { textEl.textContent = err.message === "Offline" ? "Koneksi terputus — ringkasan tidak dapat dimuat. Periksa internet." : err.message; return; }
+        textEl.textContent = apiErrorMessage(err.status || 0, "Gagal memuat ringkasan donasi. Periksa koneksi lalu coba lagi.");
       }
     }
 
