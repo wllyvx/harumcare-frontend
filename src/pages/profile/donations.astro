@@ -3,30 +3,59 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
 ---
 
 <PrimaryLayout title="Riwayat Donasi - Profil">
+  <style>
+    #donations-list { min-width: 0; }
+    #donations-list h4 { overflow-wrap: anywhere; word-break: break-word; hyphens: auto; min-width: 0; font-size: clamp(0.875rem, 1.5vw + 0.75rem, 0.9375rem); }
+    #donations-list p { overflow-wrap: anywhere; min-width: 0; }
+    ::selection { background: #dbeafe; color: #1e3a8a; }
+    :where(a) { text-underline-offset: 3px; text-decoration-thickness: 1.2px; }
+    @media (prefers-reduced-motion: reduce) { .animate-spin, .animate-pulse { animation: none !important; } }
+    @media (pointer: coarse) {
+      #donations-pagination button, .btn-download-receipt, #donations-list a { min-height: 44px; min-width: 44px; }
+      .btn-download-receipt { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+      #donations-pagination button { padding-left: 1rem; padding-right: 1rem; }
+    }
+    @media (pointer: fine) {
+      #donations-list > div:hover { border-color: #bfdbfe; box-shadow: 0 4px 16px rgba(37,99,235,0.06); }
+    }
+    @media (hover: none) {
+      #donations-list > div:hover { border-color: var(--border); box-shadow: none; }
+    }
+    @media (max-width: 767px) {
+      #donations-list + #donations-pagination { position: sticky; bottom: max(5rem, env(safe-area-inset-bottom, 0px) + 4.25rem); z-index: 10; background: rgba(248,250,252,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin-left: -1rem; margin-right: -1rem; padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 0; }
+      .min-h-screen { padding-bottom: max(5rem, env(safe-area-inset-bottom)); }
+      .sticky.top-16 { top: max(4rem, env(safe-area-inset-top, 0px) + 4rem); }
+    }
+    @media (max-height: 500px) and (orientation: landscape) {
+      .sticky.top-16 { position: relative; top: auto; }
+    }
+    @media (forced-colors: active) { #donations-list > div { border: 1px solid CanvasText; } }
+  </style>
+  <noscript><style>#donations-list{contain:none!important}</style></noscript>
   <div class="min-h-screen bg-[#f8fafc]">
-    <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30">
-      <div class="container mx-auto px-4 py-3.5">
-        <div class="flex items-center gap-3">
-          <a href="/profile" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke profil">
+    <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30 shadow-[0_1px_12px_rgba(15,23,42,0.04)]">
+      <div class="container mx-auto px-4 md:px-6 py-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <a href="/profile" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke profil">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           </a>
-          <div>
-            <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none">Riwayat Donasi</h1>
-            <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Semua transaksi donasi Anda dalam satu tempat</p>
+          <div class="min-w-0">
+            <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none truncate">Riwayat Donasi</h1>
+            <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Semua donasi yang pernah Anda lakukan</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="container mx-auto px-4 py-6 md:py-8">
-      <div class="max-w-3xl mx-auto">
+    <div class="container mx-auto px-4 md:px-6 py-6 md:py-7 lg:py-8">
+      <div class="max-w-3xl mx-auto space-y-0">
         <div class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border overflow-hidden">
-          <div class="px-6 md:px-7 pt-6 pb-4 border-b border-border">
+          <div class="px-5 md:px-7 pt-6 pb-5 border-b border-border">
             <h2 class="text-base font-semibold tracking-tight text-foreground">Semua Riwayat Donasi</h2>
-            <p class="text-sm text-muted-foreground mt-1">Kelola bukti donasi dan status pembayaran</p>
+            <p class="text-sm text-muted-foreground mt-1.5 leading-relaxed">Lihat status pembayaran dan unduh kwitansi</p>
           </div>
-          <div class="p-6 md:p-7">
-            <div id="donations-list" class="space-y-3 [content-visibility:auto] [contain-intrinsic-size:1px_500px]" aria-live="polite" style="contain: content">
+          <div class="p-5 md:p-6 lg:p-7">
+            <div id="donations-list" class="space-y-3.5 [content-visibility:auto] [contain-intrinsic-size:1px_500px]" aria-live="polite" style="contain: content">
               <div class="flex flex-col items-center justify-center py-12 gap-4">
                 <div class="animate-spin rounded-full h-8 w-8 border-[3px] border-brand-100 border-t-brand-600" aria-hidden="true"></div>
                 <p class="text-sm font-medium text-muted-foreground">Memuat riwayat donasi...</p>
@@ -55,6 +84,11 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
     const amountFmt = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
     const dateFmt = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
+    function safeSliceGrapheme(s, n) {
+      const t = String(s ?? "");
+      try { if (typeof Intl !== "undefined" && Intl.Segmenter) return [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(t)].slice(0, n).map((x) => x.segment).join(""); } catch {}
+      return [...t].slice(0, n).join("");
+    }
     function formatDateSafe(v) {
       try {
         const d = new Date(v);
@@ -64,8 +98,8 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
     }
     function formatAmountSafe(v) {
       const n = Number(v);
-      if (!Number.isFinite(n)) return "Rp -";
-      try { return amountFmt.format(n); } catch { return `Rp ${n.toLocaleString("id-ID")}`; }
+      if (!Number.isFinite(n) || Math.abs(n) > 9999999999999) return "Rp -";
+      try { return amountFmt.format(Math.trunc(n)); } catch { return `Rp ${Math.trunc(n).toLocaleString("id-ID")}`; }
     }
     function isOnline() { return typeof navigator === "undefined" ? true : navigator.onLine; }
     function apiErrorMessage(status, fallback) {
@@ -85,8 +119,10 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
     }
     function statusMeta(status) {
       if (status === "completed") return { label: "Berhasil", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" };
-      if (status === "pending") return { label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-200" };
-      if (status === "failed" || status === "cancelled" || status === "expired") return { label: "Gagal", cls: "bg-red-50 text-red-600 border-red-200" };
+      if (status === "pending") return { label: "Menunggu pembayaran", cls: "bg-amber-50 text-amber-700 border-amber-200" };
+      if (status === "failed") return { label: "Gagal", cls: "bg-red-50 text-red-600 border-red-200" };
+      if (status === "cancelled") return { label: "Dibatalkan", cls: "bg-red-50 text-red-600 border-red-200" };
+      if (status === "expired") return { label: "Kedaluwarsa", cls: "bg-red-50 text-red-600 border-red-200" };
       return { label: escapeHtml(String(status || "Tidak diketahui")), cls: "bg-gray-50 text-muted-foreground border-border" };
     }
 
@@ -100,12 +136,12 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
       if (!container || isLoading) return;
       const token = localStorage.getItem("token");
       if (!token) {
-        container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><p class="text-sm font-medium text-foreground">Silakan masuk untuk melihat riwayat donasi</p><p class="text-sm text-muted-foreground mt-1">Masuk ke akun Anda untuk mengakses data ini</p><a href="/auth/login" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke Akun</a></div>`;
+        container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div><p class="text-sm font-medium text-foreground">Silakan masuk untuk melihat riwayat donasi</p><p class="text-sm text-muted-foreground mt-1">Masuk untuk melihat riwayat donasi Anda</p><a href="/auth/login" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke akun</a></div>`;
         if (pagination) pagination.innerHTML = "";
         return;
       }
       if (!API_URL) {
-        container.innerHTML = `<div class="text-center py-10 bg-red-50/60 rounded-xl border border-red-200"><p class="text-sm font-medium text-red-700">Konfigurasi API belum diatur.</p><p class="text-xs text-red-600 mt-1">Hubungi admin.</p></div>`;
+        container.innerHTML = `<div class="text-center py-10 bg-red-50/60 rounded-xl border border-red-200"><p class="text-sm font-medium text-red-700">Pengaturan aplikasi belum lengkap.</p><p class="text-xs text-red-600 mt-1">Hubungi dukungan jika berlanjut.</p></div>`;
         return;
       }
       if (!isOnline()) {
@@ -132,7 +168,7 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         const donations = Array.isArray(data.donations) ? data.donations : [];
         cachedDonations = donations;
         if (donations.length === 0) {
-          container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><span class="material-symbols-outlined text-muted-foreground" aria-hidden="true">volunteer_activism</span></div><p class="text-sm font-medium text-foreground">Belum ada riwayat donasi</p><p class="text-sm text-muted-foreground mt-1 text-balance">Donasi Anda akan tampil di sini setelah bertransaksi</p><a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Mulai Donasi</a></div>`;
+          container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><span class="material-symbols-outlined text-muted-foreground" aria-hidden="true">volunteer_activism</span></div><p class="text-sm font-medium text-foreground">Belum ada riwayat donasi</p><p class="text-sm text-muted-foreground mt-1 text-balance">Donasi akan tampil di sini setelah pembayaran berhasil</p><a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Mulai Donasi</a></div>`;
           if (pagination) pagination.innerHTML = "";
           return;
         }
@@ -142,10 +178,10 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             const date = formatDateSafe(d.createdAt);
             const amount = formatAmountSafe(d.amount);
             const meta = statusMeta(d.paymentStatus);
-            const campaignTitle = escapeHtml((d.campaignId?.title || "Campaign tidak tersedia").toString().slice(0, 120));
+            const campaignTitle = escapeHtml((d.campaignId?.title || "Kampanye tidak tersedia").toString().slice(0, 120));
             const tx = escapeHtml((d.transactionId || "-").toString().slice(0, 64));
             const safeAmount = escapeHtml(amount);
-            return `<div class="group bg-white border border-border rounded-xl p-4 md:p-5 hover:border-brand-200 hover:shadow-[0_4px_16px_rgba(37,99,235,0.06)] transition-all" style="contain:content;content-visibility:auto;contain-intrinsic-size:0 120px"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex-1 min-w-0"><p class="text-xs text-muted-foreground truncate">${escapeHtml(date)} · <span class="font-mono text-[11px] tracking-wide break-all">${tx}</span></p><h4 class="font-semibold text-sm leading-snug text-foreground break-words line-clamp-2 mt-1" title="${campaignTitle}">${campaignTitle}</h4><p class="text-[15px] font-semibold tracking-tight text-brand-600 mt-1 break-all tabular-nums">${safeAmount}</p></div><div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 w-full md:w-auto shrink-0"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${meta.cls}">${meta.label}</span><button type="button" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground bg-white border border-input px-3.5 py-2 rounded-button hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 btn-download-receipt disabled:opacity-40 disabled:cursor-not-allowed" data-idx="${i}" aria-label="Unduh kwitansi untuk ${campaignTitle}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Kwitansi</button></div></div></div>`;
+            return `<div class="group bg-white border border-border rounded-xl p-4 md:p-5 hover:border-brand-200 hover:shadow-[0_4px_16px_rgba(37,99,235,0.06)] transition-all" style="contain:content;content-visibility:auto;contain-intrinsic-size:0 120px"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex-1 min-w-0"><p class="text-xs text-muted-foreground truncate">${escapeHtml(date)} · <span class="font-mono text-[11px] tracking-wide break-all">${tx}</span></p><h4 class="font-semibold text-sm leading-snug text-foreground break-words line-clamp-2 mt-1" title="${campaignTitle}">${campaignTitle}</h4><p class="text-[15px] font-semibold tracking-tight text-brand-600 mt-1 break-all tabular-nums">${safeAmount}</p></div><div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 w-full md:w-auto shrink-0"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${meta.cls}">${meta.label}</span><button type="button" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground bg-white border border-input px-3.5 py-2 rounded-button hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 btn-download-receipt disabled:opacity-40 disabled:cursor-not-allowed" data-idx="${i}" aria-label="Unduh kwitansi untuk ${campaignTitle}"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Unduh kwitansi</button></div></div></div>`;
           }).join("");
         while (tmp.firstChild) frag.appendChild(tmp.firstChild);
         container.replaceChildren(frag);
@@ -153,7 +189,7 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         if (pagination) {
           totalPages = Math.max(1, Math.floor(Number(data.totalPages) || 1));
           currentPage = Math.min(totalPages, Math.max(1, Math.floor(Number(data.currentPage) || safePage)));
-          pagination.innerHTML = `<button type="button" data-page="prev" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage <= 1 ? "disabled aria-disabled='true'" : ""} aria-label="Halaman sebelumnya">Prev</button><span class="text-sm text-muted-foreground px-3 tabular-nums" aria-live="polite">Halaman ${currentPage} / ${totalPages}</span><button type="button" data-page="next" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage >= totalPages ? "disabled aria-disabled='true'" : ""} aria-label="Halaman berikutnya">Next</button>`;
+          pagination.innerHTML = `<button type="button" data-page="prev" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage <= 1 ? "disabled aria-disabled='true'" : ""} aria-label="Halaman sebelumnya">Sebelumnya</button><span class="text-sm text-muted-foreground px-3 tabular-nums" aria-live="polite">Halaman ${currentPage} / ${totalPages}</span><button type="button" data-page="next" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage >= totalPages ? "disabled aria-disabled='true'" : ""} aria-label="Halaman berikutnya">Selanjutnya</button>`;
         }
       } catch (err) {
         if (err?.name === "AbortError") {

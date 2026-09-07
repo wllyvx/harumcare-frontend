@@ -9,15 +9,62 @@ import Button from "../../components/common/Button.astro";
     @keyframes hc-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes hc-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
     @keyframes hc-soft-pop { 0% { transform: scale(0.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes hc-slide-up { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .hc-enter { animation: hc-enter 420ms cubic-bezier(0.16,1,0.3,1) both; }
     .hc-pop { animation: hc-soft-pop 360ms cubic-bezier(0.16,1,0.3,1) both; }
     .hc-check-path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: hc-check-draw 520ms 120ms cubic-bezier(0.16,1,0.3,1) forwards; }
     .hc-skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%); background-size: 400% 100%; animation: hc-shimmer 1.4s ease infinite; }
     @media (prefers-reduced-motion: reduce) {
-      .hc-enter, .hc-pop, .hc-check-path, .hc-skeleton { animation: none !important; }
+      .hc-enter, .hc-pop, .hc-check-path, .hc-skeleton, .animate-spin, .animate-pulse { animation: none !important; }
       .hc-enter { opacity: 1; transform: none; }
     }
+    #user-name { font-size: clamp(1rem, 2vw + 0.75rem, 1.0625rem); line-height: 1.25; }
+    #user-name, #user-fullname, #user-username, #user-email, #user-address { overflow-wrap: anywhere; word-break: break-word; hyphens: auto; min-width: 0; }
+    #profile-card dl dd { min-width: 0; }
+    #profile-success, #donation-summary-container, #profile-card { min-width: 0; }
+    #input-nama, #input-email, #input-phone, #input-address { font-size: 16px; caret-color: #2563eb; }
+    #input-nama:focus, #input-email:focus, #input-phone:focus, #input-address:focus { caret-color: #2563eb; }
+    ::selection { background: #dbeafe; color: #1e3a8a; }
+    :where(a) { text-underline-offset: 3px; text-decoration-thickness: 1.2px; }
+    :where(a):hover { text-underline-offset: 4px; }
+    @media (pointer: coarse) {
+      #edit-profile-inline, #dismiss-success, #action-buttons button, #action-buttons a { min-height: 44px; min-width: 44px; }
+      #edit-profile-inline { padding: 0; }
+      #action-buttons a, #action-buttons button { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    }
+    @media (pointer: fine) {
+      #profile-card:hover { box-shadow: 0 4px 20px rgba(15,23,42,0.08), 0 12px 28px rgba(15,23,42,0.06); }
+    }
+    @media (hover: hover) {
+      #edit-profile-inline:hover { background: #f8fafc; }
+    }
+    @media (hover: none) {
+      #profile-card:hover { box-shadow: 0 2px 16px rgba(15,23,42,0.06),0 8px 24px rgba(15,23,42,0.04); }
+    }
+    @media (min-width: 768px) { #input-nama, #input-email, #input-phone, #input-address { font-size: 14px; } }
+    @media (max-width: 767px) {
+      #profile-container { padding-bottom: max(5rem, env(safe-area-inset-bottom)); }
+      #profile-content .sticky { top: max(4rem, env(safe-area-inset-top, 0px) + 4rem); }
+      #action-buttons { position: static; bottom: auto; z-index: auto; }
+    }
+    @media (min-width: 768px) and (max-width: 1023px) {
+      #profile-container .grid.lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+      #profile-container .lg\:col-span-4 { grid-column: span 5 / span 5; }
+      #profile-container .lg\:col-span-8 { grid-column: span 7 / span 7; }
+    }
+    @media (max-width: 640px) {
+      #edit-modal { align-items: flex-end; padding: 0; }
+      #edit-modal-panel { border-radius: 1.25rem 1.25rem 0 0; max-height: 92dvh; max-height: 92vh; width: 100%; margin: 0; border-bottom: 0; animation: hc-slide-up 360ms cubic-bezier(0.16,1,0.3,1) both; padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+      #edit-modal-panel::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 999px; background: #e2e8f0; margin: 0 auto 1rem; }
+      #edit-modal-backdrop { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    }
+    @media (max-height: 500px) and (orientation: landscape) {
+      #edit-modal-panel { max-height: 88dvh; overflow-y: auto; }
+      #profile-container .sticky { position: relative; top: auto; }
+    }
+    @media (forced-colors: active) { .hc-skeleton { background: CanvasText; opacity: 0.12; } #avatar-wrap { border: 1px solid CanvasText; } }
   </style>
+  <noscript><style>#profile-card,#donation-card{opacity:1!important} #loading-state{display:none!important} #profile-content{display:block!important}</style></noscript>
 
   <div id="profile-container" class="min-h-screen bg-[#f8fafc]">
     <div
@@ -27,8 +74,8 @@ import Button from "../../components/common/Button.astro";
       aria-live="polite"
       aria-busy="true"
     >
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div class="lg:col-span-4 space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
+        <div class="lg:col-span-4 space-y-4">
           <div class="bg-white rounded-card border border-border p-6">
             <div class="flex gap-4">
               <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-brand-50 border border-brand-100 shrink-0 hc-skeleton"></div>
@@ -52,13 +99,13 @@ import Button from "../../components/common/Button.astro";
             </div>
           </div>
         </div>
-        <div class="lg:col-span-8 space-y-6">
+        <div class="lg:col-span-8 space-y-4">
           <div class="bg-white rounded-card border border-border p-6 md:p-7">
             <div class="h-4 w-32 rounded-full hc-skeleton mb-5"></div>
             <div class="bg-gray-50/80 rounded-xl border border-border p-6 flex flex-col items-center gap-3">
               <div class="h-8 w-8 rounded-full border-[3px] border-brand-100 border-t-brand-600 animate-spin" aria-hidden="true"></div>
-              <p class="text-sm font-medium text-muted-foreground tracking-wide">Menyiapkan data amanah Anda…</p>
-              <p class="text-xs text-muted-foreground hidden sm:block">Mengambil profil dan jejak donasi terbaru</p>
+              <p class="text-sm font-medium text-muted-foreground tracking-wide">Memuat profil Anda…</p>
+              <p class="text-xs text-muted-foreground hidden sm:block">Mengambil data profil dan ringkasan donasi</p>
             </div>
           </div>
         </div>
@@ -75,9 +122,9 @@ import Button from "../../components/common/Button.astro";
         <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5 ring-1 ring-red-100" aria-hidden="true">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
         </div>
-        <h3 id="error-title" class="text-xl font-semibold tracking-tight text-foreground mb-2">Gagal memuat profil</h3>
-        <p id="error-message" class="text-[15px] leading-relaxed text-muted-foreground mb-2 text-balance">Profil tidak dapat dimuat. Sesi Anda mungkin berakhir atau koneksi terputus.</p>
-        <p class="text-xs text-muted-foreground mb-8">Data amanah tetap tersimpan — coba muat ulang untuk melanjutkan.</p>
+        <h3 id="error-title" class="text-xl font-semibold tracking-tight text-foreground mb-2">Profil tidak dapat dimuat</h3>
+        <p id="error-message" class="text-[15px] leading-relaxed text-muted-foreground mb-2 text-balance">Periksa koneksi internet atau masuk kembali jika sesi telah berakhir.</p>
+        <p class="text-xs text-muted-foreground mb-8">Data Anda tetap tersimpan. Coba lagi untuk melanjutkan.</p>
         <div id="error-actions" class="space-y-3">
           <button onclick="window.location.reload()" class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Muat ulang halaman</button>
         </div>
@@ -85,17 +132,17 @@ import Button from "../../components/common/Button.astro";
     </div>
 
     <div id="profile-content" class="hidden">
-      <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30">
-        <div class="container mx-auto px-4 py-3.5">
-          <div class="flex items-center gap-3">
-            <a href="/" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke beranda">
+      <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30 shadow-[0_1px_12px_rgba(15,23,42,0.04)]">
+        <div class="container mx-auto px-4 md:px-6 py-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <a href="/" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke beranda">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </a>
-            <div>
-              <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none">Profil saya</h1>
-              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Kelola data akun dan jejak kebaikan Anda</p>
+            <div class="min-w-0 flex-1">
+              <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none truncate">Profil saya</h1>
+              <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Kelola data akun dan riwayat donasi Anda</p>
             </div>
-            <span id="profile-updated-badge" class="hidden ml-auto sm:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span id="profile-updated-badge" class="hidden ml-auto shrink-0 sm:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span>
               <span id="profile-updated-text">Tersimpan</span>
             </span>
@@ -103,25 +150,25 @@ import Button from "../../components/common/Button.astro";
         </div>
       </div>
 
-      <div class="container mx-auto px-4 py-6 md:py-8">
-        <div id="profile-success" class="hidden mb-6 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 items-center gap-3 hc-pop" role="status" aria-live="polite">
+      <div class="container mx-auto px-4 md:px-6 py-6 md:py-7 lg:py-8">
+        <div id="profile-success" class="hidden mb-5 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 items-center gap-3 hc-pop" role="status" aria-live="polite">
           <div class="w-8 h-8 rounded-full bg-white border border-emerald-200 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2"><path class="hc-check-path" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M6 12.5l4 4 8-9"></path></svg>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-emerald-900">Perubahan tersimpan — amanah terjaga.</p>
-            <p id="profile-success-detail" class="text-xs text-emerald-700">Data profil Anda telah diperbarui.</p>
+            <p class="text-sm font-medium text-emerald-900">Profil berhasil diperbarui.</p>
+            <p id="profile-success-detail" class="text-xs text-emerald-700">Perubahan sudah tersimpan.</p>
           </div>
           <button type="button" id="dismiss-success" class="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-full hover:bg-emerald-100 text-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2" aria-label="Tutup notifikasi">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[88px]">
-            <div id="profile-card" class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border overflow-hidden opacity-0">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
+          <div class="lg:col-span-4 space-y-4 lg:space-y-5 lg:sticky lg:top-[108px] self-start">
+            <div id="profile-card" class="bg-white rounded-card shadow-[0_2px_16px_rgba(15,23,42,0.06),0_8px_24px_rgba(15,23,42,0.04)] border border-border overflow-hidden opacity-0">
               <div class="h-1 bg-gradient-to-r from-brand-600 via-brand-500 to-highlight-500"></div>
-              <div class="p-6">
+              <div class="p-5 md:p-6">
                 <div class="flex items-start gap-4">
                   <div id="avatar-wrap" class="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center shrink-0 border overflow-hidden relative bg-brand-50 border-brand-100" aria-hidden="true">
                     <span id="avatar-initials" class="text-lg md:text-xl font-semibold tracking-tight text-brand-700">—</span>
@@ -130,14 +177,14 @@ import Button from "../../components/common/Button.astro";
                   <div class="flex-1 min-w-0">
                     <div class="flex items-start justify-between gap-2">
                       <div class="min-w-0">
-                        <h2 id="user-name" class="text-lg font-semibold tracking-tight text-foreground leading-tight truncate">Memuat...</h2>
-                        <p id="user-role" class="inline-flex items-center mt-1.5 text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-muted-foreground border border-border">Memuat...</p>
-                        <p id="profile-meta" class="text-xs text-muted-foreground mt-2 hidden">—</p>
+                        <h2 id="user-name" class="text-[17px] font-semibold tracking-tight text-foreground leading-tight truncate text-balance">Memuat...</h2>
+                        <p id="user-role" class="inline-flex items-center mt-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-muted-foreground border border-border">Memuat...</p>
+                        <p id="profile-meta" class="text-xs text-muted-foreground mt-2 hidden leading-relaxed">—</p>
                       </div>
                       <button
                         id="edit-profile-inline"
                         class="hidden shrink-0 inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-brand-600 hover:text-brand-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
-                        aria-label="Ubah data profil"
+                        aria-label="Ubah profil"
                         type="button"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6"></path></svg>
@@ -146,78 +193,78 @@ import Button from "../../components/common/Button.astro";
                   </div>
                 </div>
 
-                <div id="completeness-wrap" class="mt-5 hidden">
-                  <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-xs font-medium text-muted-foreground">Kelengkapan profil</span>
+                <div id="completeness-wrap" class="mt-5 hidden rounded-xl bg-gray-50/70 border border-border p-3.5">
+                  <div class="flex items-center justify-between gap-3 mb-2">
+                    <span class="text-xs font-medium tracking-wide text-muted-foreground">Kelengkapan profil</span>
                     <span id="completeness-pct" class="text-xs font-semibold text-foreground tabular-nums">0%</span>
                   </div>
-                  <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden border border-border">
+                  <div class="h-1.5 bg-white rounded-full overflow-hidden border border-border">
                     <div id="completeness-bar" class="h-full bg-brand-600 rounded-full transition-all duration-700 ease-out" style="width:0%"></div>
                   </div>
-                  <p id="completeness-hint" class="text-xs text-muted-foreground mt-1.5 leading-relaxed"></p>
+                  <p id="completeness-hint" class="text-xs text-muted-foreground mt-2 leading-relaxed text-pretty"></p>
                 </div>
 
-                <dl class="mt-6 space-y-4">
-                  <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Nama lengkap</dt>
-                    <dd id="user-fullname" class="text-sm font-medium text-foreground break-words">-</dd>
+                <dl class="mt-6 space-y-0 divide-y divide-dashed divide-gray-100">
+                  <div class="flex flex-col gap-1.5 py-3.5 first:pt-2">
+                    <dt class="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">Nama lengkap</dt>
+                    <dd id="user-fullname" class="text-sm font-medium text-foreground break-words leading-relaxed">-</dd>
                   </div>
-                  <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Username</dt>
+                  <div class="flex flex-col gap-1.5 py-3.5">
+                    <dt class="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">Username</dt>
                     <dd id="user-username" class="text-sm font-medium text-foreground break-all">-</dd>
                   </div>
-                  <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Email</dt>
+                  <div class="flex flex-col gap-1.5 py-3.5">
+                    <dt class="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">Email</dt>
                     <dd id="user-email" class="text-sm font-medium text-foreground break-all">-</dd>
                   </div>
-                  <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Nomor HP · opsional</dt>
-                    <dd id="user-phone" class="text-sm font-medium text-foreground">-</dd>
+                  <div class="flex flex-col gap-1.5 py-3.5">
+                    <dt class="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">Nomor HP · opsional</dt>
+                    <dd id="user-phone" class="text-sm font-medium text-foreground tabular-nums">-</dd>
                   </div>
-                  <div class="flex flex-col gap-1">
-                    <dt class="text-xs font-medium tracking-wide uppercase text-muted-foreground">Alamat · opsional</dt>
-                    <dd id="user-address" class="text-sm leading-relaxed text-foreground break-words">-</dd>
+                  <div class="flex flex-col gap-1.5 pt-3.5">
+                    <dt class="text-[11px] font-semibold tracking-widest uppercase text-muted-foreground">Alamat · opsional</dt>
+                    <dd id="user-address" class="text-sm leading-relaxed text-foreground break-words text-pretty">-</dd>
                   </div>
                 </dl>
               </div>
+              <div id="action-buttons" class="hidden border-t border-border bg-gray-50/60 px-5 py-4 md:px-6"></div>
             </div>
 
-            <div id="action-buttons" class="space-y-3"></div>
-
-            <div class="hidden lg:block bg-brand-600 rounded-card p-5 text-white overflow-hidden relative">
-              <div class="absolute -right-8 -top-8 w-24 h-24 bg-white/10 rounded-full blur-2xl" aria-hidden="true"></div>
-              <p class="text-sm font-medium leading-relaxed relative">“Kebaikan kecil yang istiqomah lebih dicintai.”</p>
-              <p class="text-xs text-white/80 mt-1.5 relative">Jejak donasi Anda adalah amanah yang kami jaga.</p>
-              <a href="/campaign" class="relative mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-brand-700 px-3.5 py-2 rounded-button hover:bg-brand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40">Lihat kampanye <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
+            <div class="hidden lg:block bg-brand-600 rounded-card p-5 text-white overflow-hidden relative shadow-[0_8px_24px_rgba(37,99,235,0.18)]">
+              <div class="absolute -right-8 -top-8 w-28 h-28 bg-white/10 rounded-full blur-2xl" aria-hidden="true"></div>
+              <div class="absolute inset-0 bg-gradient-to-br from-white/[0.06] to-transparent pointer-events-none" aria-hidden="true"></div>
+              <p class="text-sm font-medium leading-relaxed relative text-pretty">“Kebaikan kecil yang konsisten lebih dicintai.”</p>
+              <p class="text-xs text-white/80 mt-1.5 relative leading-relaxed">Riwayat donasi Anda tersimpan dengan aman.</p>
+              <a href="/campaign" class="relative mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-white text-brand-700 px-3.5 py-2.5 rounded-button hover:bg-brand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-600 min-h-9">Jelajahi kampanye <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
             </div>
           </div>
 
-          <div class="lg:col-span-8 space-y-6">
-            <div id="donation-card" class="bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-6 md:p-7 opacity-0">
-              <div class="flex items-center justify-between gap-4 mb-5">
-                <div>
-                  <h3 class="text-base font-semibold tracking-tight text-foreground">Jejak kebaikan</h3>
-                  <p class="text-xs text-muted-foreground mt-0.5">Riwayat donasi dan bukti amanah Anda</p>
+          <div class="lg:col-span-8 space-y-4 lg:space-y-5">
+            <div id="donation-card" class="bg-white rounded-card shadow-[0_2px_16px_rgba(15,23,42,0.06),0_8px_24px_rgba(15,23,42,0.04)] border border-border p-5 md:p-6 lg:p-7 opacity-0">
+              <div class="flex items-start justify-between gap-4 mb-6">
+                <div class="min-w-0">
+                  <h3 class="text-[15px] font-semibold tracking-tight text-foreground">Riwayat donasi</h3>
+                  <p class="text-xs text-muted-foreground mt-1 leading-relaxed">Riwayat donasi dan bukti pembayaran Anda</p>
                 </div>
-                <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Terbaru dari donasi Anda</span>
+                <span class="hidden sm:inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Terbaru</span>
               </div>
               <div id="donation-summary-container">
-                <div class="bg-gray-50/80 rounded-xl border border-border p-6 text-center">
-                  <p id="donation-summary-text" class="text-sm leading-relaxed text-muted-foreground mb-4">Memuat ringkasan donasi Anda...</p>
-                  <Button asChild variant="default" className="bg-brand-600 hover:bg-brand-700 text-white w-full md:w-auto">
+                <div class="bg-gray-50/70 rounded-xl border border-border p-6 text-center">
+                  <p id="donation-summary-text" class="text-sm leading-relaxed text-muted-foreground mb-4 text-pretty">Memuat ringkasan donasi Anda...</p>
+                  <Button asChild variant="default" className="bg-brand-600 hover:bg-brand-700 text-white w-full md:w-auto shadow-[0_4px_16px_rgba(37,99,235,0.22)]">
                     <a href="/profile/donations" class="inline-flex w-full md:w-auto justify-center">Lihat semua riwayat donasi</a>
                   </Button>
                 </div>
               </div>
             </div>
 
-            <div id="login-prompt" class="hidden bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-8">
+            <div id="login-prompt" class="hidden bg-white rounded-card shadow-[0_2px_16px_rgba(15,23,42,0.06),0_8px_24px_rgba(15,23,42,0.04)] border border-border p-8">
               <div class="text-center max-w-sm mx-auto">
                 <div class="w-14 h-14 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-brand-100" aria-hidden="true">
                   <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
                 <h3 class="text-base font-semibold tracking-tight text-foreground mb-1.5">Anda belum masuk</h3>
-                <p class="text-sm leading-relaxed text-muted-foreground mb-6 text-balance">Masuk untuk melihat data profil dan mengelola jejak donasi Anda. Amanah Anda menunggu.</p>
+                <p class="text-sm leading-relaxed text-muted-foreground mb-6 text-balance">Masuk untuk melihat profil dan riwayat donasi Anda.</p>
                 <div class="space-y-3">
                   <a href="/auth/login" class="w-full bg-brand-600 text-white py-3 px-4 rounded-button hover:bg-brand-700 transition-colors duration-200 font-medium text-center block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk ke akun</a>
                   <p class="text-sm text-muted-foreground">Belum punya akun? <a href="/auth/signup" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Daftar sekarang</a></p>
@@ -230,8 +277,8 @@ import Button from "../../components/common/Button.astro";
         <div id="edit-modal" class="fixed inset-0 hidden items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
           <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" id="edit-modal-backdrop"></div>
           <div id="edit-modal-panel" class="bg-white rounded-card shadow-[0_16px_48px_rgba(15,23,42,0.16)] max-w-lg w-full p-6 md:p-7 z-10 border border-border max-h-[90vh] overflow-auto">
-            <h3 id="edit-modal-title" class="text-lg font-semibold tracking-tight text-foreground mb-1">Ubah data profil</h3>
-            <p class="text-sm text-muted-foreground mb-5">Perbarui informasi yang tampil di profil Anda. Perubahan tersimpan sebagai amanah.</p>
+            <h3 id="edit-modal-title" class="text-lg font-semibold tracking-tight text-foreground mb-1">Ubah profil</h3>
+            <p class="text-sm text-muted-foreground mb-5">Perbarui nama, email, dan informasi kontak Anda.</p>
             <form id="edit-profile-form" class="space-y-4" novalidate>
               <div>
                 <label for="input-nama" class="block text-sm font-medium text-foreground mb-1.5">Nama lengkap <span class="text-muted-foreground font-normal">· wajib, maks. 100 karakter</span></label>
@@ -321,15 +368,32 @@ import Button from "../../components/common/Button.astro";
       const cancel = document.getElementById("cancel-edit");
       if (btn) { btn.disabled = isSaving; btn.setAttribute("aria-busy", String(isSaving)); btn.classList.toggle("opacity-60", isSaving); btn.classList.toggle("cursor-not-allowed", isSaving); }
       if (cancel) cancel.disabled = isSaving;
-      if (label) label.textContent = isSaving ? "Menyimpan amanah…" : "Simpan perubahan";
+      if (label) label.textContent = isSaving ? "Menyimpan…" : "Simpan perubahan";
       if (spin) spin.classList.toggle("hidden", !isSaving);
     }
-    function formatPhoneForDisplay(v) { return (v || "-").toString().trim() || "-"; }
+    function formatPhoneForDisplay(v) {
+      const t = (v ?? "").toString().trim();
+      if (!t || t === "-") return "-";
+      return t.slice(0, 20);
+    }
+    function safeSlice(s, n) {
+      const t = (s ?? "").toString();
+      try {
+        if (typeof Intl !== "undefined" && Intl.Segmenter) {
+          const seg = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+          return [...seg.segment(t)].slice(0, n).map((x) => x.segment).join("");
+        }
+      } catch {}
+      return [...t].slice(0, n).join("");
+    }
+    function graphemeLen(s) { try { if (typeof Intl !== "undefined" && Intl.Segmenter) return [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(s || "")].length; } catch {} return [...(s || "")].length; }
     function getInitials(name) {
-      const parts = (name || "").trim().split(/\s+/).filter(Boolean).slice(0,2);
+      const raw = (name || "").toString().trim();
+      if (!raw || raw === "-" || raw.toLowerCase() === "user") return "—";
+      const parts = raw.split(/\s+/).filter(Boolean).slice(0, 2);
       if (parts.length === 0) return "—";
-      if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      if (parts.length === 1) return safeSlice(parts[0], 2).toUpperCase();
+      return (safeSlice(parts[0], 1) + safeSlice(parts[1], 1)).toUpperCase();
     }
     function updateAvatar(name) {
       const initials = document.getElementById("avatar-initials");
@@ -374,7 +438,7 @@ import Button from "../../components/common/Button.astro";
       pctEl.textContent = pct + "%";
       if (pct === 100) {
         bar.className = "h-full bg-emerald-500 rounded-full transition-all duration-700 ease-out";
-        hint.textContent = "Lengkap — profil siap untuk amanah berikutnya.";
+        hint.textContent = "Lengkap — profil siap digunakan.";
       } else if (pct >= 50) {
         bar.className = "h-full bg-brand-600 rounded-full transition-all duration-700 ease-out";
         hint.textContent = !hasPhone || !hasAddress ? "Tambah nomor HP dan alamat agar donasi lebih mudah diverifikasi." : "Hampir lengkap.";
@@ -418,6 +482,7 @@ import Button from "../../components/common/Button.astro";
       }
     }
 
+    let pendingProfileController = null;
     function showError(title, message, isSessionError = false) {
       const loadingState = document.querySelector("#loading-state");
       const profileContent = document.querySelector("#profile-content");
@@ -428,18 +493,31 @@ import Button from "../../components/common/Button.astro";
       hideElement(loadingState);
       hideElement(profileContent);
       showElement(errorState);
-      if (errorTitle) errorTitle.textContent = title;
-      if (errorMessage) errorMessage.textContent = message;
-      if (isSessionError && errorActions) {
-        errorActions.innerHTML = `
-          <a href="/auth/login" class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk kembali</a>
-          <button onclick="window.location.reload()" class="block w-full bg-white hover:bg-gray-50 text-foreground font-medium py-3 px-6 rounded-button border border-input transition-colors duration-200 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Muat ulang halaman</button>
-        `;
+      if (errorTitle) errorTitle.textContent = (title || "Gagal memuat").toString().slice(0, 120);
+      if (errorMessage) {
+        const m = (message || "Terjadi kesalahan. Coba lagi.").toString().slice(0, 500);
+        errorMessage.textContent = m;
+        errorMessage.setAttribute("title", m);
+      }
+      if (errorActions) {
+        if (isSessionError) {
+          errorActions.innerHTML = `<a href="/auth/login" class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Masuk kembali</a><button type="button" data-retry-profile class="block w-full bg-white hover:bg-gray-50 text-foreground font-medium py-3 px-6 rounded-button border border-input transition-colors duration-200 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Muat ulang halaman</button>`;
+        } else {
+          const offline = !isOnline();
+          errorActions.innerHTML = `<button type="button" data-retry-profile class="block w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-6 rounded-button transition-colors duration-200 shadow-[0_4px_16px_rgba(37,99,235,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">${offline ? "Coba lagi (offline)" : "Coba lagi"}</button><button type="button" onclick="window.location.reload()" class="block w-full bg-white hover:bg-gray-50 text-foreground font-medium py-3 px-6 rounded-button border border-input transition-colors duration-200 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Muat ulang halaman</button>`;
+        }
+      }
+      if (errorState) {
+        errorState.setAttribute("tabindex", "-1");
+        try { errorState.focus({ preventScroll: true }); } catch {}
       }
     }
 
+    function safeGetToken() {
+      try { return localStorage.getItem("token") || ""; } catch { return ""; }
+    }
     function checkAuthStatus() {
-      const token = localStorage.getItem("token");
+      const token = safeGetToken();
       const loadingState = document.querySelector("#loading-state");
       const profileContent = document.querySelector("#profile-content");
       const actionButtons = document.querySelector("#action-buttons");
@@ -454,10 +532,12 @@ import Button from "../../components/common/Button.astro";
         revealProfile();
         fetchUserProfile(token).catch((e) => {
           console.error(e);
-          showError("Gagal memuat profil", e.message || "Terjadi kesalahan saat memuat data profil. Periksa koneksi lalu muat ulang halaman.");
+          const m = (e && e.message) ? e.message.toString().slice(0, 500) : "Terjadi kesalahan saat memuat data profil. Periksa koneksi lalu muat ulang halaman.";
+          showError("Gagal memuat profil", m);
         });
         fetchDonationSummary(token).catch((e) => console.error(e));
       } else {
+        if (pendingProfileController) try { pendingProfileController.abort(); } catch {}
         hideElement(loadingState);
         showElement(profileContent);
         showElement(loginPrompt);
@@ -470,30 +550,33 @@ import Button from "../../components/common/Button.astro";
         if (userRoleElement) userRoleElement.textContent = "Belum masuk";
         if (userEmailElement) userEmailElement.textContent = "Masuk untuk melihat data profil Anda";
         const meta = document.getElementById("profile-meta");
-        if (meta) { meta.textContent = "Masuk untuk menjaga amanah tetap tercatat"; meta.classList.remove("hidden"); }
+        if (meta) { meta.textContent = "Masuk untuk melihat donasi Anda"; meta.classList.remove("hidden"); }
         updateAvatar("");
         const cw = document.getElementById("completeness-wrap");
         if (cw) cw.classList.add("hidden");
         actionButtons.innerHTML = "";
+        actionButtons.classList.add("hidden");
       }
     }
 
     async function fetchUserProfile(token) {
       if (!isOnline()) { showError("Koneksi terputus", "Anda sedang offline. Periksa koneksi internet lalu muat ulang halaman."); return; }
       if (!API_URL) { showError("Konfigurasi tidak tersedia", "Pengaturan aplikasi belum lengkap. Hubungi dukungan."); return; }
+      if (pendingProfileController) try { pendingProfileController.abort(); } catch {}
+      pendingProfileController = new AbortController();
       try {
-        const res = await fetchWithTimeout(`${API_URL}/auth/profile`, { headers: { Authorization: `Bearer ${token}` } }, 12000);
+        const res = await fetchWithTimeout(`${API_URL}/auth/profile`, { headers: { Authorization: `Bearer ${token}` }, signal: pendingProfileController.signal }, 12000);
         const text = await res.text();
         let parsed;
         try { parsed = JSON.parse(text); } catch (e) { parsed = text; }
         if (!res.ok) {
           if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem("token"); localStorage.removeItem("role");
+            try { localStorage.removeItem("token"); localStorage.removeItem("role"); } catch {}
             showError("Sesi berakhir", "Sesi Anda telah berakhir. Silakan masuk kembali untuk melanjutkan.", true);
             return;
           }
           const msg = typeof parsed === "object" ? (parsed?.error || parsed?.message) : parsed;
-          throw new Error(apiErrorMessage(res.status, msg || "Gagal mengambil profil"));
+          throw new Error(apiErrorMessage(res.status, (msg || "Gagal mengambil profil").toString().slice(0, 500)));
         }
         const user = typeof parsed === "object" ? parsed : JSON.parse(text);
         const nameHeading = document.querySelector("#user-name");
@@ -504,51 +587,57 @@ import Button from "../../components/common/Button.astro";
         const phoneEl = document.querySelector("#user-phone");
         const addressEl = document.querySelector("#user-address");
         const editInlineBtn = document.querySelector("#edit-profile-inline");
-        const safeNama = (user.nama || "User").toString().slice(0, 100);
-        if (nameHeading) { nameHeading.textContent = safeNama; nameHeading.title = safeNama; }
+        const safeNama = safeSlice(user.nama || "User", 100);
+        if (nameHeading) {
+          nameHeading.textContent = safeNama;
+          nameHeading.title = safeNama;
+          nameHeading.setAttribute("dir", "auto");
+        }
         if (roleEl) roleEl.textContent = user.role === "admin" ? "Administrator" : "User";
-        if (fullName) fullName.textContent = (user.nama || "-").toString().slice(0, 100) || "-";
-        if (usernameEl) usernameEl.textContent = (user.username || "-").toString().slice(0, 50) || "-";
-        if (emailEl) emailEl.textContent = (user.email || "-").toString().slice(0, 254) || "-";
+        if (fullName) { const v = safeSlice(user.nama || "-", 100) || "-"; fullName.textContent = v; fullName.title = v; fullName.setAttribute("dir", "auto"); }
+        if (usernameEl) { const v = safeSlice(user.username || "-", 50) || "-"; usernameEl.textContent = v; usernameEl.title = v; }
+        if (emailEl) { const v = safeSlice(user.email || "-", 254) || "-"; emailEl.textContent = v; emailEl.title = v; }
         if (phoneEl) phoneEl.textContent = formatPhoneForDisplay(user.nomorHp);
-        if (addressEl) addressEl.textContent = (user.alamat || "-").toString().slice(0, 500) || "-";
+        if (addressEl) { const v = safeSlice(user.alamat || "-", 500) || "-"; addressEl.textContent = v; addressEl.title = v === "-" ? "" : v; addressEl.setAttribute("dir", "auto"); }
         const meta = document.getElementById("profile-meta");
         if (meta) {
           const last = user.updatedAt || user.createdAt;
-          let label = "Amanah tercatat";
-          try { if (last) label = "Diperbarui " + new Date(last).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }); } catch {}
+          let           label = "Terdaftar";
+          try { if (last) label = "Diperbarui " + new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(last)); } catch {}
+          try { if (last && isNaN(new Date(last).getTime())) label = "Terdaftar"; } catch {}
           meta.textContent = label + " · " + (user.role === "admin" ? "Administrator" : "Donatur");
           meta.classList.remove("hidden");
         }
         updateAvatar(safeNama);
         updateCompleteness(user);
-        if (user.nama) localStorage.setItem("userName", safeNama);
-        if (user.email) localStorage.setItem("userEmail", user.email.toString().slice(0, 254));
+        try {
+          if (user.nama) localStorage.setItem("userName", safeNama);
+          if (user.email) localStorage.setItem("userEmail", safeSlice(user.email, 254));
+        } catch {}
         if (editInlineBtn) editInlineBtn.classList.remove("hidden");
         renderActionButtons(user.role || "user");
       } catch (err) {
         if (err?.name === "AbortError") { showError("Koneksi lambat", "Permintaan memakan waktu terlalu lama. Periksa koneksi internet lalu muat ulang halaman."); return; }
         if (!isOnline()) { showError("Koneksi terputus", "Anda sedang offline. Periksa koneksi internet lalu muat ulang halaman."); return; }
-        showError("Gagal memuat profil", err.message || "Terjadi kesalahan saat memuat profil. Periksa koneksi lalu muat ulang halaman.");
-      }
+        showError("Gagal memuat profil", (err && err.message) ? err.message.toString().slice(0, 500) : "Terjadi kesalahan saat memuat profil. Periksa koneksi lalu muat ulang halaman.");
+      } finally { pendingProfileController = null; }
     }
 
     function renderActionButtons(role) {
       const actionButtons = document.querySelector("#action-buttons");
       if (!actionButtons) return;
       actionButtons.innerHTML = "";
-      const box = document.createElement("div");
-      box.className = "bg-white rounded-card shadow-[0_4px_20px_rgba(15,23,42,0.06)] border border-border p-5";
+      actionButtons.classList.remove("hidden");
       const title = document.createElement("h3");
       title.className = "text-sm font-semibold tracking-tight text-foreground mb-3";
-      title.textContent = "Aksi";
-      box.appendChild(title);
+      title.textContent = "Kelola akun";
+      actionButtons.appendChild(title);
       const list = document.createElement("div");
       list.className = "space-y-2.5";
       const editBtn = document.createElement("button");
       editBtn.id = "open-edit-btn";
       editBtn.type = "button";
-       editBtn.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-input text-foreground min-h-11 py-3 px-4 rounded-button hover:bg-gray-50 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2";
+      editBtn.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-input text-foreground min-h-11 py-3 px-4 rounded-button hover:bg-gray-50 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2";
       editBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M16 3l5 5M7 11l6 6" /></svg> Ubah profil';
       list.appendChild(editBtn);
       if (role === "admin") {
@@ -564,8 +653,7 @@ import Button from "../../components/common/Button.astro";
       logoutLink.className = "w-full inline-flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 min-h-11 py-3 px-4 rounded-button hover:bg-red-50 transition-colors text-sm font-medium text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2";
       logoutLink.textContent = "Keluar dari akun";
       list.appendChild(logoutLink);
-      box.appendChild(list);
-      actionButtons.appendChild(box);
+      actionButtons.appendChild(list);
       logoutLink.addEventListener("click", (e) => {
         e.preventDefault();
         localStorage.removeItem("token"); localStorage.removeItem("role"); localStorage.removeItem("userName"); localStorage.removeItem("userEmail");
@@ -612,7 +700,8 @@ import Button from "../../components/common/Button.astro";
       const cnt = document.getElementById("address-count");
       addr?.addEventListener("input", () => {
         setFieldError("err-address","");
-        if (cnt && addr instanceof HTMLTextAreaElement) cnt.textContent = `${addr.value.length}/500`;
+        if (cnt && addr instanceof HTMLTextAreaElement) cnt.textContent = `${graphemeLen(addr.value)}/500`;
+        if (addr instanceof HTMLTextAreaElement && graphemeLen(addr.value) > 500) setFieldError("err-address", "Alamat maksimal 500 karakter.");
       });
       document.getElementById("dismiss-success")?.addEventListener("click", () => {
         const b = document.getElementById("profile-success");
@@ -638,7 +727,7 @@ import Button from "../../components/common/Button.astro";
       if (inputPhone) inputPhone.value = phone === "-" ? "" : phone;
       if (inputAddress) inputAddress.value = address === "-" ? "" : address;
       const cnt = document.getElementById("address-count");
-      if (cnt && inputAddress instanceof HTMLTextAreaElement) cnt.textContent = `${inputAddress.value.length}/500`;
+      if (cnt && inputAddress instanceof HTMLTextAreaElement) cnt.textContent = `${graphemeLen(inputAddress.value)}/500`;
       clearFieldErrors();
       modal.classList.remove("hidden");
       modal.classList.add("flex");
@@ -664,18 +753,21 @@ import Button from "../../components/common/Button.astro";
       clearFieldErrors();
       const n = nama.trim();
       if (!n) { setFieldError("err-nama", "Nama lengkap wajib diisi."); ok = false; }
-      else if (n.length < 2) { setFieldError("err-nama", "Nama minimal 2 karakter."); ok = false; }
-      else if (n.length > 100) { setFieldError("err-nama", "Nama maksimal 100 karakter."); ok = false; }
+      else if (graphemeLen(n) < 2) { setFieldError("err-nama", "Nama minimal 2 karakter."); ok = false; }
+      else if (graphemeLen(n) > 100) { setFieldError("err-nama", "Nama maksimal 100 karakter."); ok = false; }
+      else if (!/^[\p{L}\p{N}\p{M} .,'\-]+$/u.test(n)) { setFieldError("err-nama", "Nama berisi karakter tidak didukung. Gunakan huruf, angka, spasi, titik, koma, petik, atau strip."); ok = false; }
       const em = email.trim();
       if (!em) { setFieldError("err-email", "Email wajib diisi."); ok = false; }
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { setFieldError("err-email", "Gunakan format email yang valid, contoh: nama@email.com"); ok = false; }
-      else if (em.length > 254) { setFieldError("err-email", "Email terlalu panjang (maks. 254 karakter)."); ok = false; }
+      else if (graphemeLen(em) > 254) { setFieldError("err-email", "Email terlalu panjang (maks. 254 karakter)."); ok = false; }
       const ph = nomorHp.trim();
       if (ph && !/^08[0-9]{8,11}$/.test(ph)) { setFieldError("err-phone", "Gunakan format 08xxxxxxxxxx (10–13 digit angka)."); ok = false; }
-      if (alamat.length > 500) { setFieldError("err-address", "Alamat maksimal 500 karakter."); ok = false; }
+      if (graphemeLen(alamat) > 500) { setFieldError("err-address", "Alamat maksimal 500 karakter."); ok = false; }
       if (!ok) {
         const firstErr = document.querySelector('[aria-invalid="true"]');
         if (firstErr instanceof HTMLElement) firstErr.focus();
+        const g = document.getElementById("form-global-error");
+        if (g && !g.textContent) { g.textContent = "Periksa kembali isian yang ditandai di atas."; g.classList.remove("hidden"); }
       }
       return ok;
     }
@@ -683,7 +775,7 @@ import Button from "../../components/common/Button.astro";
     async function submitEditForm(e) {
       e.preventDefault();
       if (document.getElementById("save-edit")?.disabled) return;
-      const token = localStorage.getItem("token");
+      const token = safeGetToken();
       if (!token) { if (window.showToast) window.showToast("Anda harus masuk untuk mengubah profil", "warning"); return; }
       if (!isOnline()) { setGlobalFormError("Koneksi terputus. Periksa internet lalu coba simpan kembali."); if (window.showToast) window.showToast("Koneksi terputus — perubahan belum disimpan.", "error"); return; }
       const nama = (document.querySelector("#input-nama")?.value || "").trim();
@@ -698,14 +790,14 @@ import Button from "../../components/common/Button.astro";
         const res = await fetchWithTimeout(`${API_URL}/auth/profile`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ nama, email, nomorHp, alamat }),
+          body: JSON.stringify({ nama: safeSlice(nama, 100), email: safeSlice(email, 254), nomorHp: safeSlice(nomorHp, 15), alamat: safeSlice(alamat, 500) }),
         }, 12000);
         const text = await res.text();
         let data;
-        try { data = JSON.parse(text); } catch { data = { error: text }; }
+        try { data = JSON.parse(text); } catch { data = { error: text.slice(0, 500) }; }
         if (!res.ok) {
           if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem("token"); localStorage.removeItem("role");
+            try { localStorage.removeItem("token"); localStorage.removeItem("role"); } catch {}
             closeEditModal();
             showError("Sesi berakhir", "Sesi Anda telah berakhir. Silakan masuk kembali untuk melanjutkan.", true);
             return;
@@ -713,35 +805,48 @@ import Button from "../../components/common/Button.astro";
           if (res.status === 400 && data?.details) {
             if (Array.isArray(data.details)) data.details.forEach((d) => {
               const f = (d.field || "").toLowerCase();
-              if (f.includes("nama")) setFieldError("err-nama", d.message || "Nama tidak valid");
-              else if (f.includes("email")) setFieldError("err-email", d.message || "Email tidak valid");
-              else if (f.includes("hp") || f.includes("phone") || f.includes("nomor")) setFieldError("err-phone", d.message || "Nomor HP tidak valid");
-              else if (f.includes("alamat") || f.includes("address")) setFieldError("err-address", d.message || "Alamat tidak valid");
+              const m = (d.message || "Tidak valid").toString().slice(0, 200);
+              if (f.includes("nama")) setFieldError("err-nama", m);
+              else if (f.includes("email")) setFieldError("err-email", m);
+              else if (f.includes("hp") || f.includes("phone") || f.includes("nomor")) setFieldError("err-phone", m);
+              else if (f.includes("alamat") || f.includes("address")) setFieldError("err-address", m);
+              else setGlobalFormError(m);
             });
-            throw new Error(data.error || "Periksa kembali isian Anda.");
+            throw new Error((data.error || "Periksa kembali isian Anda.").toString().slice(0, 500));
           }
-          throw new Error(apiErrorMessage(res.status, data.error || data.message || "Gagal menyimpan perubahan profil"));
+          if (res.status === 429) { setGlobalFormError(apiErrorMessage(429, "")); throw new Error(apiErrorMessage(429, data.error || data.message || "")); }
+          throw new Error(apiErrorMessage(res.status, (data.error || data.message || "Gagal menyimpan perubahan profil").toString().slice(0, 500)));
         }
         const u = data.user || {};
-        const safeNama = (u.nama || nama).toString().slice(0,100);
-        document.querySelector("#user-name").textContent = safeNama;
-        document.querySelector("#user-name").title = safeNama;
-        document.querySelector("#user-fullname").textContent = safeNama;
-        document.querySelector("#user-email").textContent = (u.email || email).toString().slice(0,254);
-        document.querySelector("#user-phone").textContent = formatPhoneForDisplay(u.nomorHp || nomorHp);
-        document.querySelector("#user-address").textContent = (u.alamat || alamat).toString().slice(0,500) || "-";
+        const safeNama = safeSlice(u.nama || nama, 100);
+        const safeEmail = safeSlice(u.email || email, 254);
+        const safePhone = formatPhoneForDisplay(u.nomorHp ?? nomorHp);
+        const safeAddr = safeSlice(u.alamat ?? alamat, 500) || "-";
+        const nameEl = document.querySelector("#user-name");
+        const fullEl = document.querySelector("#user-fullname");
+        const emailEl = document.querySelector("#user-email");
+        const phoneEl = document.querySelector("#user-phone");
+        const addrEl = document.querySelector("#user-address");
+        if (nameEl) { nameEl.textContent = safeNama; nameEl.title = safeNama; nameEl.setAttribute("dir", "auto"); }
+        if (fullEl) { fullEl.textContent = safeNama; fullEl.title = safeNama; fullEl.setAttribute("dir", "auto"); }
+        if (emailEl) { emailEl.textContent = safeEmail; emailEl.title = safeEmail; }
+        if (phoneEl) phoneEl.textContent = safePhone;
+        if (addrEl) { addrEl.textContent = safeAddr; addrEl.title = safeAddr === "-" ? "" : safeAddr; addrEl.setAttribute("dir", "auto"); }
         const meta = document.getElementById("profile-meta");
         if (meta) { meta.textContent = "Diperbarui barusan · " + (u.role === "admin" ? "Administrator" : "Donatur"); meta.classList.remove("hidden"); }
         updateAvatar(safeNama);
-        updateCompleteness({ nama: safeNama, email: u.email || email, nomorHp: u.nomorHp || nomorHp, alamat: u.alamat || alamat });
-        if (u.nama) localStorage.setItem("userName", safeNama);
-        if (u.email) localStorage.setItem("userEmail", u.email.toString().slice(0,254));
+        updateCompleteness({ nama: safeNama, email: safeEmail, nomorHp: u.nomorHp ?? nomorHp, alamat: u.alamat ?? alamat });
+        try {
+          if (u.nama) localStorage.setItem("userName", safeNama);
+          if (u.email) localStorage.setItem("userEmail", safeEmail);
+        } catch {}
         closeEditModal();
         showInlineSuccess("Profil diperbarui — " + safeNama);
-        if (window.showToast) window.showToast("Perubahan profil disimpan — amanah terjaga.", "success");
+        if (window.showToast) window.showToast("Perubahan profil disimpan.", "success");
       } catch (err) {
         if (err?.name === "AbortError") { setGlobalFormError("Permintaan terlalu lama. Periksa koneksi lalu coba simpan kembali."); if (window.showToast) window.showToast("Koneksi lambat — coba simpan kembali.", "error"); return; }
-        const msg = err instanceof Error ? err.message : "Gagal menyimpan perubahan profil";
+        if (!isOnline()) { setGlobalFormError("Koneksi terputus. Coba lagi setelah online."); return; }
+        const msg = err instanceof Error ? err.message.toString().slice(0, 500) : "Gagal menyimpan perubahan profil";
         setGlobalFormError(msg);
         if (window.showToast) window.showToast(msg, "error");
       } finally { setSaving(false); }
@@ -760,60 +865,72 @@ import Button from "../../components/common/Button.astro";
           if (res.status === 401 || res.status === 403) { textEl.innerHTML = `Sesi berakhir. <a href="/auth/login" class="text-brand-600 hover:text-brand-700 font-medium underline underline-offset-4">Masuk kembali</a> untuk melihat ringkasan.`; return; }
           throw new Error(apiErrorMessage(res.status, "Gagal memuat ringkasan donasi"));
         }
-        const data = await res.json();
-        const donations = data.donations || [];
+        let data;
+        try { data = await res.json(); } catch { data = {}; }
+        const donations = Array.isArray(data.donations) ? data.donations : [];
         if (donations.length === 0) {
-          container.innerHTML = `
-            <div class="rounded-xl border border-dashed border-brand-200 bg-brand-50/50 p-6 text-center">
-              <div class="w-12 h-12 bg-white border border-brand-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
-                <span class="material-symbols-outlined text-brand-600" aria-hidden="true">volunteer_activism</span>
-              </div>
-              <p class="text-sm font-semibold text-foreground">Belum ada jejak kebaikan</p>
-              <p class="text-sm text-muted-foreground mt-1 text-balance leading-relaxed">Setiap donasi tercatat sebagai amanah. Mulai kebaikan pertama Anda — kami jaga transparansinya.</p>
-              <a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors shadow-[0_4px_16px_rgba(37,99,235,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Jelajahi kampanye</a>
-            </div>`;
+          container.innerHTML = `<div class="rounded-xl border border-dashed border-brand-200 bg-brand-50/50 p-6 text-center"><div class="w-12 h-12 bg-white border border-brand-100 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm"><span class="material-symbols-outlined text-brand-600" aria-hidden="true">volunteer_activism</span></div><p class="text-sm font-semibold text-foreground">Belum ada donasi</p><p class="text-sm text-muted-foreground mt-1 text-balance leading-relaxed break-words">Donasi pertama Anda akan tampil di sini setelah pembayaran berhasil.</p><a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors shadow-[0_4px_16px_rgba(37,99,235,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 min-h-11">Jelajahi kampanye</a></div>`;
         } else {
           const count = donations.length;
           const last = donations[0];
           let date = "-";
-          try { date = new Date(last.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }); } catch {}
-          const safeCount = Number.isFinite(count) ? count : donations.length;
+          try { const d = new Date(last.createdAt); if (!isNaN(d.getTime())) date = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(d); } catch {}
+          const safeCount = Number.isFinite(count) ? Math.min(count, 999999) : donations.length;
           let totalLabel = "";
           try {
             const total = donations.reduce((s, d) => s + (Number(d.amount) || 0), 0);
-            if (total > 0) totalLabel = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(total);
+            if (total > 0) totalLabel = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.min(total, 9999999999999));
           } catch {}
-          container.innerHTML = `
-            <div class="rounded-xl border border-border bg-white p-5">
-              <div class="flex items-start justify-between gap-4">
-                <div class="flex gap-3">
-                  <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-emerald-600 text-[20px]" aria-hidden="true">favorite</span>
-                  </div>
-                  <div>
-                    <p class="text-xs tracking-wide uppercase font-medium text-muted-foreground">Jejak kebaikan Anda</p>
-                    <p class="text-2xl font-semibold tracking-tight text-foreground tabular-nums leading-none mt-1">${escapeHtml(String(safeCount))} <span class="text-sm font-medium text-muted-foreground">donasi</span></p>
-                    ${totalLabel ? `<p class="text-xs text-muted-foreground mt-1 tabular-nums">Total tercatat ${escapeHtml(totalLabel)}</p>` : ``}
-                  </div>
-                </div>
-                <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Terakhir ${escapeHtml(date)}</span>
-              </div>
-              <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                <a href="/profile/donations" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Lihat semua jejak <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a>
-                <a href="/campaign" class="inline-flex items-center justify-center bg-white border border-input text-foreground text-sm font-medium px-4 py-2.5 rounded-button hover:bg-gray-50 transition-colors">Donasi lagi</a>
-              </div>
-              <p class="text-xs text-muted-foreground mt-3 leading-relaxed">Terima kasih — setiap rupiah adalah amanah yang kami jaga.</p>
-            </div>`;
+          const summaryInner = `<div class="rounded-xl border border-border bg-white p-5 min-w-0"><div class="flex items-start justify-between gap-3 sm:gap-4 min-w-0"><div class="flex gap-3 min-w-0 flex-1"><div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-emerald-600 text-[20px]" aria-hidden="true">favorite</span></div><div class="min-w-0"><p class="text-xs tracking-wide uppercase font-medium text-muted-foreground">Total donasi Anda</p><p class="text-2xl font-semibold tracking-tight text-foreground tabular-nums leading-none mt-1 break-words">${escapeHtml(String(safeCount))} <span class="text-sm font-medium text-muted-foreground">donasi</span></p>${totalLabel ? `<p class="text-xs text-muted-foreground mt-1 tabular-nums break-all">Total nominal ${escapeHtml(totalLabel)}</p>` : ``}</div></div><span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 max-w-[45%] truncate" title="${escapeHtml(date)}">Terakhir ${escapeHtml(date)}</span></div><div class="mt-4 flex flex-col sm:flex-row gap-2"><a href="/profile/donations" class="flex-1 inline-flex items-center justify-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 min-h-11">Lihat semua riwayat <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></a><a href="/campaign" class="inline-flex items-center justify-center bg-white border border-input text-foreground text-sm font-medium px-4 py-2.5 rounded-button hover:bg-gray-50 transition-colors min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Donasi lagi</a></div><p class="text-xs text-muted-foreground mt-3 leading-relaxed break-words">Terima kasih — setiap rupiah adalah amanah yang kami jaga.</p></div>`;
+          container.innerHTML = summaryInner;
         }
       } catch (err) {
-        if (err?.name === "AbortError") { textEl.textContent = "Koneksi lambat. Periksa internet lalu coba lagi."; return; }
-        if (!isOnline() || err.message === "Offline" || err.message === "Pengaturan aplikasi belum lengkap.") { textEl.textContent = err.message === "Offline" ? "Koneksi terputus — ringkasan tidak dapat dimuat. Periksa internet." : err.message; return; }
-        textEl.textContent = apiErrorMessage(err.status || 0, "Gagal memuat ringkasan donasi. Periksa koneksi lalu coba lagi.");
+        if (err?.name === "AbortError") {
+          if (container.contains(textEl)) textEl.textContent = "Koneksi lambat. Periksa internet lalu coba lagi.";
+          else container.innerHTML = `<div class="bg-amber-50/60 rounded-xl border border-amber-200 p-5 text-center"><p class="text-sm font-medium text-amber-800">Koneksi lambat</p><p class="text-xs text-amber-700 mt-1">Coba lagi dengan koneksi lebih stabil.</p><button type="button" data-retry-summary class="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 min-h-11">Coba lagi</button></div>`;
+          return;
+        }
+        if (!isOnline() || err.message === "Offline" || err.message === "Pengaturan aplikasi belum lengkap.") {
+          const m = err.message === "Offline" ? "Koneksi terputus — ringkasan tidak dapat dimuat. Periksa internet." : err.message.toString().slice(0, 300);
+          if (container.contains(textEl)) textEl.textContent = m;
+          else container.innerHTML = `<div class="bg-amber-50/60 rounded-xl border border-amber-200 p-5 text-center"><p class="text-sm font-medium text-amber-800">Gagal memuat ringkasan</p><p class="text-xs text-amber-700 mt-1 break-words">${escapeHtml(m)}</p><button type="button" data-retry-summary class="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 min-h-11">Coba lagi</button></div>`;
+          return;
+        }
+        const m2 = apiErrorMessage(err.status || 0, "Gagal memuat ringkasan donasi. Periksa koneksi lalu coba lagi.");
+        if (container.contains(textEl)) textEl.textContent = m2;
+        else container.innerHTML = `<div class="bg-red-50/60 rounded-xl border border-red-200 p-5 text-center"><p class="text-sm font-medium text-red-700 break-words">${escapeHtml(m2)}</p><button type="button" data-retry-summary class="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-red-200 text-sm font-medium text-red-700 hover:bg-red-50 min-h-11">Coba lagi</button></div>`;
       }
+    }
+
+    function bindRetryDelegation() {
+      document.addEventListener("click", (e) => {
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        const r = t.closest("[data-retry-profile]");
+        if (r) {
+          const tok = safeGetToken();
+          if (tok) fetchUserProfile(tok).catch(() => {});
+          else checkAuthStatus();
+        }
+        const s = t.closest("[data-retry-summary]");
+        if (s) {
+          const tok2 = safeGetToken();
+          if (tok2) fetchDonationSummary(tok2).catch(() => {});
+        }
+      });
+      let wasOffline = !isOnline();
+      window.addEventListener("online", () => {
+        if (wasOffline && window.showToast) window.showToast("Kembali online — memuat ulang data.", "success");
+        wasOffline = false;
+        const tok = safeGetToken();
+        if (tok) { fetchUserProfile(tok).catch(()=>{}); fetchDonationSummary(tok).catch(()=>{}); }
+      });
+      window.addEventListener("offline", () => { wasOffline = true; if (window.showToast) window.showToast("Anda offline — perubahan akan tertunda.", "warning"); });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       bindModalEvents();
+      bindRetryDelegation();
       checkAuthStatus();
     });
     window.addEventListener("storage", checkAuthStatus);

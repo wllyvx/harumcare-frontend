@@ -258,6 +258,36 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+@media (pointer: coarse) {
+  button, a, [role="button"], input, textarea, select {
+    min-height: 44px;
+  }
+}
+
+@media (hover: hover) {
+  a:hover { text-underline-offset: 4px; }
+}
+
+@media (hover: none) {
+  .hover\:shadow-lg:hover { box-shadow: none !important; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
