@@ -109,7 +109,7 @@ const metaDescription = campaign.description
 >
   <section class="w-full relative max-w-6xl mx-auto">
     <div
-      class="w-full h-[300px] md:h-[400px] lg:h-[500px] bg-gray-300 relative overflow-hidden"
+      class="w-full h-[300px] md:h-[400px] lg:h-[380px] bg-gray-300 relative overflow-hidden"
     >
       <img
         src={campaign.imageUrl}
@@ -126,7 +126,7 @@ const metaDescription = campaign.description
             {campaign.category}
           </span>
           <h1
-            class="text-white text-2xl md:text-4xl lg:text-5xl font-bold max-w-4xl"
+            class="text-white text-2xl md:text-4xl lg:text-5xl font-bold max-w-4xl break-words overflow-wrap-anywhere"
           >
             {campaign.title}
           </h1>
@@ -233,7 +233,7 @@ const metaDescription = campaign.description
           </div>
         </div>
         <h2 class="text-2xl font-bold mb-4">Deskripsi Kampanye</h2>
-        <p class="text-gray-600 mb-6">{campaign.description}</p>
+        <p class="text-gray-600 mb-6 break-words overflow-wrap-anywhere">{campaign.description}</p>
 
         <!-- Tab Section -->
         <div class="my-8">
@@ -338,9 +338,8 @@ const metaDescription = campaign.description
       <div class="lg:w-1/3 px-2">
         <div class="sticky top-20">
           <div
-            class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 p-6 rounded-xl shadow-lg"
+            class="bg-white border border-gray-200 p-6 rounded-xl shadow-sm"
           >
-            <div class="p-6">
               <h2
                 class="text-2xl font-bold mb-4 text-blue-800 flex items-center"
               >
@@ -400,32 +399,32 @@ const metaDescription = campaign.description
                 <div class="grid grid-cols-3 gap-2">
                   <button
                     type="button"
-                    class="amount-btn bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
+                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
                     data-amount="25000">Rp 25K</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
+                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
                     data-amount="50000">Rp 50K</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
+                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
                     data-amount="100000">Rp 100K</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
+                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
                     data-amount="250000">Rp 250K</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
+                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
                     data-amount="500000">Rp 500K</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
+                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
                     data-amount="1000000">Rp 1M</button
                   >
                 </div>
@@ -436,6 +435,8 @@ const metaDescription = campaign.description
                 <button
                   type="button"
                   id="toggle-form-btn"
+                  aria-expanded="false"
+                  aria-controls="donate-form"
                   class="w-full py-3 px-4 bg-white border-2 border-blue-300 text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-200 flex items-center justify-center"
                 >
                   <span id="toggle-text">Lanjutkan Donasi</span>
@@ -455,12 +456,21 @@ const metaDescription = campaign.description
                 </button>
               </div>
 
-              <!-- Donation Form -->
+              <!-- Donation Form — single instance: IDs must stay unique for the submit listener -->
               <form
                 id="donate-form"
                 class="space-y-4 hidden"
                 data-campaign-id={campaign.id}
+                aria-label="Formulir donasi"
+                novalidate
               >
+                <div
+                  id="donate-error"
+                  role="alert"
+                  aria-live="polite"
+                  class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700"
+                >
+                </div>
                 {
                   !isCampaignActive && (
                     <div class="mb-4 p-3 bg-gray-100 rounded-md">
@@ -483,6 +493,8 @@ const metaDescription = campaign.description
                     type="text"
                     id="donor-name"
                     name="donor-name"
+                    maxlength="100"
+                    autocomplete="name"
                     class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
                     placeholder="Kosongkan jika ingin anonim"
                     disabled={!isCampaignActive}
@@ -516,6 +528,9 @@ const metaDescription = campaign.description
                       type="text"
                       id="donation-amount"
                       name="donation-amount"
+                      inputmode="numeric"
+                      autocomplete="transaction-amount"
+                      aria-describedby="donate-error"
                       class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
                       placeholder="1.000.000"
                       required
@@ -543,7 +558,8 @@ const metaDescription = campaign.description
                 </div>
                 <button
                   type="submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
+                  id="donate-submit"
+                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 ${
                     isCampaignActive
                       ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
                       : "bg-gray-400 text-gray-200 cursor-not-allowed"
@@ -557,452 +573,6 @@ const metaDescription = campaign.description
                   }
                 </button>
               </form>
-              <!-- Donation Form -->
-              <form
-                id="donate-form"
-                class="space-y-4 hidden"
-                data-campaign-id={campaign.id}
-              >
-                {
-                  !isCampaignActive && (
-                    <div class="mb-4 p-3 bg-gray-100 rounded-md">
-                      <p class="text-sm text-gray-600 text-center">
-                        {isCampaignEnded
-                          ? "Kampanye ini telah berakhir dan tidak dapat menerima donasi lagi."
-                          : "Target donasi telah tercapai. Terima kasih atas dukungan semua donatur!"}
-                      </p>
-                    </div>
-                  )
-                }
-
-                <div>
-                  <label
-                    for="donor-name"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Nama Donatur</label
-                  >
-                  <input
-                    type="text"
-                    id="donor-name"
-                    name="donor-name"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                    placeholder="Kosongkan jika ingin anonim"
-                    disabled={!isCampaignActive}
-                  />
-                </div>
-                <div>
-                  <label
-                    for="donation-amount"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Donasi</label
-                  >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
-                      >Rp</span
-                    >
-                    <input
-                      type="text"
-                      id="donation-amount"
-                      name="donation-amount"
-                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                      placeholder="1.000.000"
-                      required
-                      disabled={!isCampaignActive}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    for="donation-message"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Pesan Donasi</label
-                  >
-                  <textarea
-                    id="donation-message"
-                    name="donation-message"
-                    rows="3"
-                    maxlength="500"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 resize-none"
-                    placeholder="Tuliskan pesan dukungan atau doa untuk kampanye ini (opsional)"
-                    disabled={!isCampaignActive}></textarea>
-                  <div class="mt-1 text-xs text-gray-500 text-right">
-                    <span id="message-counter">0</span>/500 karakter
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
-                    isCampaignActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  }`}
-                  disabled={!isCampaignActive}
-                >
-                  {
-                    isCampaignActive
-                      ? "💝 Lanjut ke Pembayaran"
-                      : "❌ Kampanye Tidak Aktif"
-                  }
-                </button>
-              </form>
-              <!-- Donation Form -->
-              <form
-                id="donate-form"
-                class="space-y-4 hidden"
-                data-campaign-id={campaign.id}
-              >
-                {
-                  !isCampaignActive && (
-                    <div class="mb-4 p-3 bg-gray-100 rounded-md">
-                      <p class="text-sm text-gray-600 text-center">
-                        {isCampaignEnded
-                          ? "Kampanye ini telah berakhir dan tidak dapat menerima donasi lagi."
-                          : "Target donasi telah tercapai. Terima kasih atas dukungan semua donatur!"}
-                      </p>
-                    </div>
-                  )
-                }
-
-                <div>
-                  <label
-                    for="donor-name"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Nama Donatur</label
-                  >
-                  <input
-                    type="text"
-                    id="donor-name"
-                    name="donor-name"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                    placeholder="Kosongkan jika ingin anonim"
-                    disabled={!isCampaignActive}
-                  />
-                </div>
-                <div>
-                  <label
-                    for="donation-amount"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Donasi</label
-                  >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
-                      >Rp</span
-                    >
-                    <input
-                      type="text"
-                      id="donation-amount"
-                      name="donation-amount"
-                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                      placeholder="1.000.000"
-                      required
-                      disabled={!isCampaignActive}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    for="donation-message"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Pesan Donasi</label
-                  >
-                  <textarea
-                    id="donation-message"
-                    name="donation-message"
-                    rows="3"
-                    maxlength="500"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 resize-none"
-                    placeholder="Tuliskan pesan dukungan atau doa untuk kampanye ini (opsional)"
-                    disabled={!isCampaignActive}></textarea>
-                  <div class="mt-1 text-xs text-gray-500 text-right">
-                    <span id="message-counter">0</span>/500 karakter
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
-                    isCampaignActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  }`}
-                  disabled={!isCampaignActive}
-                >
-                  {
-                    isCampaignActive
-                      ? "💝 Lanjut ke Pembayaran"
-                      : "❌ Kampanye Tidak Aktif"
-                  }
-                </button>
-              </form>
-              <!-- Donation Form -->
-              <form
-                id="donate-form"
-                class="space-y-4 hidden"
-                data-campaign-id={campaign.id}
-              >
-                {
-                  !isCampaignActive && (
-                    <div class="mb-4 p-3 bg-gray-100 rounded-md">
-                      <p class="text-sm text-gray-600 text-center">
-                        {isCampaignEnded
-                          ? "Kampanye ini telah berakhir dan tidak dapat menerima donasi lagi."
-                          : "Target donasi telah tercapai. Terima kasih atas dukungan semua donatur!"}
-                      </p>
-                    </div>
-                  )
-                }
-
-                <div>
-                  <label
-                    for="donor-name"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Nama Donatur</label
-                  >
-                  <input
-                    type="text"
-                    id="donor-name"
-                    name="donor-name"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                    placeholder="Kosongkan jika ingin anonim"
-                    disabled={!isCampaignActive}
-                  />
-                </div>
-                <div>
-                  <label
-                    for="donation-amount"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Donasi</label
-                  >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
-                      >Rp</span
-                    >
-                    <input
-                      type="text"
-                      id="donation-amount"
-                      name="donation-amount"
-                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                      placeholder="1.000.000"
-                      required
-                      disabled={!isCampaignActive}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    for="donation-message"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Pesan Donasi</label
-                  >
-                  <textarea
-                    id="donation-message"
-                    name="donation-message"
-                    rows="3"
-                    maxlength="500"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 resize-none"
-                    placeholder="Tuliskan pesan dukungan atau doa untuk kampanye ini (opsional)"
-                    disabled={!isCampaignActive}></textarea>
-                  <div class="mt-1 text-xs text-gray-500 text-right">
-                    <span id="message-counter">0</span>/500 karakter
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
-                    isCampaignActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  }`}
-                  disabled={!isCampaignActive}
-                >
-                  {
-                    isCampaignActive
-                      ? "💝 Lanjut ke Pembayaran"
-                      : "❌ Kampanye Tidak Aktif"
-                  }
-                </button>
-              </form>
-              <!-- Donation Form -->
-              <form
-                id="donate-form"
-                class="space-y-4 hidden"
-                data-campaign-id={campaign.id}
-              >
-                {
-                  !isCampaignActive && (
-                    <div class="mb-4 p-3 bg-gray-100 rounded-md">
-                      <p class="text-sm text-gray-600 text-center">
-                        {isCampaignEnded
-                          ? "Kampanye ini telah berakhir dan tidak dapat menerima donasi lagi."
-                          : "Target donasi telah tercapai. Terima kasih atas dukungan semua donatur!"}
-                      </p>
-                    </div>
-                  )
-                }
-
-                <div>
-                  <label
-                    for="donor-name"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Nama Donatur</label
-                  >
-                  <input
-                    type="text"
-                    id="donor-name"
-                    name="donor-name"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                    placeholder="Kosongkan jika ingin anonim"
-                    disabled={!isCampaignActive}
-                  />
-                </div>
-                <div>
-                  <label
-                    for="donation-amount"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Donasi</label
-                  >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
-                      >Rp</span
-                    >
-                    <input
-                      type="text"
-                      id="donation-amount"
-                      name="donation-amount"
-                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                      placeholder="1.000.000"
-                      required
-                      disabled={!isCampaignActive}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    for="donation-message"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Pesan Donasi</label
-                  >
-                  <textarea
-                    id="donation-message"
-                    name="donation-message"
-                    rows="3"
-                    maxlength="500"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 resize-none"
-                    placeholder="Tuliskan pesan dukungan atau doa untuk kampanye ini (opsional)"
-                    disabled={!isCampaignActive}></textarea>
-                  <div class="mt-1 text-xs text-gray-500 text-right">
-                    <span id="message-counter">0</span>/500 karakter
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
-                    isCampaignActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  }`}
-                  disabled={!isCampaignActive}
-                >
-                  {
-                    isCampaignActive
-                      ? "💝 Lanjut ke Pembayaran"
-                      : "❌ Kampanye Tidak Aktif"
-                  }
-                </button>
-              </form>
-              <!-- Donation Form -->
-              <form
-                id="donate-form"
-                class="space-y-4 hidden"
-                data-campaign-id={campaign.id}
-              >
-                {
-                  !isCampaignActive && (
-                    <div class="mb-4 p-3 bg-gray-100 rounded-md">
-                      <p class="text-sm text-gray-600 text-center">
-                        {isCampaignEnded
-                          ? "Kampanye ini telah berakhir dan tidak dapat menerima donasi lagi."
-                          : "Target donasi telah tercapai. Terima kasih atas dukungan semua donatur!"}
-                      </p>
-                    </div>
-                  )
-                }
-
-                <div>
-                  <label
-                    for="donor-name"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Nama Donatur</label
-                  >
-                  <input
-                    type="text"
-                    id="donor-name"
-                    name="donor-name"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                    placeholder="Kosongkan jika ingin anonim"
-                    disabled={!isCampaignActive}
-                  />
-                </div>
-                <div>
-                  <label
-                    for="donation-amount"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Donasi</label
-                  >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
-                      >Rp</span
-                    >
-                    <input
-                      type="text"
-                      id="donation-amount"
-                      name="donation-amount"
-                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                      placeholder="1.000.000"
-                      required
-                      disabled={!isCampaignActive}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    for="donation-message"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Pesan Donasi</label
-                  >
-                  <textarea
-                    id="donation-message"
-                    name="donation-message"
-                    rows="3"
-                    maxlength="500"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 resize-none"
-                    placeholder="Tuliskan pesan dukungan atau doa untuk kampanye ini (opsional)"
-                    disabled={!isCampaignActive}></textarea>
-                  <div class="mt-1 text-xs text-gray-500 text-right">
-                    <span id="message-counter">0</span>/500 karakter
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
-                    isCampaignActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                  }`}
-                  disabled={!isCampaignActive}
-                >
-                  {
-                    isCampaignActive
-                      ? "💝 Lanjut ke Pembayaran"
-                      : "❌ Kampanye Tidak Aktif"
-                  }
-                </button>
-              </form>
-            </div>
           </div>
         </div>
       </div>
@@ -1332,8 +902,9 @@ const metaDescription = campaign.description
     // Quick Amount Buttons functionality
     function setupQuickAmountButtons() {
       const amountButtons = document.querySelectorAll(".amount-btn");
-      const amountInput =
-        document.querySelector<HTMLInputElement>("#donation-amount");
+      const amountInput = document.getElementById(
+        "donation-amount",
+      ) as HTMLInputElement | null;
 
       amountButtons.forEach((button) => {
         button.addEventListener("click", () => {
@@ -1364,14 +935,15 @@ const metaDescription = campaign.description
           }
 
           // Show form if hidden
-          const donateForm = document.querySelector("#donate-form");
-          const toggleBtn = document.querySelector("#toggle-form-btn");
+          const donateForm = document.getElementById("donate-form");
+          const toggleBtn = document.getElementById("toggle-form-btn");
           const toggleText = document.querySelector("#toggle-text");
           const toggleIcon = document.querySelector("#toggle-icon");
 
           if (donateForm && donateForm.classList.contains("hidden")) {
             donateForm.classList.remove("hidden");
             if (toggleText) toggleText.textContent = "Sembunyikan Form";
+            if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "true");
             if (toggleIcon && toggleIcon instanceof HTMLElement)
               toggleIcon.style.transform = "rotate(180deg)";
           }
@@ -1381,8 +953,8 @@ const metaDescription = campaign.description
 
     // Progressive Disclosure functionality
     function setupProgressiveDisclosure() {
-      const toggleBtn = document.querySelector("#toggle-form-btn");
-      const donateForm = document.querySelector("#donate-form");
+      const toggleBtn = document.getElementById("toggle-form-btn");
+      const donateForm = document.getElementById("donate-form");
       const toggleText = document.querySelector("#toggle-text");
       const toggleIcon = document.querySelector("#toggle-icon");
 
@@ -1391,11 +963,13 @@ const metaDescription = campaign.description
           if (donateForm.classList.contains("hidden")) {
             donateForm.classList.remove("hidden");
             toggleText.textContent = "Sembunyikan Form";
+            toggleBtn.setAttribute("aria-expanded", "true");
             if (toggleIcon instanceof HTMLElement)
               toggleIcon.style.transform = "rotate(180deg)";
           } else {
             donateForm.classList.add("hidden");
             toggleText.textContent = "Lanjutkan Donasi";
+            toggleBtn.setAttribute("aria-expanded", "false");
             if (toggleIcon instanceof HTMLElement)
               toggleIcon.style.transform = "rotate(0deg)";
           }
@@ -1408,12 +982,12 @@ const metaDescription = campaign.description
       const checkboxContainer = document.getElementById(
         "use-profile-container",
       );
-      const checkbox = document.querySelector(
-        "#use-profile-name",
-      ) as HTMLInputElement;
-      const nameInput = document.querySelector(
-        "#donor-name",
-      ) as HTMLInputElement;
+      const checkbox = document.getElementById(
+        "use-profile-name",
+      ) as HTMLInputElement | null;
+      const nameInput = document.getElementById(
+        "donor-name",
+      ) as HTMLInputElement | null;
       const token = localStorage.getItem("token");
 
       if (checkboxContainer && checkbox && nameInput && token) {
@@ -1468,9 +1042,10 @@ const metaDescription = campaign.description
 
     // Setup message character counter
     function setupMessageCounter() {
-      const messageInput =
-        document.querySelector<HTMLTextAreaElement>("#donation-message");
-      const messageCounter = document.querySelector("#message-counter");
+      const messageInput = document.getElementById(
+        "donation-message",
+      ) as HTMLTextAreaElement | null;
+      const messageCounter = document.getElementById("message-counter");
 
       if (messageInput && messageCounter) {
         messageInput.addEventListener("input", () => {
@@ -1529,7 +1104,7 @@ const metaDescription = campaign.description
 
           // Load data for the active tab if not already loaded
           const campaignId = document
-            .querySelector("#donate-form")
+            .getElementById("donate-form")
             ?.getAttribute("data-campaign-id");
           if (campaignId) {
             if (targetTab === "donation") {
@@ -1564,8 +1139,9 @@ const metaDescription = campaign.description
 
     // Format currency input with thousand separators
     function setupCurrencyFormatting() {
-      const amountInput =
-        document.querySelector<HTMLInputElement>("#donation-amount");
+      const amountInput = document.getElementById(
+        "donation-amount",
+      ) as HTMLInputElement | null;
 
       if (amountInput) {
         // Function to format number with thousand separators
@@ -1657,48 +1233,94 @@ const metaDescription = campaign.description
       setupMessageCounter();
       setupUseProfile();
 
-      const donateForm = document.querySelector("#donate-form");
+      const donateForm = document.getElementById(
+        "donate-form",
+      ) as HTMLFormElement | null;
       if (donateForm) {
         console.log("Donate form found, adding event listener...");
+        let isSubmitting = false;
+        const showFormError = (message: string) => {
+          const errorBox = document.getElementById("donate-error");
+          if (errorBox) {
+            errorBox.textContent = message;
+            errorBox.classList.remove("hidden");
+          } else {
+            alert(message);
+          }
+        };
+        const clearFormError = () => {
+          const errorBox = document.getElementById("donate-error");
+          if (errorBox) {
+            errorBox.textContent = "";
+            errorBox.classList.add("hidden");
+          }
+        };
         donateForm.addEventListener("submit", async (event) => {
           event.preventDefault();
+          if (isSubmitting) return;
 
-          const amountInput =
-            document.querySelector<HTMLInputElement>("#donation-amount");
-          const donorNameInput =
-            document.querySelector<HTMLInputElement>("#donor-name");
-          const messageInput =
-            document.querySelector<HTMLTextAreaElement>("#donation-message");
+          const amountInput = document.getElementById(
+            "donation-amount",
+          ) as HTMLInputElement | null;
+          const donorNameInput = document.getElementById(
+            "donor-name",
+          ) as HTMLInputElement | null;
+          const messageInput = document.getElementById(
+            "donation-message",
+          ) as HTMLTextAreaElement | null;
+          const submitBtn = document.getElementById(
+            "donate-submit",
+          ) as HTMLButtonElement | null;
 
           if (!amountInput || !donorNameInput || !messageInput) {
             console.error("Required form elements not found");
+            showFormError("Formulir tidak lengkap. Silakan muat ulang halaman.");
             return;
           }
 
           // Parse the formatted amount back to number
           const formattedAmount = amountInput.value;
           const amount = parseInt(formattedAmount.replace(/[^0-9]/g, "")) || 0;
-          const donorName = donorNameInput.value;
+          const donorName = donorNameInput.value.trim().slice(0, 100);
           const message = messageInput.value;
           const campaignId = donateForm.getAttribute("data-campaign-id");
 
           if (amount < 1000) {
-            alert("Minimum donasi adalah Rp 1.000");
+            showFormError("Minimum donasi adalah Rp 1.000");
+            amountInput.focus();
             return;
           }
 
           if (!campaignId) {
-            alert("ID kampanye tidak ditemukan.");
+            showFormError("ID kampanye tidak ditemukan.");
             return;
           }
 
-          const result = await initiatePayment(
-            amount,
-            campaignId,
-            donorName,
-            message,
-          );
-          console.log("Payment initiation response:", result);
+          clearFormError();
+          isSubmitting = true;
+          const originalLabel = submitBtn ? submitBtn.innerHTML : "";
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.setAttribute("aria-busy", "true");
+            submitBtn.innerHTML = "Memproses…";
+          }
+
+          try {
+            const result = await initiatePayment(
+              amount,
+              campaignId,
+              donorName,
+              message,
+            );
+            console.log("Payment initiation response:", result);
+          } finally {
+            isSubmitting = false;
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.removeAttribute("aria-busy");
+              submitBtn.innerHTML = originalLabel;
+            }
+          }
         });
       } else {
         console.error("Form donasi tidak ditemukan di DOM");
@@ -1706,7 +1328,7 @@ const metaDescription = campaign.description
 
       // Load donation history when page loads (default active tab)
       const campaignId = document
-        .querySelector("#donate-form")
+        .getElementById("donate-form")
         ?.getAttribute("data-campaign-id");
       if (campaignId) {
         // Only load donation history by default (tab is active)
