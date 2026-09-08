@@ -42,6 +42,7 @@ import Button from "../../components/common/Button.astro";
       #profile-container { padding-bottom: max(5rem, env(safe-area-inset-bottom)); }
       #profile-content .sticky { top: max(4rem, env(safe-area-inset-top, 0px) + 4rem); }
       #action-buttons { position: static; bottom: auto; z-index: auto; }
+      #edit-modal, #logout-confirm-modal { z-index: 60; }
     }
     @media (min-width: 768px) and (max-width: 1023px) {
       #profile-container .grid.lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
@@ -49,8 +50,9 @@ import Button from "../../components/common/Button.astro";
       #profile-container .lg\:col-span-8 { grid-column: span 7 / span 7; }
     }
     @media (max-width: 640px) {
-      #edit-modal { align-items: flex-end; padding: 0; }
-      #edit-modal-panel { border-radius: 1.25rem 1.25rem 0 0; max-height: 92dvh; max-height: 92vh; width: 100%; margin: 0; border-bottom: 0; animation: hc-slide-up 360ms cubic-bezier(0.16,1,0.3,1) both; padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+      #edit-modal, #logout-confirm-modal { z-index: 60; }
+      #edit-modal { align-items: flex-end; padding: 0 0.75rem max(0.75rem, env(safe-area-inset-bottom)); }
+      #edit-modal-panel { border-radius: 1.25rem; max-height: 92dvh; max-height: 92vh; width: 100%; margin: 0 auto; margin-bottom: max(0.75rem, env(safe-area-inset-bottom)); border-bottom-width: 1px; animation: hc-slide-up 360ms cubic-bezier(0.16,1,0.3,1) both; padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
       #edit-modal-panel::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 999px; background: #e2e8f0; margin: 0 auto 1rem; }
       #edit-modal-backdrop { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     }
@@ -761,11 +763,13 @@ import Button from "../../components/common/Button.astro";
       });
     }
 
-    function openEditModal() {
+    function openEditModal(e) {
       const modal = document.querySelector("#edit-modal");
       const panel = document.getElementById("edit-modal-panel");
       if (!modal) return;
-      lastFocusEl = document.activeElement;
+      const trigger = e?.currentTarget instanceof HTMLElement ? e.currentTarget : document.getElementById("open-edit-btn");
+      const activeInsideModal = !!(modal.contains(document.activeElement));
+      lastFocusEl = trigger instanceof HTMLElement ? trigger : (!activeInsideModal && document.activeElement instanceof HTMLElement ? document.activeElement : null);
       const inputNama = document.querySelector("#input-nama");
       const inputEmail = document.querySelector("#input-email");
       const inputPhone = document.querySelector("#input-phone");
@@ -797,7 +801,8 @@ import Button from "../../components/common/Button.astro";
       modal.classList.remove("flex");
       document.body.style.overflow = "";
       clearFieldErrors();
-      if (lastFocusEl instanceof HTMLElement) lastFocusEl.focus();
+      if (lastFocusEl instanceof HTMLElement && lastFocusEl.isConnected) lastFocusEl.focus();
+      else document.getElementById("open-edit-btn")?.focus();
     }
 
     function validateEditForm(nama, email, nomorHp, alamat) {

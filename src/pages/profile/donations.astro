@@ -16,10 +16,10 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
       #donations-pagination button { padding-left: 1rem; padding-right: 1rem; }
     }
     @media (pointer: fine) {
-      #donations-list > div:hover { border-color: #bfdbfe; box-shadow: 0 4px 16px rgba(37,99,235,0.06); }
+      #donations-list > div:hover { border-color: #bfdbfe; box-shadow: 0 4px 20px rgba(15,23,42,0.08), 0 12px 28px rgba(15,23,42,0.06); }
     }
     @media (hover: none) {
-      #donations-list > div:hover { border-color: var(--border); box-shadow: none; }
+      #donations-list > div:hover { border-color: var(--border); box-shadow: 0 2px 16px rgba(15,23,42,0.06), 0 8px 24px rgba(15,23,42,0.04); }
     }
     @media (max-width: 767px) {
       #donations-list + #donations-pagination { position: sticky; bottom: max(5rem, env(safe-area-inset-bottom, 0px) + 4.25rem); z-index: 10; background: rgba(248,250,252,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); margin-left: -1rem; margin-right: -1rem; padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); border-radius: 0; }
@@ -33,16 +33,20 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
   </style>
   <noscript><style>#donations-list{contain:none!important}</style></noscript>
   <div class="min-h-screen bg-[#f8fafc]">
-    <div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30 shadow-[0_1px_12px_rgba(15,23,42,0.04)]">
+<div class="bg-white/80 backdrop-blur-sm border-b border-border sticky top-16 z-30 shadow-[0_1px_12px_rgba(15,23,42,0.04)]">
       <div class="container mx-auto px-4 md:px-6 py-3">
         <div class="flex items-center gap-3 min-w-0">
           <a href="/profile" class="inline-flex items-center justify-center w-11 h-11 rounded-button border border-border bg-white hover:bg-gray-50 text-muted-foreground hover:text-foreground transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" aria-label="Kembali ke profil">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
           </a>
-          <div class="min-w-0">
+          <div class="min-w-0 flex-1">
             <h1 class="text-[15px] font-semibold tracking-tight text-foreground leading-none truncate">Riwayat Donasi</h1>
             <p class="text-xs text-muted-foreground mt-1 hidden sm:block">Semua donasi yang pernah Anda lakukan</p>
           </div>
+          <span id="donations-updated-badge" class="hidden ml-auto shrink-0 sm:inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span>
+            <span id="donations-updated-text">Tersimpan</span>
+          </span>
         </div>
       </div>
     </div>
@@ -148,7 +152,7 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         container.innerHTML = `<div class="text-center py-10 bg-amber-50/60 rounded-xl border border-amber-200"><p class="text-sm font-medium text-amber-800">Anda sedang offline</p><p class="text-sm text-amber-700 mt-1">Periksa koneksi lalu coba lagi.</p><button type="button" data-retry class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">Coba Lagi</button></div>`;
         return;
       }
-      isLoading = true;
+isLoading = true;
       try {
         container.innerHTML = renderSkeleton();
         if (pagination) pagination.innerHTML = `<span class="text-sm text-muted-foreground tabular-nums">Memuat...</span>`;
@@ -168,8 +172,9 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         const donations = Array.isArray(data.donations) ? data.donations : [];
         cachedDonations = donations;
         if (donations.length === 0) {
-          container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><span class="material-symbols-outlined text-muted-foreground" aria-hidden="true">volunteer_activism</span></div><p class="text-sm font-medium text-foreground">Belum ada riwayat donasi</p><p class="text-sm text-muted-foreground mt-1 text-balance">Donasi akan tampil di sini setelah pembayaran berhasil</p><a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Mulai Donasi</a></div>`;
+          container.innerHTML = `<div class="text-center py-10 bg-gray-50/80 rounded-xl border border-dashed border-border"><div class="w-12 h-12 bg-white border border-border rounded-xl flex items-center justify-center mx-auto mb-3"><svg class="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg></div><p class="text-sm font-medium text-foreground">Belum ada riwayat donasi</p><p class="text-sm text-muted-foreground mt-1 text-balance">Donasi akan tampil di sini setelah pembayaran berhasil</p><a href="/campaign" class="inline-flex items-center justify-center mt-4 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-5 py-2.5 rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Mulai Donasi</a></div>`;
           if (pagination) pagination.innerHTML = "";
+          updateDonationsBadge();
           return;
         }
         const frag = document.createDocumentFragment();
@@ -191,6 +196,7 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
           currentPage = Math.min(totalPages, Math.max(1, Math.floor(Number(data.currentPage) || safePage)));
           pagination.innerHTML = `<button type="button" data-page="prev" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage <= 1 ? "disabled aria-disabled='true'" : ""} aria-label="Halaman sebelumnya">Sebelumnya</button><span class="text-sm text-muted-foreground px-3 tabular-nums" aria-live="polite">Halaman ${currentPage} / ${totalPages}</span><button type="button" data-page="next" class="inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button border border-input bg-white text-sm font-medium hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2" ${currentPage >= totalPages ? "disabled aria-disabled='true'" : ""} aria-label="Halaman berikutnya">Selanjutnya</button>`;
         }
+        updateDonationsBadge();
       } catch (err) {
         if (err?.name === "AbortError") {
           container.innerHTML = `<div class="text-center py-10 bg-amber-50/60 rounded-xl border border-amber-200"><p class="text-sm font-medium text-amber-800">Koneksi timeout</p><p class="text-sm text-amber-700 mt-1">Coba lagi dengan koneksi lebih stabil.</p><button type="button" data-retry class="mt-4 inline-flex items-center justify-center px-4 py-2 rounded-button bg-white border border-amber-200 text-sm font-medium text-amber-800 hover:bg-amber-50 transition-colors">Coba Lagi</button></div>`;
@@ -208,6 +214,16 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
         if (pagination) pagination.innerHTML = "";
       } finally {
         isLoading = false;
+      }
+    }
+
+    function updateDonationsBadge() {
+      const badge = document.getElementById("donations-updated-badge");
+      const badgeText = document.getElementById("donations-updated-text");
+      if (badge && badgeText) {
+        badge.classList.remove("hidden");
+        badgeText.textContent = "Diperbarui barusan";
+        setTimeout(() => { badgeText.textContent = "Tersimpan"; }, 4000);
       }
     }
 
