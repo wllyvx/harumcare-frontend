@@ -2,198 +2,262 @@
 import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
 ---
 <PrimaryLayout>
-    <section class="max-w-6xl mx-auto p-6">
-        <h1 class="text-2xl md:text-3xl font-bold mb-2">Kalkulator & Pembayaran Zakat</h1>
-        <p class="text-sm md:text-base text-gray-600 mb-6">Hitung kewajiban zakat Anda secara akurat dan lanjutkan ke formulir pembayaran.</p>
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-balance">Kalkulator & Pembayaran Zakat</h1>
+        <p class="text-sm md:text-base text-gray-600 mb-8 max-w-2xl">Hitung kewajiban zakat Anda secara akurat dan lanjutkan ke formulir pembayaran.</p>
+        <noscript>
+            <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
+                Kalkulator membutuhkan JavaScript untuk menghitung nisab. Aktifkan JavaScript, atau hubungi kami melalui halaman konsultasi untuk bantuan perhitungan manual.
+            </div>
+        </noscript>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            <!-- Left: Calculator -->
-            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+            <!-- Left: Calculator (leads) -->
+            <div class="lg:col-span-2 min-w-0 bg-white p-5 sm:p-7 rounded-xl shadow-md flex flex-col gap-6">
                 <!-- Tabs -->
-                <div class="mb-4">
-                    <nav class="flex sm:flex-row flex-col sm:space-x-2 space-y-2 sm:space-y-0 overflow-auto" role="tablist" aria-label="Jenis Zakat">
-                        <button data-tab="penghasilan" aria-pressed="true" class="tab-btn px-4 py-2 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 w-full sm:w-auto text-left sm:text-center">Zakat Penghasilan</button>
-                        <button data-tab="perdagangan" aria-pressed="false" class="tab-btn px-4 py-2 rounded-lg bg-white text-gray-700 border w-full sm:w-auto text-left sm:text-center">Zakat Perdagangan</button>
-                        <button data-tab="emasperak" aria-pressed="false" class="tab-btn px-4 py-2 rounded-lg bg-white text-gray-700 border w-full sm:w-auto text-left sm:text-center">Zakat Emas & Perak</button>
+                <div>
+                    <nav class="flex gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto" role="tablist" aria-label="Jenis Zakat">
+                        <button role="tab" id="tab-penghasilan" aria-selected="true" aria-controls="form-penghasilan" tabindex="0" data-tab="penghasilan" class="tab-btn flex-1 whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Penghasilan</button>
+                        <button role="tab" id="tab-perdagangan" aria-selected="false" aria-controls="form-perdagangan" tabindex="-1" data-tab="perdagangan" class="tab-btn flex-1 whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Perdagangan</button>
+                        <button role="tab" id="tab-emasperak" aria-selected="false" aria-controls="form-emasperak" tabindex="-1" data-tab="emasperak" class="tab-btn flex-1 whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Emas &amp; Perak</button>
                     </nav>
                 </div>
 
                 <!-- Price inputs used for nisab calculation -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <label class="flex flex-col text-sm">
+                <fieldset class="bg-gray-50 rounded-xl p-4 flex flex-col gap-1 min-w-0">
+                    <legend class="sr-only">Harga acuan nisab</legend>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-600" aria-hidden="true">Harga acuan nisab</p>
+                    <p id="price-hint" class="text-xs text-gray-500">Acuan default dapat diubah mengikuti harga pasar hari ini. Semua nominal dalam Rupiah.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                    <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">
                         Harga Emas (per gr)
-                        <input id="priceGold" type="number" value="1150000" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                        <input id="priceGold" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 1.150.000" aria-describedby="price-hint priceGold-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="1150000" />
+                        <span id="priceGold-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                     </label>
-                    <label class="flex flex-col text-sm">
+                    <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">
                         Harga Perak (per gr)
-                        <input id="priceSilver" type="number" value="12000" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                        <input id="priceSilver" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 12.000" aria-describedby="price-hint priceSilver-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="12000" />
+                        <span id="priceSilver-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                     </label>
-                </div>
+                    </div>
+                </fieldset>
 
                 <!-- Forms -->
-                <div>
+                <div class="min-w-0">
                     <!-- Penghasilan -->
-                    <form id="form-penghasilan" class="zakat-form">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="flex flex-col text-sm">
+                    <form id="form-penghasilan" role="tabpanel" aria-labelledby="tab-penghasilan" tabindex="0" class="zakat-form focus:outline-none">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">
                                 Jumlah penghasilan / gaji (1 tahun)
-                                <input id="income_year" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                                <input id="income_year" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 96.000.000" aria-describedby="income_year-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="income_year-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
-                            <label class="flex flex-col text-sm">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">
                                 Pendapatan lain (bonus, THR) (1 tahun)
-                                <input id="income_other" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                                <input id="income_other" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 6.000.000" aria-describedby="income_other-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="income_other-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
                         </div>
-                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-                            <div class="flex items-center gap-2 text-sm text-gray-700">
-                                <!-- gold icon -->
-                                <svg class="w-4 h-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
-                                <span>Nisab (85 gr emas): <span id="nisab_income_text" class="font-medium">-</span></span>
+                        <div class="mt-6 p-5 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-4 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-blue-100 min-w-0">
+                                <div class="flex items-center gap-2 text-sm font-medium text-blue-900 min-w-0">
+                                    <!-- gold icon -->
+                                    <svg class="w-4 h-4 shrink-0 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
+                                    <span class="min-w-0 break-words">Nisab (85 gr emas): <span id="nisab_income_text" class="font-semibold tabular-nums" aria-live="polite" aria-atomic="true">-</span></span>
+                                </div>
+                                <span class="inline-flex shrink-0 items-center px-2.5 py-1 rounded-full bg-white border border-blue-200 text-blue-800 text-xs font-bold tracking-wide">Kadar 2,5%</span>
                             </div>
 
-                            <div class="mt-3 flex items-center justify-between">
-                                <div>
-                                    <div class="text-sm text-gray-600">Zakat yang harus dibayar</div>
-                                    <div class="text-2xl md:text-3xl font-bold text-blue-700"><span id="result_income">Rp 0</span></div>
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-3 justify-between">
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold uppercase tracking-wider text-blue-800">Zakat yang harus dibayar</div>
+                                    <div class="mt-1.5 text-3xl md:text-4xl font-extrabold tracking-tight text-blue-900 tabular-nums break-words min-h-[2.75rem]" aria-live="polite" aria-atomic="true"><span id="result_income">Rp 0</span></div>
+                                    <p class="mt-1.5 text-xs text-blue-800">Dihitung × 2,5% dari harta kena zakat • Nisab mengikuti harga acuan di atas.</p>
                                 </div>
-                                <div>
-                                    <div id="status_income" class="px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold">WAJIB ZAKAT</div>
+                                <div class="shrink-0 self-start sm:self-center">
+                                    <div id="status_income" role="status" aria-live="polite" class="px-3 py-1.5 rounded-full bg-white border border-blue-200 text-blue-800 text-xs font-bold tracking-wide">BELUM WAJIB</div>
                                 </div>
                             </div>
 
-                            <div id="hint_income" class="hint-text mt-2 text-sm text-gray-600 hidden"></div>
+                            <div id="hint_income" role="status" class="hint-text mt-1 text-sm text-blue-800 hidden break-words"></div>
                         </div>
                     </form>
 
                     <!-- Perdagangan -->
-                    <form id="form-perdagangan" class="zakat-form hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="flex flex-col text-sm whitespace-normal">
+                    <form id="form-perdagangan" role="tabpanel" aria-labelledby="tab-perdagangan" tabindex="0" class="zakat-form hidden focus:outline-none">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 whitespace-normal min-w-0">
                                 Modal
-                                <input id="trade_modal" type="number" value="0" class="mt-1 p-3 border border-gray-200 rounded w-full shadow-sm" />
+                                <input id="trade_modal" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 50.000.000" aria-describedby="trade_modal-error" class="p-3 border border-gray-200 rounded-md w-full shadow-sm font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="trade_modal-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
-                            <label class="flex flex-col text-sm whitespace-normal">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 whitespace-normal min-w-0">
                                 Laba
-                                <input id="trade_profit" type="number" value="0" class="mt-1 p-3 border border-gray-200 rounded w-full shadow-sm" />
+                                <input id="trade_profit" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 10.000.000" aria-describedby="trade_profit-error" class="p-3 border border-gray-200 rounded-md w-full shadow-sm font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="trade_profit-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
-                            <label class="flex flex-col text-sm whitespace-normal">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 whitespace-normal min-w-0">
                                 Piutang lancar
-                                <input id="trade_receivables" type="number" value="0" class="mt-1 p-3 border border-gray-200 rounded w-full shadow-sm" />
+                                <input id="trade_receivables" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 5.000.000" aria-describedby="trade_receivables-error" class="p-3 border border-gray-200 rounded-md w-full shadow-sm font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="trade_receivables-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
-                            <label class="flex flex-col text-sm whitespace-normal">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 whitespace-normal min-w-0">
                                 Hutang jatuh tempo
-                                <input id="trade_debts" type="number" value="0" class="mt-1 p-3 border border-gray-200 rounded w-full shadow-sm" />
+                                <input id="trade_debts" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 2.000.000" aria-describedby="trade_debts-error" class="p-3 border border-gray-200 rounded-md w-full shadow-sm font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="trade_debts-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
-                            <label class="flex flex-col text-sm col-span-2 whitespace-normal">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 sm:col-span-2 whitespace-normal min-w-0">
                                 Kerugian
-                                <input id="trade_losses" type="number" value="0" class="mt-1 p-3 border border-gray-200 rounded w-full shadow-sm" />
+                                <input id="trade_losses" type="text" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="cth. 0" aria-describedby="trade_losses-error" class="p-3 border border-gray-200 rounded-md w-full shadow-sm font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="trade_losses-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
                         </div>
 
-                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-                            <div class="flex items-center gap-2 text-sm text-gray-700">
-                                <svg class="w-4 h-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
-                                <span>Nisab (85 gr emas): <span id="nisab_trade_text" class="font-medium">-</span></span>
+                        <div class="mt-6 p-5 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-4 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-blue-100 min-w-0">
+                                <div class="flex items-center gap-2 text-sm font-medium text-blue-900 min-w-0">
+                                <svg class="w-4 h-4 shrink-0 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
+                                <span class="min-w-0 break-words">Nisab (85 gr emas): <span id="nisab_trade_text" class="font-semibold tabular-nums" aria-live="polite" aria-atomic="true">-</span></span>
+                                </div>
+                                <span class="inline-flex shrink-0 items-center px-2.5 py-1 rounded-full bg-white border border-blue-200 text-blue-800 text-xs font-bold tracking-wide">Kadar 2,5%</span>
                             </div>
 
-                            <div class="mt-2 flex items-center justify-between">
-                                <div>
-                                    <div class="text-sm text-gray-600">Zakat yang harus dibayar</div>
-                                    <div class="text-2xl font-bold text-blue-700"><span id="result_trade">Rp 0</span></div>
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-3 justify-between">
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold uppercase tracking-wider text-blue-800">Zakat yang harus dibayar</div>
+                                    <div class="mt-1.5 text-3xl md:text-4xl font-extrabold tracking-tight text-blue-900 tabular-nums break-words min-h-[2.75rem]" aria-live="polite" aria-atomic="true"><span id="result_trade">Rp 0</span></div>
+                                    <p class="mt-1.5 text-xs text-blue-800">Dihitung × 2,5% dari harta dagang bersih • Nisab mengikuti harga acuan di atas.</p>
                                 </div>
-                                <div>
-                                    <div id="status_trade" class="px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold">WAJIB ZAKAT</div>
+                                <div class="shrink-0 self-start sm:self-center">
+                                    <div id="status_trade" role="status" aria-live="polite" class="px-3 py-1.5 rounded-full bg-white border border-blue-200 text-blue-800 text-xs font-bold tracking-wide">BELUM WAJIB</div>
                                 </div>
                             </div>
 
-                            <div id="hint_trade" class="hint-text mt-2 text-sm text-gray-600 hidden"></div>
+                            <div id="hint_trade" role="status" class="hint-text mt-1 text-sm text-blue-800 hidden break-words"></div>
                         </div>
                     </form>
 
                     <!-- Emas & Perak -->
-                    <form id="form-emasperak" class="zakat-form hidden">
-                        <div class="flex items-center gap-4 mb-3">
-                            <label class="flex items-center gap-2"><input type="radio" name="metal" value="gold" checked /> Emas</label>
-                            <label class="flex items-center gap-2"><input type="radio" name="metal" value="silver" /> Perak</label>
-                        </div>
+                    <form id="form-emasperak" role="tabpanel" aria-labelledby="tab-emasperak" tabindex="0" class="zakat-form hidden focus:outline-none">
+                        <fieldset class="min-w-0">
+                            <legend class="sr-only">Jenis logam</legend>
+                            <div class="flex flex-wrap items-center gap-2 mb-3" role="radiogroup" aria-label="Jenis logam">
+                                <label class="inline-flex items-center gap-2 px-3 py-2 min-h-[44px] border border-gray-200 rounded-lg cursor-pointer text-sm font-medium text-gray-700 focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-1"><input type="radio" name="metal" value="gold" checked class="w-4 h-4 accent-blue-700" /> Emas</label>
+                                <label class="inline-flex items-center gap-2 px-3 py-2 min-h-[44px] border border-gray-200 rounded-lg cursor-pointer text-sm font-medium text-gray-700 focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-1"><input type="radio" name="metal" value="silver" class="w-4 h-4 accent-blue-700" /> Perak</label>
+                            </div>
+                        </fieldset>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label class="flex flex-col text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">
                                 Jumlah dimiliki (gram)
-                                <input id="metal_owned" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                                <input id="metal_owned" type="text" inputmode="decimal" autocomplete="off" maxlength="12" placeholder="cth. 100" aria-describedby="metal_owned-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="metal_owned-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
-                            <label class="flex flex-col text-sm">
+                            <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">
                                 Jumlah dipakai (gram)
-                                <input id="metal_worn" type="number" value="0" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" />
+                                <input id="metal_worn" type="text" inputmode="decimal" autocomplete="off" maxlength="12" placeholder="cth. 10" aria-describedby="metal_worn-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" value="0" />
+                                <span id="metal_worn-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                             </label>
                         </div>
-                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-                            <div class="flex items-center gap-2 text-sm text-gray-700">
-                                <svg class="w-4 h-4 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
-                                <span>Nisab: <span id="nisab_metal_text">85 gr emas / 595 gr perak</span></span>
+                        <div class="mt-6 p-5 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-4 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-blue-100 min-w-0">
+                                <div class="flex items-center gap-2 text-sm font-medium text-blue-900 min-w-0">
+                                <svg class="w-4 h-4 shrink-0 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.5 5.5L20 9l-4 3 1 6-5-3-5 3 1-6-4-3 5.5-1.5L12 2z" /></svg>
+                                <span class="min-w-0 break-words">Nisab: <span id="nisab_metal_text" class="font-semibold tabular-nums" aria-live="polite" aria-atomic="true">85 gr emas / 595 gr perak</span></span>
+                                </div>
+                                <span class="inline-flex shrink-0 items-center px-2.5 py-1 rounded-full bg-white border border-blue-200 text-blue-800 text-xs font-bold tracking-wide">Kadar 2,5%</span>
                             </div>
 
-                            <div class="mt-2 flex items-center justify-between">
-                                <div>
-                                    <div class="text-sm text-gray-600">Zakat yang harus dibayar</div>
-                                    <div class="text-2xl font-bold text-blue-700"><span id="result_metal">Rp 0</span></div>
+                            <div class="flex flex-col sm:flex-row sm:items-end gap-3 justify-between">
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold uppercase tracking-wider text-blue-800">Zakat yang harus dibayar</div>
+                                    <div class="mt-1.5 text-3xl md:text-4xl font-extrabold tracking-tight text-blue-900 tabular-nums break-words min-h-[2.75rem]" aria-live="polite" aria-atomic="true"><span id="result_metal">Rp 0</span></div>
+                                    <p class="mt-1.5 text-xs text-blue-800">Dihitung × 2,5% dari berat bersih • Nisab 85 gr emas / 595 gr perak.</p>
                                 </div>
-                                <div>
-                                    <div id="status_metal" class="px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold">WAJIB ZAKAT</div>
+                                <div class="shrink-0 self-start sm:self-center">
+                                    <div id="status_metal" role="status" aria-live="polite" class="px-3 py-1.5 rounded-full bg-white border border-blue-200 text-blue-800 text-xs font-bold tracking-wide">BELUM WAJIB</div>
                                 </div>
                             </div>
 
-                            <div id="hint_metal" class="hint-text mt-2 text-sm text-gray-600 hidden"></div>
+                            <div id="hint_metal" role="status" class="hint-text mt-1 text-sm text-blue-800 hidden break-words"></div>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <!-- Right: Payment form -->
-        <aside class="bg-white p-6 rounded-xl shadow-md border border-blue-50">
-                <h3 class="font-semibold mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S17.523 1 12 1zm1 14h-2v-2h2v2zm0-4h-2V6h2v5z"/></svg>Detail Pembayaran</h3>
-                <div class="mb-4">
-                    <div class="text-sm text-gray-500">Nominal Zakat</div>
-            <div id="paymentAmount" class="mt-2 p-4 border rounded text-xl md:text-2xl font-bold bg-white text-blue-700 border-blue-200">Rp 0</div>
+            <!-- Right: Payment form (supports) -->
+        <aside class="min-w-0 bg-white p-5 sm:p-6 rounded-xl shadow-md border border-blue-50 flex flex-col gap-5 lg:sticky lg:top-6" aria-labelledby="payment-heading">
+                <h3 id="payment-heading" class="font-semibold text-base flex items-center gap-2"><svg class="w-5 h-5 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S17.523 1 12 1zm1 14h-2v-2h2v2zm0-4h-2V6h2v5z"/></svg>Detail Pembayaran</h3>
+                <div>
+                    <div class="text-sm text-gray-600">Nominal Zakat</div>
+            <div id="paymentAmount" role="status" aria-live="polite" aria-atomic="true" aria-label="Nominal zakat terhitung" class="mt-2 p-4 border rounded-lg text-xl md:text-2xl font-bold tracking-tight bg-white text-blue-700 border-blue-200 tabular-nums break-words min-h-[4rem] flex items-center">Rp 0</div>
+                    <p id="payment-source" class="mt-1.5 text-xs text-gray-500">Nominal mengikuti tab kalkulator yang aktif.</p>
                 </div>
 
-                <label class="flex flex-col text-sm mb-3">Nama Lengkap
-                    <input id="pay_name" type="text" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" placeholder="Masukkan nama Anda" />
+                <form id="payment-form" novalidate class="flex flex-col gap-5 min-w-0">
+                <div class="flex flex-col gap-4">
+                <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">Nama Lengkap
+                    <input id="pay_name" type="text" autocomplete="name" enterkeyhint="next" maxlength="100" minlength="2" required placeholder="Masukkan nama Anda" aria-describedby="pay_name-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" />
+                    <span id="pay_name-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                 </label>
-                <label class="flex flex-col text-sm mb-3">Email
-                    <input id="pay_email" type="email" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" placeholder="alamat@email.com" />
+                <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">Email
+                    <input id="pay_email" type="email" autocomplete="email" enterkeyhint="next" maxlength="254" required placeholder="alamat@email.com" aria-describedby="pay_email-error" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" />
+                    <span id="pay_email-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                 </label>
-                <label class="flex flex-col text-sm mb-3">WhatsApp
-                    <input id="pay_whatsapp" type="text" class="mt-1 p-3 border rounded-md w-full shadow-sm border-gray-200" placeholder="08xx..." />
+                <label class="flex flex-col gap-1.5 text-sm font-medium text-gray-700 min-w-0">WhatsApp
+                    <input id="pay_whatsapp" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" maxlength="16" placeholder="08xx..." aria-describedby="pay_whatsapp-error pay_whatsapp-hint" class="p-3 border rounded-md w-full shadow-sm border-gray-200 font-normal placeholder:text-gray-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/30" />
+                    <span id="pay_whatsapp-hint" class="text-xs font-normal text-gray-500">Opsional. Format Indonesia, cth. 081234567890.</span>
+                    <span id="pay_whatsapp-error" class="hidden text-sm font-normal text-red-600" aria-live="polite"></span>
                 </label>
+                </div>
 
-                <div class="mb-4">
-                    <div class="text-sm text-gray-600 mb-2">Pilih Metode Pembayaran</div>
-                    <div class="flex gap-2">
-                        <label class="flex items-center gap-3 p-2 border rounded cursor-pointer">
-                            <input type="radio" name="method" value="va" checked />
-                            <svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7v10a2 2 0 0 0 2 2h16V5H4a2 2 0 0 0-2 2zM7 12h10v2H7v-2z"/></svg>
+                <fieldset class="min-w-0">
+                    <legend class="text-sm font-medium text-gray-700 mb-2">Pilih Metode Pembayaran</legend>
+                    <div class="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2">
+                        <label class="flex items-center gap-3 p-3 min-h-[44px] border border-gray-200 rounded-lg cursor-pointer focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-1">
+                            <input type="radio" name="method" value="va" checked class="w-4 h-4 shrink-0 accent-blue-700" />
+                            <svg class="w-5 h-5 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7v10a2 2 0 0 0 2 2h16V5H4a2 2 0 0 0-2 2zM7 12h10v2H7v-2z"/></svg>
                             <span class="text-sm">Virtual Account</span>
                         </label>
-                        <label class="flex items-center gap-3 p-2 border rounded cursor-pointer">
-                            <input type="radio" name="method" value="ewallet" />
-                            <svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7v10a2 2 0 0 0 2 2h16V5H4a2 2 0 0 0-2 2zm4 2h10v2H6V9z"/></svg>
+                        <label class="flex items-center gap-3 p-3 min-h-[44px] border border-gray-200 rounded-lg cursor-pointer focus-within:ring-2 focus-within:ring-blue-600 focus-within:ring-offset-1">
+                            <input type="radio" name="method" value="ewallet" class="w-4 h-4 shrink-0 accent-blue-700" />
+                            <svg class="w-5 h-5 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 7v10a2 2 0 0 0 2 2h16V5H4a2 2 0 0 0-2 2zm4 2h10v2H6V9z"/></svg>
                             <span class="text-sm">E-Wallet</span>
                         </label>
                     </div>
-                </div>
+                </fieldset>
 
-                <div class="flex items-center justify-between">
-                    <button id="payBtn" class="px-4 py-3 bg-blue-600 text-white rounded-lg shadow-md w-full">Tunaikan Zakat Sekarang</button>
+                <div id="payment-feedback" role="alert" aria-live="assertive" tabindex="-1" class="hidden rounded-lg border p-3 text-sm break-words focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"></div>
+
+                <div>
+                    <button id="payBtn" type="submit" aria-describedby="payment-feedback payment-source" class="px-4 py-3.5 min-h-[48px] bg-blue-600 text-white font-semibold rounded-lg shadow-md w-full inline-flex items-center justify-center gap-2 transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                        <svg id="paySpinner" class="hidden w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"/><path d="M22 12a10 10 0 0 0-10-10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+                        <span id="payBtnLabel">Tunaikan Zakat Sekarang</span>
+                    </button>
+                    <p class="mt-2 text-xs text-gray-500">Data hanya digunakan untuk bukti pembayaran zakat.</p>
                 </div>
 
                 <!-- hidden field to capture numeric amount for submission or later use -->
                 <input type="hidden" id="paymentAmountValue" value="0" />
+                </form>
             </aside>
         </div>
 
+    <style>
+        @media (prefers-reduced-motion: reduce) {
+            .tab-btn, #payBtn { transition: none !important; }
+            #paySpinner { animation: none !important; }
+        }
+        input[aria-invalid="true"] { border-color: #dc2626; }
+    </style>
+
     <script type="module">
-            import { calcIncomeZakat, calcTradeZakat, calcMetalZakat, nisabValueForGold, nisabValueForSilver } from '/js/zakat.js';
+            import { calcIncomeZakat, calcTradeZakat, calcMetalZakat, nisabValueForGold } from '/js/zakat.js';
+
+            const DEFAULT_GOLD = 1150000;
+            const DEFAULT_SILVER = 12000;
+            const MAX_RUPIAH = 999999999999999; // 999 triliun — batas format aman
+            const MAX_GRAM = 100000;
 
             const currencyFormatter = new Intl.NumberFormat('id-ID');
             const toRupiah = (value) => {
@@ -204,95 +268,265 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             const q = (s) => document.querySelector(s);
             const qa = (s) => Array.from(document.querySelectorAll(s));
 
-            // Currency helpers
+            const debounce = (fn, wait = 150) => {
+                let t;
+                return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+            };
+
+            const notify = (msg, type = 'default') => {
+                try { if (typeof window.showToast === 'function') window.showToast(msg, type); } catch (e) {}
+            };
+
+            // Currency helpers — pertahankan tanda negatif agar bisa divalidasi, bukan disembunyikan
             function parseNumberFromString(s){
                 if(typeof s === 'number') return s;
-                const digits = String(s).replace(/[^0-9]/g,'');
-                return digits ? Number(digits) : 0;
+                const str = String(s ?? '').trim();
+                if(!str) return 0;
+                const isNeg = /^-/.test(str);
+                const digits = str.replace(/[^0-9]/g,'');
+                if(!digits) return 0;
+                const n = Number(digits);
+                return isNeg ? -n : n;
+            }
+
+            function parseGrams(s){
+                if(typeof s === 'number') return s;
+                const str = String(s ?? '').trim();
+                if(!str) return 0;
+                const isNeg = /^-/.test(str);
+                // id-ID: titik = ribuan, koma = desimal
+                const normalized = str.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+                const n = Number(normalized);
+                if(!Number.isFinite(n)) return 0;
+                return isNeg ? -Math.abs(n) : n;
             }
 
             function formatNumberToText(n){
                 return currencyFormatter.format(Math.round(Number(n) || 0));
             }
 
+            function setError(el, msg){
+                if(!el) return;
+                el.setAttribute('aria-invalid', 'true');
+                el.classList.add('border-red-500');
+                el.classList.remove('border-gray-200');
+                let node = document.getElementById(el.id + '-error');
+                if(!node){
+                    node = document.createElement('p');
+                    node.id = el.id + '-error';
+                    node.className = 'text-sm font-normal text-red-600';
+                    node.setAttribute('aria-live', 'polite');
+                    el.parentNode.appendChild(node);
+                }
+                node.textContent = msg;
+                node.classList.remove('hidden');
+            }
+
+            function clearError(el){
+                if(!el) return;
+                el.removeAttribute('aria-invalid');
+                el.classList.remove('border-red-500');
+                if(!el.classList.contains('border-gray-200')) el.classList.add('border-gray-200');
+                const node = document.getElementById(el.id + '-error');
+                if(node){ node.textContent = ''; node.classList.add('hidden'); }
+            }
+
+            // Kompatibilitas dengan pemanggil lama
+            function showValidation(el, msg){ setError(el, msg); }
+            function clearValidation(el){ clearError(el); }
+
+            function setFeedback(type, msg){
+                const box = q('#payment-feedback');
+                if(!box) return;
+                box.classList.remove('hidden', 'border-red-200', 'bg-red-50', 'text-red-700', 'border-green-200', 'bg-green-50', 'text-green-800');
+                if(type === 'error'){
+                    box.classList.add('border-red-200', 'bg-red-50', 'text-red-700');
+                } else {
+                    box.classList.add('border-green-200', 'bg-green-50', 'text-green-800');
+                }
+                box.textContent = msg;
+            }
+
+            function clearFeedback(){
+                const box = q('#payment-feedback');
+                if(!box) return;
+                box.textContent = '';
+                box.classList.add('hidden');
+            }
+
+            function setHintWithSedekah(el, prefix, shortText){
+                if(!el) return;
+                el.innerHTML = '';
+                el.append(document.createTextNode(prefix + ' ' + shortText + ' '));
+                const link = document.createElement('a');
+                link.href = '/campaign';
+                link.className = 'underline underline-offset-2 font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm';
+                link.textContent = 'Lihat program sedekah';
+                el.append(link);
+                el.classList.remove('hidden');
+            }
+
             function getVal(selector){
                 const el = q(selector);
                 if(!el) return 0;
-                if(el.dataset && el.dataset.value) return Number(el.dataset.value) || 0;
+                if(el.dataset && el.dataset.value !== undefined && el.dataset.value !== '') return Number(el.dataset.value) || 0;
                 return parseNumberFromString(el.value || '');
+            }
+
+            function getValidPrice(selector, fallback, label){
+                const el = q(selector);
+                const raw = parseNumberFromString(el ? el.value : '');
+                if(!Number.isFinite(raw) || raw <= 0){
+                    if(el) setError(el, label + ' harus lebih dari 0. Menggunakan acuan default ' + formatNumberToText(fallback) + '.');
+                    return fallback;
+                }
+                if(raw > MAX_RUPIAH){
+                    if(el) setError(el, label + ' terlalu besar. Dibatasi ' + formatNumberToText(MAX_RUPIAH) + '.');
+                    return MAX_RUPIAH;
+                }
+                if(el) clearError(el);
+                return raw;
             }
 
             function bindCurrencyInput(selector){
                 qa(selector).forEach(el => {
-                    // ensure text input for formatting
                     try{ el.type = 'text'; } catch(e){}
-                    // initialize dataset
                     const initial = parseNumberFromString(el.value || el.getAttribute('value') || '0');
-                    el.dataset.value = initial;
-                    el.value = initial ? formatNumberToText(initial) : '';
-                    el.addEventListener('input', (e) => {
+                    const clamped = initial < 0 ? 0 : Math.min(initial, MAX_RUPIAH);
+                    el.dataset.value = String(clamped);
+                    el.value = clamped ? formatNumberToText(clamped) : '';
+                    if(initial < 0) setError(el, 'Nilai tidak boleh negatif. Dihitung sebagai 0.');
+                    const apply = () => {
                         const raw = parseNumberFromString(el.value);
-                        el.dataset.value = raw;
-                        el.value = raw ? formatNumberToText(raw) : '';
-                        clearValidation(el);
+                        if(raw < 0){
+                            setError(el, 'Nilai tidak boleh negatif. Dihitung sebagai 0.');
+                            el.dataset.value = '0';
+                            el.value = '';
+                        } else if(raw > MAX_RUPIAH){
+                            setError(el, 'Nilai terlalu besar. Dibatasi ' + formatNumberToText(MAX_RUPIAH) + '.');
+                            el.dataset.value = String(MAX_RUPIAH);
+                            el.value = formatNumberToText(MAX_RUPIAH);
+                        } else {
+                            clearError(el);
+                            el.dataset.value = String(raw);
+                            el.value = raw ? formatNumberToText(raw) : '';
+                        }
+                        clearFeedback();
                         recalcAll();
+                    };
+                    const debounced = debounce(apply, 150);
+                    el.addEventListener('input', debounced);
+                    el.addEventListener('blur', () => {
+                        // Pastikan harga acuan ikut tervalidasi saat selesai mengetik
+                        if(el.id === 'priceGold' || el.id === 'priceSilver') validatePrices(false);
+                        else apply();
                     });
-                    // keep caret at end on focus (simple UX)
-                    el.addEventListener('focus', () => { setTimeout(()=>{ el.selectionStart = el.selectionEnd = el.value.length; },0); });
+                    el.addEventListener('change', () => {
+                        if(el.id === 'priceGold' || el.id === 'priceSilver'){
+                            validatePrices(true);
+                            recalcAll();
+                        }
+                    });
                 });
             }
 
-            // small validation helper
-            function showValidation(el, msg){
-                let node = el.nextElementSibling;
-                if(!node || !node.classList || !node.classList.contains('validation-msg')){
-                    node = document.createElement('div');
-                    node.className = 'validation-msg text-red-600 text-sm mt-1';
-                    el.parentNode.appendChild(node);
+            function bindGramInput(selector){
+                qa(selector).forEach(el => {
+                    const apply = () => {
+                        const raw = parseGrams(el.value);
+                        if(raw < 0){
+                            setError(el, 'Nilai tidak boleh negatif. Dihitung sebagai 0.');
+                        } else if(raw > MAX_GRAM){
+                            setError(el, 'Nilai terlalu besar. Maksimal ' + formatNumberToText(MAX_GRAM) + ' gram.');
+                            el.value = formatNumberToText(MAX_GRAM);
+                        } else {
+                            clearError(el);
+                        }
+                        clearFeedback();
+                        recalcAll();
+                    };
+                    el.addEventListener('input', debounce(apply, 150));
+                    el.addEventListener('blur', apply);
+                });
+            }
+
+            function validatePrices(announce){
+                const gold = getValidPrice('#priceGold', DEFAULT_GOLD, 'Harga emas');
+                const silver = getValidPrice('#priceSilver', DEFAULT_SILVER, 'Harga perak');
+                if(announce){
+                    const goldEl = q('#priceGold');
+                    const silverEl = q('#priceSilver');
+                    const hasError = (goldEl && goldEl.hasAttribute('aria-invalid')) || (silverEl && silverEl.hasAttribute('aria-invalid'));
+                    if(!hasError) notify('Nisab diperbarui mengikuti harga acuan.', 'default');
                 }
-                node.textContent = msg;
+                return { gold, silver };
             }
 
-            function clearValidation(el){
-                const node = el.nextElementSibling;
-                if(node && node.classList && node.classList.contains('validation-msg')) node.textContent = '';
-            }
-
-            // Tabs
-            qa('.tab-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                const tab = btn.getAttribute('data-tab');
-                qa('.tab-btn').forEach(b => { b.classList.remove('bg-blue-50','text-blue-700'); b.setAttribute('aria-pressed','false'); });
-                btn.classList.add('bg-blue-50','text-blue-700');
-                btn.setAttribute('aria-pressed','true');
+            // Tabs — pola tab asli dengan roving tabindex + navigasi panah
+            const tabs = qa('.tab-btn');
+            function selectTab(tab, focus = false){
+                const name = tab.getAttribute('data-tab');
+                tabs.forEach(b => {
+                    const active = b === tab;
+                    b.classList.toggle('bg-blue-50', active);
+                    b.classList.toggle('text-blue-700', active);
+                    b.classList.toggle('border-blue-100', active);
+                    b.classList.toggle('bg-white', !active);
+                    b.classList.toggle('text-gray-700', !active);
+                    b.setAttribute('aria-selected', active ? 'true' : 'false');
+                    b.tabIndex = active ? 0 : -1;
+                });
                 qa('.zakat-form').forEach(f => f.classList.add('hidden'));
-                q('#form-' + tab).classList.remove('hidden');
+                const panel = q('#form-' + name);
+                if(panel) panel.classList.remove('hidden');
+                if(focus) tab.focus();
+                clearFeedback();
                 recalcAll();
-            }));
+            }
+
+            tabs.forEach((btn, i) => {
+                btn.addEventListener('click', () => selectTab(btn, false));
+                btn.addEventListener('keydown', (e) => {
+                    let next = null;
+                    if(e.key === 'ArrowRight' || e.key === 'ArrowDown') next = tabs[(i + 1) % tabs.length];
+                    if(e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = tabs[(i - 1 + tabs.length) % tabs.length];
+                    if(e.key === 'Home') next = tabs[0];
+                    if(e.key === 'End') next = tabs[tabs.length - 1];
+                    if(next){ e.preventDefault(); selectTab(next, true); }
+                });
+            });
+
+            function setStatus(el, wajib){
+                if(!el) return;
+                el.textContent = wajib ? 'WAJIB ZAKAT' : 'BELUM WAJIB';
+                el.classList.toggle('bg-blue-700', wajib);
+                el.classList.toggle('text-white', wajib);
+                el.classList.toggle('border-blue-700', wajib);
+                el.classList.toggle('bg-white', !wajib);
+                el.classList.toggle('border-blue-200', !wajib);
+                el.classList.toggle('text-blue-800', !wajib);
+            }
 
             // Calculate functions using utils
             function recalcIncome(){
                 const income = getVal('#income_year');
                 const other = getVal('#income_other');
-                const priceGold = getVal('#priceGold');
-                const nisab = nisabValueForGold(priceGold);
+                const { gold } = validatePrices(false);
+                const nisab = nisabValueForGold(gold);
                 const taxable = income + other;
-                const zakat = calcIncomeZakat(income, other);
+                let zakat = 0;
+                try { zakat = calcIncomeZakat(income, other); } catch (e) { zakat = taxable * 0.025; }
                 q('#nisab_income_text').textContent = toRupiah(nisab);
                 q('#result_income').textContent = toRupiah(zakat);
-                // status
                 const hintIncome = q('#hint_income');
-                if(taxable >= nisab){
-                    q('#status_income').textContent = 'WAJIB ZAKAT';
-                    q('#status_income').classList.remove('bg-gray-100','text-gray-600');
-                    q('#status_income').classList.add('bg-blue-600','text-white');
+                if(taxable >= nisab && nisab > 0){
+                    setStatus(q('#status_income'), true);
                     hintIncome.classList.add('hidden');
+                    hintIncome.innerHTML = '';
                 } else {
-                    q('#status_income').textContent = 'BELUM WAJIB';
-                    q('#status_income').classList.remove('bg-blue-600','text-white');
-                    q('#status_income').classList.add('bg-gray-200','text-gray-700');
-                    const short = nisab - taxable;
-                    hintIncome.textContent = 'BELUM WAJIB ZAKAT. Nisab: ' + toRupiah(nisab) + '. Anda kekurangan ' + toRupiah(short) + ' untuk mencapai nisab.';
-                    hintIncome.classList.remove('hidden');
+                    setStatus(q('#status_income'), false);
+                    const short = Math.max(0, nisab - taxable);
+                    setHintWithSedekah(hintIncome, 'Belum wajib zakat. Nisab ' + toRupiah(nisab) + '. Jarak ke nisab ' + toRupiah(short) + '.', 'Sedekah tetap dianjurkan.');
                 }
                 updatePayment(zakat);
             }
@@ -303,53 +537,79 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
                 const receivables = getVal('#trade_receivables');
                 const debts = getVal('#trade_debts');
                 const losses = getVal('#trade_losses');
-                const priceGold = getVal('#priceGold');
-                const nisab = nisabValueForGold(priceGold);
+                const { gold } = validatePrices(false);
+                const nisab = nisabValueForGold(gold);
                 const net = (modal + profit + receivables) - (debts + losses);
-                const zakat = calcTradeZakat(modal, profit, receivables, debts, losses);
+                let zakat = 0;
+                try { zakat = calcTradeZakat(modal, profit, receivables, debts, losses); } catch (e) { zakat = Math.max(0, net) * 0.025; }
                 q('#nisab_trade_text').textContent = toRupiah(nisab);
                 q('#result_trade').textContent = toRupiah(zakat);
                 const hintTrade = q('#hint_trade');
-                if(net >= nisab){
-                    q('#status_trade').textContent = 'WAJIB ZAKAT';
-                    q('#status_trade').classList.remove('bg-gray-200','text-gray-700');
-                    q('#status_trade').classList.add('bg-blue-600','text-white');
+                if(net >= nisab && nisab > 0){
+                    setStatus(q('#status_trade'), true);
                     hintTrade.classList.add('hidden');
+                    hintTrade.innerHTML = '';
                 } else {
-                    q('#status_trade').textContent = 'BELUM WAJIB';
-                    q('#status_trade').classList.remove('bg-blue-600','text-white');
-                    q('#status_trade').classList.add('bg-gray-200','text-gray-700');
-                    const short = nisab - net;
-                    hintTrade.textContent = 'Nisab: ' + toRupiah(nisab) + '. Anda kekurangan ' + toRupiah(short) + ' untuk mencapai nisab.';
-                    hintTrade.classList.remove('hidden');
+                    setStatus(q('#status_trade'), false);
+                    const short = Math.max(0, nisab - net);
+                    setHintWithSedekah(hintTrade, 'Belum wajib zakat. Nisab ' + toRupiah(nisab) + '. Jarak ke nisab ' + toRupiah(short) + '.', 'Sedekah tetap dianjurkan.');
                 }
                 updatePayment(zakat);
             }
 
             function recalcMetal(){
-                const metal = document.querySelector('input[name="metal"]:checked').value;
-                const owned = parseNumberFromString(q('#metal_owned').value) || 0;
-                const worn = parseNumberFromString(q('#metal_worn').value) || 0;
-                const netGr = Math.max(0, owned - worn);
-                const price = metal === 'gold' ? getVal('#priceGold') : getVal('#priceSilver');
+                const metalEl = document.querySelector('input[name="metal"]:checked');
+                const metal = metalEl ? metalEl.value : 'gold';
+                const ownedEl = q('#metal_owned');
+                const wornEl = q('#metal_worn');
+                const owned = parseGrams(ownedEl ? ownedEl.value : '0') || 0;
+                const worn = parseGrams(wornEl ? wornEl.value : '0') || 0;
+                const { gold, silver } = validatePrices(false);
+                const price = metal === 'gold' ? gold : silver;
                 const nisabGr = metal === 'gold' ? 85 : 595;
                 const nisabIdr = nisabGr * price;
-                const zakatIdr = calcMetalZakat(netGr, price);
+                const netGr = Math.max(0, owned - worn);
+                let zakatIdr = 0;
+                try { zakatIdr = calcMetalZakat(netGr, price); } catch (e) { zakatIdr = netGr * 0.025 * price; }
                 q('#nisab_metal_text').textContent = nisabGr + ' gr (' + toRupiah(nisabIdr) + ')';
                 q('#result_metal').textContent = toRupiah(zakatIdr);
-                // status by grams
+                const hintMetal = q('#hint_metal');
+                if(worn > owned){
+                    if(wornEl) setError(wornEl, 'Jumlah dipakai melebihi dimiliki. Kelebihan diabaikan, dihitung ' + netGr + ' gr.');
+                } else if(wornEl && !wornEl.hasAttribute('aria-invalid')){
+                    // biarkan error negatif/terlalu besar dari bindGramInput jika ada
+                }
                 if(netGr >= nisabGr){
-                    q('#status_metal').textContent = 'WAJIB ZAKAT';
-                    q('#status_metal').classList.remove('bg-gray-200','text-gray-700');
-                    q('#status_metal').classList.add('bg-blue-600','text-white');
-                    q('#hint_metal').classList.add('hidden');
+                    setStatus(q('#status_metal'), true);
+                    if(worn <= owned){ hintMetal.classList.add('hidden'); hintMetal.innerHTML = ''; }
+                    else {
+                        hintMetal.classList.remove('hidden');
+                        const warn = hintMetal.querySelector('[data-worn-warn]');
+                        if(!warn){
+                            const p = document.createElement('p');
+                            p.setAttribute('data-worn-warn', 'true');
+                            p.textContent = 'Catatan: jumlah dipakai melebihi dimiliki, dihitung ' + netGr + ' gr.';
+                            hintMetal.append(p);
+                        }
+                    }
                 } else {
-                    q('#status_metal').textContent = 'BELUM WAJIB';
-                    q('#status_metal').classList.remove('bg-blue-600','text-white');
-                    q('#status_metal').classList.add('bg-gray-200','text-gray-700');
-                    const shortGr = nisabGr - netGr;
-                    q('#hint_metal').textContent = 'Nisab: ' + nisabGr + ' gr. Anda kekurangan ' + shortGr + ' gr untuk mencapai nisab.';
-                    q('#hint_metal').classList.remove('hidden');
+                    setStatus(q('#status_metal'), false);
+                    const shortGr = Math.max(0, nisabGr - netGr);
+                    hintMetal.innerHTML = '';
+                    const base = document.createElement('span');
+                    base.textContent = 'Belum wajib zakat. Nisab ' + nisabGr + ' gr. Jarak ke nisab ' + shortGr + ' gr. Sedekah tetap dianjurkan. ';
+                    hintMetal.append(base);
+                    const link = document.createElement('a');
+                    link.href = '/campaign';
+                    link.className = 'underline underline-offset-2 font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm';
+                    link.textContent = 'Lihat program sedekah';
+                    hintMetal.append(link);
+                    if(worn > owned){
+                        const p = document.createElement('p');
+                        p.textContent = 'Catatan: jumlah dipakai melebihi dimiliki, dihitung ' + netGr + ' gr.';
+                        hintMetal.append(p);
+                    }
+                    hintMetal.classList.remove('hidden');
                 }
                 updatePayment(zakatIdr);
             }
@@ -357,52 +617,142 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             function recalcAll(){
                 const visible = document.querySelector('.zakat-form:not(.hidden)');
                 if(!visible) return;
-                if(visible.id === 'form-penghasilan') recalcIncome();
-                if(visible.id === 'form-perdagangan') recalcTrade();
-                if(visible.id === 'form-emasperak') recalcMetal();
+                try {
+                    if(visible.id === 'form-penghasilan') recalcIncome();
+                    if(visible.id === 'form-perdagangan') recalcTrade();
+                    if(visible.id === 'form-emasperak') recalcMetal();
+                } catch (err) {
+                    setFeedback('error', 'Perhitungan gagal. Periksa kembali angka yang dimasukkan, lalu coba lagi.');
+                }
             }
 
             // update payment display and hidden value
             function updatePayment(amount){
                 const v = Number(amount) || 0;
                 q('#paymentAmount').textContent = toRupiah(v);
-                q('#paymentAmountValue').value = Math.round(v);
+                q('#paymentAmountValue').value = String(Math.round(v));
             }
 
             // Bind currency formatting to monetary inputs
             bindCurrencyInput('#priceGold, #priceSilver, #income_year, #income_other, #trade_modal, #trade_profit, #trade_receivables, #trade_debts, #trade_losses');
 
-            // Wire inputs with basic validation for non-money fields
-            qa('#metal_owned, #metal_worn').forEach(el => el.addEventListener('input', (e) => { clearValidation(e.target); recalcAll(); }));
+            // Gram inputs mengizinkan desimal (koma/titik)
+            bindGramInput('#metal_owned, #metal_worn');
             qa('input[name="metal"]').forEach(el => el.addEventListener('change', recalcAll));
+
+            // Validasi gagal impor util — degradasi yang jelas, bukan diam
+            if(typeof calcIncomeZakat !== 'function' || typeof calcTradeZakat !== 'function' || typeof calcMetalZakat !== 'function'){
+                setFeedback('error', 'Modul perhitungan tidak dapat dimuat. Muat ulang halaman. Jika berlanjut, gunakan browser terbaru.');
+            }
 
             // Initial calculation
             recalcAll();
 
-            // Pay button with simple validation
-            q('#payBtn').addEventListener('click', (e) => {
-                e.preventDefault();
+            // Payment — validasi inline + cegah double-submit, tanpa alert()
+            let isSubmitting = false;
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+            const paymentForm = q('#payment-form');
+
+            function validatePayment(){
                 const amount = Number(q('#paymentAmountValue').value) || 0;
                 const nameEl = q('#pay_name');
                 const emailEl = q('#pay_email');
+                const waEl = q('#pay_whatsapp');
+                const firstInvalid = [];
+
                 if(amount <= 0){
-                    alert('Nominal zakat masih 0 — pastikan Anda sudah mengisi form dan mendapat hasil zakat.');
-                    return;
+                    setFeedback('error', 'Nominal zakat masih Rp 0. Isi form kalkulator hingga muncul nominal, lalu coba lagi.');
+                    const visible = document.querySelector('.zakat-form:not(.hidden) input');
+                    if(visible) firstInvalid.push(visible);
                 }
-                if(!nameEl.value.trim()){
-                    showValidation(nameEl, 'Nama harus diisi');
-                    nameEl.focus();
-                    return;
+
+                const name = (nameEl.value || '').trim();
+                if(!name){
+                    setError(nameEl, 'Nama harus diisi.');
+                    firstInvalid.push(nameEl);
+                } else if(name.length < 2){
+                    setError(nameEl, 'Nama minimal 2 karakter.');
+                    firstInvalid.push(nameEl);
+                } else if(name.length > 100){
+                    setError(nameEl, 'Nama maksimal 100 karakter.');
+                    firstInvalid.push(nameEl);
+                } else {
+                    clearError(nameEl);
                 }
-                if(!emailEl.value.trim()){
-                    showValidation(emailEl, 'Email harus diisi');
-                    emailEl.focus();
-                    return;
+
+                const email = (emailEl.value || '').trim();
+                if(!email){
+                    setError(emailEl, 'Email harus diisi untuk bukti pembayaran.');
+                    firstInvalid.push(emailEl);
+                } else if(email.length > 254 || !emailRe.test(email)){
+                    setError(emailEl, 'Masukkan email yang valid, cth. nama@email.com.');
+                    firstInvalid.push(emailEl);
+                } else {
+                    clearError(emailEl);
                 }
-                // Stub: replace with actual payment integration
-                console.log('Prepare payment', { amount, name: nameEl.value, email: emailEl.value });
-                alert('Form pembayaran siap. Nominal: ' + toRupiah(amount));
-            });
+
+                const waRaw = (waEl.value || '').trim().replace(/[\s\-.]/g, '');
+                if(waRaw){
+                    if(!/^08[0-9]{7,13}$/.test(waRaw)){
+                        setError(waEl, 'Nomor WhatsApp tidak valid. Gunakan format 08xx, 10–15 digit.');
+                        firstInvalid.push(waEl);
+                    } else {
+                        clearError(waEl);
+                        if(waEl.value !== waRaw) waEl.value = waRaw;
+                    }
+                } else {
+                    clearError(waEl);
+                }
+
+                return { ok: firstInvalid.length === 0, firstInvalid: firstInvalid[0] || null, amount };
+            }
+
+            function setPayLoading(loading){
+                const btn = q('#payBtn');
+                const label = q('#payBtnLabel');
+                const spinner = q('#paySpinner');
+                if(!btn || !label || !spinner) return;
+                btn.disabled = loading;
+                spinner.classList.toggle('hidden', !loading);
+                label.textContent = loading ? 'Memproses...' : 'Tunaikan Zakat Sekarang';
+                btn.setAttribute('aria-busy', loading ? 'true' : 'false');
+            }
+
+            if(paymentForm){
+                paymentForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if(isSubmitting) return;
+                    clearFeedback();
+                    const { ok, firstInvalid, amount } = validatePayment();
+                    if(!ok){
+                        const box = q('#payment-feedback');
+                        if((Number(q('#paymentAmountValue').value) || 0) <= 0 && box && box.classList.contains('hidden')){
+                            setFeedback('error', 'Nominal zakat masih Rp 0. Isi form kalkulator hingga muncul nominal, lalu coba lagi.');
+                        }
+                        notify('Periksa kembali data pembayaran yang ditandai.', 'error');
+                        if(firstInvalid) firstInvalid.focus();
+                        const fb = q('#payment-feedback');
+                        if(fb && !fb.classList.contains('hidden')) fb.focus({ preventScroll: false });
+                        return;
+                    }
+                    isSubmitting = true;
+                    setPayLoading(true);
+                    const methodEl = document.querySelector('input[name="method"]:checked');
+                    const method = methodEl ? methodEl.value : 'va';
+                    // Simulasi persiapan pembayaran + guard double-submit; ganti dengan integrasi payment sebenarnya
+                    setTimeout(() => {
+                        setPayLoading(false);
+                        isSubmitting = false;
+                        setFeedback('success', 'Siap dibayar: ' + toRupiah(amount) + ' via ' + (method === 'ewallet' ? 'E-Wallet' : 'Virtual Account') + '. Lanjutkan ke langkah pembayaran.');
+                        notify('Nominal ' + toRupiah(amount) + ' siap dibayar.', 'success');
+                        q('#payment-feedback').focus({ preventScroll: false });
+                    }, 500);
+                });
+                ['#pay_name', '#pay_email', '#pay_whatsapp'].forEach(sel => {
+                    const el = q(sel);
+                    if(el) el.addEventListener('input', () => { clearError(el); clearFeedback(); });
+                });
+            }
         </script>
     </section>
 </PrimaryLayout>
