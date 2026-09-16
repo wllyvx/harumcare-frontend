@@ -4,7 +4,22 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
 <PrimaryLayout>
     <section class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <h1 class="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-balance">Kalkulator & Pembayaran Zakat</h1>
-        <p class="text-sm md:text-base text-gray-600 mb-8 max-w-2xl">Hitung kewajiban zakat Anda secara akurat dan lanjutkan ke formulir pembayaran.</p>
+        <p class="text-sm md:text-base text-gray-600 mb-4 max-w-2xl">Hitung kewajiban zakat Anda secara akurat dan lanjutkan ke formulir pembayaran.</p>
+        <ul aria-label="Kepercayaan perhitungan zakat" class="mb-2 grid grid-cols-1 min-[480px]:grid-cols-3 gap-2 max-w-2xl">
+            <li class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-700">
+                <svg class="w-4 h-4 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                <span>Nisab 85 gr emas / 595 gr perak</span>
+            </li>
+            <li class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-700">
+                <svg class="w-4 h-4 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                <span>Bukti via email &amp; WhatsApp</span>
+            </li>
+            <li class="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-700">
+                <svg class="w-4 h-4 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>Penyaluran via <a href="/campaign" class="underline underline-offset-2 font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm">campaign transparan</a></span>
+            </li>
+        </ul>
+        <p class="text-xs text-gray-500 mb-8 max-w-2xl">Ragu soal haul atau nisab? <a href="/pojok-konsultasi" class="underline underline-offset-2 font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm">Tanya via Pojok Konsultasi</a>.</p>
         <noscript>
             <div class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
                 Kalkulator membutuhkan JavaScript untuk menghitung nisab. Aktifkan JavaScript, atau hubungi kami melalui halaman konsultasi untuk bantuan perhitungan manual.
@@ -16,10 +31,10 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             <div class="lg:col-span-2 min-w-0 bg-white p-5 sm:p-7 rounded-xl shadow-md flex flex-col gap-6">
                 <!-- Tabs -->
                 <div>
-                    <nav class="flex gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto" role="tablist" aria-label="Jenis Zakat">
-                        <button role="tab" id="tab-penghasilan" aria-selected="true" aria-controls="form-penghasilan" tabindex="0" data-tab="penghasilan" class="tab-btn flex-1 whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Penghasilan</button>
-                        <button role="tab" id="tab-perdagangan" aria-selected="false" aria-controls="form-perdagangan" tabindex="-1" data-tab="perdagangan" class="tab-btn flex-1 whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Perdagangan</button>
-                        <button role="tab" id="tab-emasperak" aria-selected="false" aria-controls="form-emasperak" tabindex="-1" data-tab="emasperak" class="tab-btn flex-1 whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Emas &amp; Perak</button>
+                    <nav class="grid grid-cols-1 gap-1 p-1 bg-gray-100 rounded-xl min-[480px]:flex min-[480px]:overflow-x-auto" role="tablist" aria-label="Jenis Zakat">
+                        <button role="tab" id="tab-penghasilan" aria-selected="true" aria-controls="form-penghasilan" tabindex="0" data-tab="penghasilan" class="tab-btn w-full min-[480px]:flex-1 min-[480px]:whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Penghasilan</button>
+                        <button role="tab" id="tab-perdagangan" aria-selected="false" aria-controls="form-perdagangan" tabindex="-1" data-tab="perdagangan" class="tab-btn w-full min-[480px]:flex-1 min-[480px]:whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Perdagangan</button>
+                        <button role="tab" id="tab-emasperak" aria-selected="false" aria-controls="form-emasperak" tabindex="-1" data-tab="emasperak" class="tab-btn w-full min-[480px]:flex-1 min-[480px]:whitespace-nowrap px-3 py-2.5 min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white text-gray-700 border border-gray-200 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Zakat Emas &amp; Perak</button>
                     </nav>
                 </div>
 
@@ -186,12 +201,20 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             </div>
 
             <!-- Right: Payment form (supports) -->
-        <aside class="min-w-0 bg-white p-5 sm:p-6 rounded-xl shadow-md border border-blue-50 flex flex-col gap-5 lg:sticky lg:top-6" aria-labelledby="payment-heading">
-                <h3 id="payment-heading" class="font-semibold text-base flex items-center gap-2"><svg class="w-5 h-5 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S17.523 1 12 1zm1 14h-2v-2h2v2zm0-4h-2V6h2v5z"/></svg>Detail Pembayaran</h3>
+        <aside class="min-w-0 bg-white p-5 sm:p-6 rounded-xl shadow-md border border-blue-50 flex flex-col gap-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto scroll-mt-24" aria-labelledby="payment-heading">
+                <h3 id="payment-heading" class="font-semibold text-base flex items-center gap-2 scroll-mt-24"><svg class="w-5 h-5 shrink-0 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1c-5.523 0-10 4.477-10 10s4.477 10 10 10 10-4.477 10-10S17.523 1 12 1zm1 14h-2v-2h2v2zm0-4h-2V6h2v5z"/></svg>Detail Pembayaran</h3>
                 <div>
                     <div class="text-sm text-gray-600">Nominal Zakat</div>
             <div id="paymentAmount" role="status" aria-live="polite" aria-atomic="true" aria-label="Nominal zakat terhitung" class="mt-2 p-4 border rounded-lg text-xl md:text-2xl font-bold tracking-tight bg-white text-blue-700 border-blue-200 tabular-nums break-words min-h-[4rem] flex items-center">Rp 0</div>
                     <p id="payment-source" class="mt-1.5 text-xs text-gray-500">Nominal mengikuti tab kalkulator yang aktif.</p>
+                    <div id="sedekah-offramp" class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                        <p class="font-semibold text-[13px]">Belum wajib zakat? Alhamdulillah.</p>
+                        <p class="mt-0.5 text-[13px] leading-relaxed">Harta Anda di bawah nisab. Sedekah tetap dianjurkan dan bisa disalurkan sekarang.</p>
+                        <div class="mt-2.5 flex flex-col min-[420px]:flex-row gap-2">
+                            <a href="/campaign" class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-[13px] font-semibold hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2 transition-colors">Lihat program sedekah</a>
+                            <a href="/pojok-konsultasi" class="inline-flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg text-[13px] font-medium underline underline-offset-2 hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 rounded-sm">Tanya konsultasi</a>
+                        </div>
+                    </div>
                 </div>
 
                 <form id="payment-form" novalidate class="flex flex-col gap-5 min-w-0">
@@ -243,12 +266,28 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             </aside>
         </div>
 
+        <!-- Mobile sticky ringkasan: ringkas nominal + status, sembunyi saat form pembayaran terlihat -->
+        <div id="mobile-summary" class="md:hidden fixed inset-x-3 z-40 rounded-xl border border-blue-100 bg-white/95 backdrop-blur px-4 py-3 shadow-lg transition-transform transition-opacity duration-200" style="bottom: calc(88px + env(safe-area-inset-bottom));" role="status" aria-live="polite" aria-atomic="true">
+            <div class="flex items-center justify-between gap-3 min-w-0">
+                <div class="min-w-0">
+                    <div id="mobile-status" class="inline-flex items-center px-2 py-0.5 rounded-full bg-white border border-blue-200 text-blue-800 text-[11px] font-bold tracking-wide">BELUM WAJIB</div>
+                    <div id="mobile-amount" class="mt-1 text-lg font-extrabold tracking-tight text-blue-900 tabular-nums truncate">Rp 0</div>
+                </div>
+                <a id="mobile-cta" href="/campaign" class="shrink-0 inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 transition-colors">Lihat sedekah</a>
+            </div>
+        </div>
+
     <style>
+        html { scroll-behavior: smooth; }
         @media (prefers-reduced-motion: reduce) {
-            .tab-btn, #payBtn { transition: none !important; }
+            html { scroll-behavior: auto; }
+            .tab-btn, #payBtn, #mobile-summary, #mobile-cta { transition: none !important; }
             #paySpinner { animation: none !important; }
         }
         input[aria-invalid="true"] { border-color: #dc2626; }
+        ::selection { background: #dbeafe; color: #1e3a8a; }
+        #mobile-summary[hidden] { display: none; }
+        #mobile-summary.is-hidden { opacity: 0; transform: translateY(12px); pointer-events: none; }
     </style>
 
     <script type="module">
@@ -357,12 +396,25 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
             function setHintWithSedekah(el, prefix, shortText){
                 if(!el) return;
                 el.innerHTML = '';
-                el.append(document.createTextNode(prefix + ' ' + shortText + ' '));
-                const link = document.createElement('a');
-                link.href = '/campaign';
-                link.className = 'underline underline-offset-2 font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm';
-                link.textContent = 'Lihat program sedekah';
-                el.append(link);
+                el.className = 'hint-text mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 break-words';
+                const title = document.createElement('p');
+                title.className = 'font-semibold text-[13px]';
+                title.textContent = 'Belum wajib zakat? Alhamdulillah.';
+                const desc = document.createElement('p');
+                desc.className = 'mt-0.5 text-[13px] leading-relaxed';
+                desc.textContent = prefix + ' ' + shortText;
+                const actions = document.createElement('div');
+                actions.className = 'mt-2.5 flex flex-col min-[420px]:flex-row gap-2';
+                const primary = document.createElement('a');
+                primary.href = '/campaign';
+                primary.className = 'inline-flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-[13px] font-semibold hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2 transition-colors';
+                primary.textContent = 'Lihat program sedekah';
+                const secondary = document.createElement('a');
+                secondary.href = '/pojok-konsultasi';
+                secondary.className = 'inline-flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg text-[13px] font-medium underline underline-offset-2 hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 rounded-sm';
+                secondary.textContent = 'Tanya konsultasi';
+                actions.append(primary, secondary);
+                el.append(title, desc, actions);
                 el.classList.remove('hidden');
             }
 
@@ -596,16 +648,31 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
                     setStatus(q('#status_metal'), false);
                     const shortGr = Math.max(0, nisabGr - netGr);
                     hintMetal.innerHTML = '';
-                    const base = document.createElement('span');
-                    base.textContent = 'Belum wajib zakat. Nisab ' + nisabGr + ' gr. Jarak ke nisab ' + shortGr + ' gr. Sedekah tetap dianjurkan. ';
+                    hintMetal.className = 'hint-text mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 break-words';
+                    const title = document.createElement('p');
+                    title.className = 'font-semibold text-[13px]';
+                    title.textContent = 'Belum wajib zakat? Alhamdulillah.';
+                    hintMetal.append(title);
+                    const base = document.createElement('p');
+                    base.className = 'mt-0.5 text-[13px] leading-relaxed';
+                    base.textContent = 'Belum wajib zakat. Nisab ' + nisabGr + ' gr. Jarak ke nisab ' + shortGr + ' gr. Sedekah tetap dianjurkan.';
                     hintMetal.append(base);
+                    const actions = document.createElement('div');
+                    actions.className = 'mt-2.5 flex flex-col min-[420px]:flex-row gap-2';
                     const link = document.createElement('a');
                     link.href = '/campaign';
-                    link.className = 'underline underline-offset-2 font-medium text-blue-700 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm';
+                    link.className = 'inline-flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-[13px] font-semibold hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2 transition-colors';
                     link.textContent = 'Lihat program sedekah';
-                    hintMetal.append(link);
+                    actions.append(link);
+                    const consult = document.createElement('a');
+                    consult.href = '/pojok-konsultasi';
+                    consult.className = 'inline-flex items-center justify-center min-h-[44px] px-3 py-2 rounded-lg text-[13px] font-medium underline underline-offset-2 hover:text-amber-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 rounded-sm';
+                    consult.textContent = 'Tanya konsultasi';
+                    actions.append(consult);
+                    hintMetal.append(actions);
                     if(worn > owned){
                         const p = document.createElement('p');
+                        p.className = 'mt-2 text-[13px]';
                         p.textContent = 'Catatan: jumlah dipakai melebihi dimiliki, dihitung ' + netGr + ' gr.';
                         hintMetal.append(p);
                     }
@@ -626,12 +693,44 @@ import PrimaryLayout from "../../layouts/PrimaryLayout.astro";
                 }
             }
 
-            // update payment display and hidden value
+            // update payment display and hidden value + sticky ringkasan + sedekah off-ramp
             function updatePayment(amount){
                 const v = Number(amount) || 0;
                 q('#paymentAmount').textContent = toRupiah(v);
                 q('#paymentAmountValue').value = String(Math.round(v));
+                const offramp = q('#sedekah-offramp');
+                if(offramp) offramp.classList.toggle('hidden', v > 0);
+                const mAmount = q('#mobile-amount');
+                if(mAmount) mAmount.textContent = toRupiah(v);
+                setStatus(q('#mobile-status'), v > 0);
+                const mCta = q('#mobile-cta');
+                if(mCta){
+                    if(v > 0){
+                        mCta.href = '#payment-heading';
+                        mCta.textContent = 'Lanjut bayar';
+                    } else {
+                        mCta.href = '/campaign';
+                        mCta.textContent = 'Lihat sedekah';
+                    }
+                }
             }
+
+            // Sembunyikan bar mobile saat form pembayaran terlihat (hindari menutup tombol bayar / bottom nav)
+            function initMobileSummary(){
+                const bar = q('#mobile-summary');
+                const target = q('#payment-form');
+                if(!bar || !target) return;
+                if(!('IntersectionObserver' in window)){
+                    return;
+                }
+                const io = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        bar.classList.toggle('is-hidden', entry.isIntersecting);
+                    });
+                }, { rootMargin: '-80px 0px 0px 0px', threshold: 0.15 });
+                io.observe(target);
+            }
+            initMobileSummary();
 
             // Bind currency formatting to monetary inputs
             bindCurrencyInput('#priceGold, #priceSilver, #income_year, #income_other, #trade_modal, #trade_profit, #trade_receivables, #trade_debts, #trade_losses');
