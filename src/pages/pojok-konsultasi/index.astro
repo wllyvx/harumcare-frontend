@@ -6,8 +6,10 @@ import { consultationCategories } from 'src/data/consultationCategories.js';
 
 const { searchParams } = Astro.url;
 const category = searchParams.get('category') || '';
+const q = (searchParams.get('q') || '').trim().slice(0, 100);
 const page = parseInt(searchParams.get('page') || '1');
 const limit = 10;
+const apiBase = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api';
 
 let consultationsData = {
   data: [],
@@ -18,6 +20,7 @@ let consultationsData = {
     totalPages: 1
   }
 };
+let loadError: string | null = null;
 
 try {
   const queryParams = new URLSearchParams({
@@ -28,89 +31,202 @@ try {
   if (category) {
     queryParams.append('category', category);
   }
+  if (q) {
+    queryParams.append('q', q);
+  }
 
-  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/consultations?${queryParams}`);
+  const response = await fetch(`${apiBase}/consultations?${queryParams}`);
   if (response.ok) {
     consultationsData = await response.json();
+  } else {
+    loadError = 'Layanan konsultasi tidak merespons. Coba muat ulang.';
   }
 } catch (error) {
   console.error('Error fetching consultations:', error);
+  loadError = 'Tidak dapat memuat pertanyaan. Periksa koneksi Anda.';
 }
 
 const { data: consultations, pagination } = consultationsData;
+
+const isValidCategory = (v: string) => v === '' || consultationCategories.some((c) => c.value === v);
+const activeCategory = isValidCategory(category) ? category : '';
+const safePage = Number.isFinite(page) && page > 0 ? page : 1;
+const totalPages = Math.max(1, pagination.totalPages || 1);
+const currentPage = Math.min(safePage, totalPages);
+
+function pageHref(p: number) {
+  const qs = new URLSearchParams();
+  if (activeCategory) qs.set('category', activeCategory);
+  if (q) qs.set('q', q);
+  if (p > 1) qs.set('page', String(p));
+  const s = qs.toString();
+  return s ? `/pojok-konsultasi?${s}` : '/pojok-konsultasi';
+}
+
+function pageWindow(cur: number, total: number): (number | '…')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const set = new Set<number>([1, 2, cur - 1, cur, cur + 1, total - 1, total]);
+  const nums = [...set].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+  const out: (number | '…')[] = [];
+  let prev = 0;
+  for (const n of nums) {
+    if (prev && n - prev > 1) out.push('…');
+    out.push(n);
+    prev = n;
+  }
+  return out;
+}
+const visiblePages = pageWindow(currentPage, totalPages);
+const categoryHref = (v: string) => {
+  const qs = new URLSearchParams();
+  if (v) qs.set('category', v);
+  if (q) qs.set('q', q);
+  const s = qs.toString();
+  return s ? `/pojok-konsultasi?${s}` : '/pojok-konsultasi';
+};
+
+const activeCategoryLabel = activeCategory
+  ? (consultationCategories.find((c) => c.value === activeCategory)?.label || activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1))
+  : '';
 ---
 
 <PrimaryLayout title="Pojok Konsultasi - Harum Care Indonesia">
-  <main class="min-h-screen bg-slate-50 py-10">
+  <main class="min-h-screen bg-white py-10 pb-24 lg:pb-10">
     <div class="mx-auto max-w-7xl px-4">
-      <section class="p-4">
-        <div class="mb-10 space-y-4 text-center">
-          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Pojok Konsultasi</p>
-          <h1 class="text-3xl font-extrabold text-slate-900 md:text-4xl">Tanya dan dapatkan jawaban dari admin</h1>
-          <p class="mx-auto max-w-2xl text-sm leading-7 text-slate-600">
-            Ajukan pertanyaan seputar zakat, donasi, ibadah, dan topik umum. Semua pertanyaan dan jawaban akan ditampilkan di sini sebagai threads.
-          </p>
+      <section>
+        <div class="relative mb-8 overflow-hidden rounded-2xl border border-[#ebebeb] bg-[#eff6ff] p-6 sm:p-8">
+          <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-transparent"></div>
+          <div class="relative max-w-3xl space-y-4">
+            <nav aria-label="Breadcrumb" class="text-sm">
+              <ol class="flex flex-wrap items-center gap-2 text-[#1e3a8a]">
+                <li><a href="/" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Beranda</a></li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" class="font-semibold">Pojok Konsultasi</li>
+              </ol>
+            </nav>
+            <h1 class="text-balance text-3xl font-bold tracking-tight text-[#252525] md:text-4xl">Ruang bertanya yang tenang dan terjaga</h1>
+            <p class="max-w-2xl text-base leading-7 text-[#525252]">
+              Ajukan pertanyaan seputar zakat, donasi, ibadah, dan topik umum. Jawaban admin tampil sebagai thread publik agar manfaatnya meluas.
+            </p>
+            <ul class="flex flex-wrap gap-2 text-sm text-[#525252]">
+              <li class="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#ebebeb] bg-white px-4 py-2"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="#1d4ed8"/><path d="M5 8.2l2 2 4-4.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Boleh anonim</li>
+              <li class="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#ebebeb] bg-white px-4 py-2"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#1d4ed8" stroke-width="1.6"/><path d="M8 4.5V8l2.5 1.5" stroke="#1d4ed8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Jawaban 1–2 hari kerja</li>
+              <li class="inline-flex min-h-11 items-center gap-2 rounded-full border border-[#ebebeb] bg-white px-4 py-2"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.8 3.8 4.1.5-3 2.8.8 4-3.7-2-3.7 2 .8-4-3-2.8 4.1-.5z" stroke="#1d4ed8" stroke-width="1.4" stroke-linejoin="round"/></svg>Gratis dan terbuka</li>
+            </ul>
+            <p class="text-sm text-[#525252]" aria-live="polite"><span class="font-semibold tabular-nums text-[#1e3a8a]">{pagination.total} thread publik</span><span aria-hidden="true"> · </span>Dijawab admin terverifikasi, biasanya 1–2 hari kerja.</p>
+          </div>
         </div>
 
-        <div class="grid gap-10 lg:grid-cols-[1fr_360px]">
-          <div class="space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-slate-50 p-5">
-              <div>
-                <h2 class="text-lg font-semibold text-slate-900">Pertanyaan Terbaru</h2>
-                <p class="text-sm text-slate-600">Lihat thread publik dan pilih kategori yang Anda minati.</p>
+        <div class="grid gap-8 lg:grid-cols-[1fr_380px]">
+          <div class="order-1 space-y-6">
+            <div class="rounded-2xl border border-[#ebebeb] bg-white p-5 shadow-sm">
+              <div class="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h2 class="text-lg font-bold text-[#252525]">Pertanyaan Terbaru</h2>
+                  <p class="mt-1 text-sm text-[#737373]">Cari dulu, lalu saring kategori bila perlu.</p>
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2">
-                <a href="/pojok-konsultasi" class={`rounded-full border px-4 py-2 text-sm ${category === '' ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}>
-                  Semua
+              <form method="get" action="/pojok-konsultasi" role="search" aria-label="Cari pertanyaan" class="mt-4 flex flex-col gap-2 sm:flex-row">
+                {activeCategory && (<input type="hidden" name="category" value={activeCategory} />)}
+                <label for="q" class="sr-only">Cari pertanyaan</label>
+                <input id="q" name="q" type="search" value={q} maxlength="100" autocomplete="off" placeholder="Cari: zakat penghasilan, qurban, fidyah…" class="min-h-11 flex-1 rounded-lg border border-[#ebebeb] bg-white px-4 py-2.5 text-sm text-[#252525] placeholder:text-[#737373] focus:border-[#1d4ed8] focus:outline-2 focus:outline-offset-1 focus:outline-brand-600" />
+                <button type="submit" class="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e3a8a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Cari</button>
+                {q && (<a href={categoryHref(activeCategory)} class="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-4 py-2.5 text-sm font-semibold text-[#525252] transition hover:bg-[#f5f5f5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Reset</a>)}
+              </form>
+              <nav aria-label="Saring kategori" class="mt-4 flex flex-wrap gap-2">
+                <a href={categoryHref('')} aria-current={activeCategory === '' ? 'page' : undefined} class={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${activeCategory === '' ? 'border-[#1d4ed8] bg-[#1d4ed8] font-bold text-white shadow-sm ring-1 ring-[#1d4ed8]' : 'border-[#ebebeb] bg-white font-medium text-[#525252] hover:border-[#dbeafe] hover:bg-[#eff6ff]'}`}>
+                  {activeCategory === '' && (<svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.2l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>)}Semua
                 </a>
                 {consultationCategories.map((item) => (
                   <a
-                    href={`/pojok-konsultasi?category=${item.value}`}
-                    class={`rounded-full border px-4 py-2 text-sm ${category === item.value ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
+                    href={categoryHref(item.value)}
+                    aria-current={activeCategory === item.value ? 'page' : undefined}
+                    class={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${activeCategory === item.value ? 'border-[#1d4ed8] bg-[#1d4ed8] font-bold text-white shadow-sm ring-1 ring-[#1d4ed8]' : 'border-[#ebebeb] bg-white font-medium text-[#525252] hover:border-[#dbeafe] hover:bg-[#eff6ff]'}`}
                   >
+                    {activeCategory === item.value && (<svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3.5 8.2l3 3 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>)}
                     {item.label}
                   </a>
                 ))}
-              </div>
+              </nav>
             </div>
 
-            <div class="grid gap-4">
-              {consultations.length > 0 ? (
+            <div class="grid gap-4" aria-live="polite">
+              {loadError ? (
+                <div class="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
+                  <p class="font-semibold text-rose-900">Tidak dapat memuat pertanyaan.</p>
+                  <p class="mt-1 text-sm text-rose-800">{loadError} Draf pertanyaan Anda di bawah tetap aman.</p>
+                  <a href={pageHref(currentPage)} class="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e3a8a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Coba lagi</a>
+                </div>
+              ) : consultations.length > 0 ? (
                 consultations.map((consultation) => (
                   <ConsultationCard consultation={consultation} />
                 ))
+              ) : q ? (
+                <div class="rounded-2xl border border-dashed border-[#ebebeb] bg-[#f5f5f5] p-10 text-center">
+                  <p class="font-semibold text-[#252525]">Tidak ditemukan untuk “{q}”.</p>
+                  <p class="mx-auto mt-1 max-w-md text-sm leading-6 text-[#737373]">Coba kata kunci lain, atau ajukan sebagai pertanyaan baru di bawah — boleh anonim.</p>
+                  <div class="mt-4 flex flex-wrap justify-center gap-2">
+                    <a href={categoryHref(activeCategory)} class="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-5 py-2.5 text-sm font-semibold text-[#525252] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Hapus pencarian</a>
+                    <a href="#ajukan" class="inline-flex min-h-11 items-center justify-center rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e3a8a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Ajukan pertanyaan ini</a>
+                  </div>
+                </div>
               ) : (
-                <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-600">
-                  Belum ada pertanyaan untuk kategori ini.
+                <div class="rounded-2xl border border-dashed border-[#ebebeb] bg-[#f5f5f5] p-10 text-center">
+                  <p class="font-semibold text-[#252525]">{activeCategory ? `Belum ada pertanyaan untuk kategori ${activeCategoryLabel}.` : 'Belum ada pertanyaan.'}</p>
+                  <p class="mx-auto mt-1 max-w-md text-sm leading-6 text-[#737373]">Jadilah yang pertama bertanya — gunakan formulir di bawah. Boleh anonim, jawaban akan tampil di sini.</p>
+                  <a href="/pojok-konsultasi" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-5 py-2.5 text-sm font-semibold text-[#525252] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Lihat semua kategori</a>
                 </div>
               )}
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-white p-5 text-sm text-slate-600 shadow-sm">
-              <div>{pagination.total} pertanyaan ditemukan</div>
-              <div class="flex items-center gap-2">
-                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNumber) => (
-                  <a
-                    href={`/pojok-konsultasi?category=${category}&page=${pageNumber}`}
-                    class={`inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 ${pageNumber === pagination.page ? 'bg-blue-600 text-white' : 'bg-white text-slate-700'}`}
-                  >
-                    {pageNumber}
-                  </a>
-                ))}
-              </div>
-            </div>
+            {!loadError && totalPages > 1 && (
+              <nav aria-label="Navigasi halaman" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#ebebeb] bg-white p-4 text-sm text-[#737373] shadow-sm">
+                <div aria-live="polite">{pagination.total} pertanyaan ditemukan · hal. {currentPage} dari {totalPages}</div>
+                <div class="flex flex-wrap items-center gap-2">
+                  {currentPage > 1 ? (
+                    <a href={pageHref(currentPage - 1)} aria-label="Halaman sebelumnya" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-3 text-[#525252] transition hover:bg-[#f5f5f5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">‹</a>
+                  ) : (
+                    <span aria-disabled="true" aria-label="Halaman sebelumnya (tidak tersedia)" class="inline-flex min-h-11 min-w-11 cursor-not-allowed items-center justify-center rounded-lg border border-[#ebebeb] bg-[#f5f5f5] px-3 text-[#737373] opacity-50">‹</span>
+                  )}
+                  {visiblePages.map((pn) => pn === '…' ? (
+                    <span aria-hidden="true" class="px-1 text-[#737373]">…</span>
+                  ) : (
+                    <a
+                      href={pageHref(pn as number)}
+                      aria-label={`Halaman ${pn}`}
+                      aria-current={(pn as number) === currentPage ? 'page' : undefined}
+                      class={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border px-3 font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 ${(pn as number) === currentPage ? 'border-[#1d4ed8] bg-[#1d4ed8] font-bold text-white ring-1 ring-[#1d4ed8]' : 'border-[#ebebeb] bg-white text-[#525252] hover:bg-[#f5f5f5]'}`}
+                    >
+                      {pn}
+                    </a>
+                  ))}
+                  {currentPage < totalPages ? (
+                    <a href={pageHref(currentPage + 1)} aria-label="Halaman berikutnya" class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-3 text-[#525252] transition hover:bg-[#f5f5f5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">›</a>
+                  ) : (
+                    <span aria-disabled="true" aria-label="Halaman berikutnya (tidak tersedia)" class="inline-flex min-h-11 min-w-11 cursor-not-allowed items-center justify-center rounded-lg border border-[#ebebeb] bg-[#f5f5f5] px-3 text-[#737373] opacity-50">›</span>
+                  )}
+                </div>
+              </nav>
+            )}
+            {!loadError && totalPages <= 1 && (
+              <p class="text-sm text-[#737373]" aria-live="polite">{pagination.total} pertanyaan ditemukan{q ? ` untuk “${q}”` : ''}</p>
+            )}
           </div>
 
-          <aside class="space-y-6">
-            <div class="rounded-[2rem] border border-slate-200 bg-slate-50 p-6">
-              <h2 class="text-lg font-semibold text-slate-900">Ajukan Pertanyaan</h2>
-              <p class="mt-2 text-sm text-slate-600">Bisa dijawab sebagai anonim atau ditautkan dengan akun Anda jika sudah login.</p>
+          <aside id="ajukan" class="order-2 scroll-mt-24 space-y-4" aria-label="Ajukan pertanyaan">
+            <div class="rounded-2xl border border-[#ebebeb] bg-white p-6 shadow-sm lg:sticky lg:top-6">
+              <h2 class="text-lg font-bold text-[#252525]">Ajukan Pertanyaan</h2>
+              <p class="mt-2 text-sm leading-6 text-[#737373]">Tulis dengan tenang — boleh anonim, atau tautkan dengan akun bila sudah login. Jawaban admin biasanya hadir dalam 1–2 hari kerja.</p>
+              <div class="mt-4">
+                <ConsultationForm actionUrl={`${apiBase}/consultations`} />
+              </div>
             </div>
-
-            <ConsultationForm actionUrl={`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/consultations`} />
           </aside>
         </div>
       </section>
     </div>
   </main>
+  <div class="fixed inset-x-0 bottom-0 z-40 border-t border-[#ebebeb] bg-white/95 p-3 backdrop-blur lg:hidden">
+    <a href="#ajukan" class="flex min-h-11 items-center justify-center rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e3a8a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Ajukan pertanyaan</a>
+  </div>
 </PrimaryLayout>

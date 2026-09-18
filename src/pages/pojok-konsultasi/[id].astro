@@ -1,15 +1,18 @@
 ---
 import PrimaryLayout from 'src/layouts/PrimaryLayout.astro';
 import ConsultationThread from 'src/components/consultation/ConsultationThread.astro';
+import ConsultationCard from 'src/components/consultation/ConsultationCard.astro';
 
 const { params } = Astro;
 const id = params.id;
+const apiBase = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api';
 
 let consultation = null;
 let loadError = null;
+let related: any[] = [];
 
 try {
-  const response = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api'}/consultations/${id}`);
+  const response = await fetch(`${apiBase}/consultations/${id}`);
   if (!response.ok) {
     loadError = 'Thread tidak ditemukan.';
   } else {
@@ -19,23 +22,101 @@ try {
   console.error('Error loading consultation thread:', error);
   loadError = 'Terjadi kesalahan saat memuat thread.';
 }
+
+const relatedHref = consultation?.category ? `/pojok-konsultasi?category=${encodeURIComponent(String(consultation.category))}` : '/pojok-konsultasi';
+const kajianHref = consultation ? `/kajian?q=${encodeURIComponent(String(consultation.title || consultation.category || '').slice(0, 60))}` : '/kajian';
+// Note: campaign route is singular `/campaign` (verified in src/pages/campaign/index.astro).
+const campaignHref = consultation?.category ? `/campaign?category=${encodeURIComponent(String(consultation.category))}` : '/campaign';
+
+// Related threads: same category, exclude current, best-effort.
+if (consultation?.category) {
+  try {
+    const qp = new URLSearchParams({ page: '1', limit: '3', category: String(consultation.category) });
+    const r = await fetch(`${apiBase}/consultations?${qp}`);
+    if (r.ok) {
+      const j = await r.json();
+      related = (j?.data || []).filter((t: any) => String(t?.id) !== String(id)).slice(0, 3);
+    }
+  } catch {
+    related = [];
+  }
+}
 ---
 
-<PrimaryLayout title={consultation ? consultation.title : 'Pojok Konsultasi'}>
-  <main class="min-h-screen bg-slate-50 py-10">
+<PrimaryLayout title={consultation ? `${consultation.title} - Pojok Konsultasi` : 'Pojok Konsultasi'}>
+  <main class="min-h-screen bg-white py-10">
     <div class="mx-auto max-w-5xl px-4">
-      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Pojok Konsultasi</p>
-          <h1 class="text-3xl font-extrabold text-slate-900">{consultation ? consultation.title : 'Thread Konsultasi'}</h1>
+      <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div class="max-w-2xl">
+          <nav aria-label="Breadcrumb" class="mb-2 text-sm">
+            <ol class="flex flex-wrap items-center gap-2 text-[#1e3a8a]">
+              <li><a href="/" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Beranda</a></li>
+              <li aria-hidden="true">/</li>
+              <li><a href="/pojok-konsultasi" class="font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Pojok Konsultasi</a></li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" class="max-w-[32ch] truncate font-semibold" title={consultation?.title || 'Thread'}>{consultation?.title || 'Thread'}</li>
+            </ol>
+          </nav>
+          <h1 class="text-balance text-3xl font-bold tracking-tight text-[#252525]">{consultation ? consultation.title : 'Thread Konsultasi'}</h1>
+          <p class="mt-2 text-sm leading-6 text-[#737373]">Thread publik Pojok Konsultasi — jawaban admin tampil di bawah pertanyaan.</p>
         </div>
-        <a href="/pojok-konsultasi" class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm border border-slate-200 transition hover:bg-slate-100">Kembali ke daftar</a>
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
+          <button id="copy-thread-link" type="button" class="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-4 py-2.5 text-sm font-semibold text-[#1d4ed8] shadow-sm transition hover:bg-[#eff6ff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Salin tautan</button>
+          <a href="/pojok-konsultasi" class="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#ebebeb] bg-white px-5 py-2.5 text-sm font-semibold text-[#525252] shadow-sm transition hover:bg-[#f5f5f5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">← Kembali ke daftar</a>
+        </div>
       </div>
+      <p id="copy-thread-feedback" role="status" aria-live="polite" class="mb-4 hidden text-sm text-[#1e3a8a]">Tautan thread tersalin — simpan untuk kembali lagi.</p>
+      <script type="module">
+        const btn = document.getElementById('copy-thread-link');
+        const fb = document.getElementById('copy-thread-feedback');
+        btn?.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            fb?.classList.remove('hidden');
+            btn.textContent = 'Tersalin ✓';
+            setTimeout(() => { btn.textContent = 'Salin tautan'; }, 2000);
+          } catch {
+            fb?.classList.remove('hidden');
+            if (fb) fb.textContent = 'Gagal menyalin — salin manual dari address bar.';
+          }
+        });
+      </script>
 
       {loadError ? (
-        <div class="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700">{loadError}</div>
+        <div class="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
+          <p class="font-semibold text-rose-900">{loadError}</p>
+          <p class="mt-1 text-sm text-rose-800">Tautan mungkin kedaluwarsa atau thread telah dihapus.</p>
+          <a href="/pojok-konsultasi" class="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-[#1d4ed8] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1e3a8a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Kembali ke daftar</a>
+        </div>
       ) : (
-        <ConsultationThread consultation={consultation} />
+        <>
+          <ConsultationThread consultation={consultation} />
+          {related.length > 0 && (
+            <section aria-label="Thread terkait" class="mt-8 space-y-4">
+              <div class="flex flex-wrap items-end justify-between gap-2">
+                <h2 class="text-lg font-bold text-[#252525]">Thread terkait</h2>
+                <a href={relatedHref} class="inline-flex min-h-11 items-center text-sm font-semibold text-[#1d4ed8] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Lihat kategori ini →</a>
+              </div>
+              <div class="grid gap-4">
+                {related.map((t) => (<ConsultationCard consultation={t} />))}
+              </div>
+            </section>
+          )}
+          <aside aria-label="Lanjutkan kebaikan" class="mt-8 grid gap-4 sm:grid-cols-2">
+            <a href={kajianHref} class="group rounded-2xl border border-[#ebebeb] bg-[#eff6ff] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
+              <p class="text-xs font-semibold uppercase tracking-wider text-[#1e3a8a]">Perdalam pemahaman</p>
+              <p class="mt-1 font-bold text-[#252525]">Baca kajian terkait</p>
+              <p class="mt-1 text-sm leading-6 text-[#525252]">Kajian seputar “{consultation?.category || 'topik ini'}” yang menenangkan.</p>
+              <span class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[#1d4ed8]">Ke kajian →</span>
+            </a>
+            <a href={campaignHref} class="group rounded-2xl border border-[#ebebeb] bg-[#fffbeb] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
+              <p class="text-xs font-semibold uppercase tracking-wider text-[#92400e]">Ubah ilmu jadi amal</p>
+              <p class="mt-1 font-bold text-[#252525]">Salurkan donasi</p>
+              <p class="mt-1 text-sm leading-6 text-[#525252]">Campaign terverifikasi seputar {consultation?.category || 'kebaikan'} yang membutuhkan.</p>
+              <span class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[#1d4ed8]">Lihat campaign →</span>
+            </a>
+          </aside>
+        </>
       )}
     </div>
   </main>

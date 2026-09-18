@@ -2,49 +2,69 @@
 import { consultationCategories } from 'src/data/consultationCategories.js';
 const { actionUrl } = Astro.props;
 ---
-<form id="consultation-form" class="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-action-url={actionUrl}>
+<form id="consultation-form" class="space-y-4" data-action-url={actionUrl} novalidate>
+  <div id="consultation-status" tabindex="-1" aria-live="polite" role="status" class="hidden rounded-2xl border p-4 text-sm leading-6"></div>
+
   <div class="space-y-2">
-    <label for="title" class="block text-sm font-medium text-slate-700">Judul Pertanyaan</label>
-    <input id="title" name="title" type="text" placeholder="Masukkan judul pertanyaan" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" required />
+    <div class="flex items-center justify-between gap-2">
+      <label for="title" class="block text-sm font-semibold text-[#252525]">Judul Pertanyaan <span aria-hidden="true" class="text-rose-700">*</span></label>
+      <span id="title-count" class="text-xs tabular-nums text-[#737373]" aria-live="polite">0 / 120</span>
+    </div>
+    <input id="title" name="title" type="text" maxlength="120" autocomplete="off" placeholder="Contoh: Bagaimana cara menghitung zakat penghasilan bulanan?" class="min-h-11 w-full rounded-lg border border-[#ebebeb] bg-white px-4 py-3 text-base text-[#252525] placeholder:text-[#737373] focus:border-[#1d4ed8] focus:outline-2 focus:outline-offset-1 focus:outline-brand-600" required aria-describedby="title-hint title-error" />
+    <p id="title-hint" class="text-xs text-[#737373]">Tulis ringkas, minimal 10 karakter.</p>
+    <p id="title-error" class="hidden text-sm text-rose-700"></p>
   </div>
 
   <div class="space-y-2">
-    <label for="content" class="block text-sm font-medium text-slate-700">Pertanyaan</label>
-    <textarea id="content" name="content" rows="5" placeholder="Tulis pertanyaan Anda..." class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" required></textarea>
+    <div class="flex items-center justify-between gap-2">
+      <label for="content" class="block text-sm font-semibold text-[#252525]">Pertanyaan <span aria-hidden="true" class="text-rose-700">*</span></label>
+      <span id="content-count" class="text-xs tabular-nums text-[#737373]" aria-live="polite">0 / 2000</span>
+    </div>
+    <textarea id="content" name="content" rows="5" maxlength="2000" placeholder="Ceritakan dengan tenang dan jelas. Contoh: Saya menerima gaji bulanan dan ingin tahu nisab serta cara membayarnya…" class="min-h-[132px] w-full rounded-lg border border-[#ebebeb] bg-white px-4 py-3 text-base text-[#252525] placeholder:text-[#737373] focus:border-[#1d4ed8] focus:outline-2 focus:outline-offset-1 focus:outline-brand-600" required aria-describedby="content-hint content-error"></textarea>
+    <p id="content-hint" class="text-xs text-[#737373]">Ceritakan minimal 20 karakter agar mudah dijawab.</p>
+    <p id="content-error" class="hidden text-sm text-rose-700"></p>
   </div>
 
   <div class="grid gap-4 md:grid-cols-2">
     <div class="space-y-2">
-      <label for="category" class="block text-sm font-medium text-slate-700">Kategori</label>
-      <select id="category" name="category" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" required>
+      <label for="category" class="block text-sm font-semibold text-[#252525]">Kategori <span aria-hidden="true" class="text-rose-700">*</span></label>
+      <select id="category" name="category" class="min-h-11 w-full rounded-lg border border-[#ebebeb] bg-white px-4 py-3 text-base text-[#252525] focus:border-[#1d4ed8] focus:outline-2 focus:outline-offset-1 focus:outline-brand-600" required aria-describedby="category-error">
         <option value="">Pilih kategori</option>
         {consultationCategories.map((item) => (
           <option value={item.value}>{item.label}</option>
         ))}
       </select>
+      <p id="category-error" class="hidden text-sm text-rose-700"></p>
     </div>
 
     <div class="space-y-2">
-      <label for="isAnonymous" class="block text-sm font-medium text-slate-700">Posting sebagai</label>
-      <div class="flex items-center gap-3 rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3">
-        <input id="isAnonymous" name="isAnonymous" type="checkbox" class="h-4 w-4 rounded text-slate-600 focus:ring-slate-500" />
-        <label for="isAnonymous" class="text-sm text-slate-700">Anonim</label>
+      <span id="anon-label" class="block text-sm font-semibold text-[#252525]">Posting sebagai</span>
+      <div class="flex min-h-11 items-center gap-3 rounded-lg border border-[#ebebeb] bg-white px-4 py-2.5" role="group" aria-labelledby="anon-label">
+        <input id="isAnonymous" name="isAnonymous" type="checkbox" checked class="h-5 w-5 shrink-0 rounded border-[#ebebeb] accent-[#1d4ed8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600" aria-describedby="anon-hint" />
+        <label for="isAnonymous" class="min-h-11 inline-flex items-center text-sm text-[#525252]">Anonim</label>
       </div>
+      <p id="anon-hint" class="text-xs leading-5 text-[#737373]">Anonim ON → nama disamarkan publik. Email di bawah hanya pengingat privat, tidak tampil publik. Pertanyaan + jawaban tampil sebagai thread publik.</p>
     </div>
   </div>
 
-  <div id="anonymous-fields" class="hidden space-y-4">
+  <div id="anonymous-fields" class="space-y-4">
     <div class="space-y-2">
-      <label for="authorName" class="block text-sm font-medium text-slate-700">Nama (opsional)</label>
-      <input id="authorName" name="authorName" type="text" placeholder="Misalnya: Anonim" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" />
+      <label for="authorName" class="block text-sm font-semibold text-[#252525]">Nama (opsional)</label>
+      <input id="authorName" name="authorName" type="text" maxlength="80" autocomplete="name" placeholder="Misalnya: Hamba Allah" class="min-h-11 w-full rounded-lg border border-[#ebebeb] bg-white px-4 py-3 text-base text-[#252525] placeholder:text-[#737373] focus:border-[#1d4ed8] focus:outline-2 focus:outline-offset-1 focus:outline-brand-600" />
     </div>
     <div class="space-y-2">
-      <label for="authorEmail" class="block text-sm font-medium text-slate-700">Email (opsional)</label>
-      <input id="authorEmail" name="authorEmail" type="email" placeholder="Alamat email untuk kontak" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-slate-500 focus:outline-none" />
+      <label for="authorEmail" class="block text-sm font-semibold text-[#252525]">Email pengingat (opsional)</label>
+      <input id="authorEmail" name="authorEmail" type="email" autocomplete="email" placeholder="Kami kirim satu pengingat saat jawaban terbit" class="min-h-11 w-full rounded-lg border border-[#ebebeb] bg-white px-4 py-3 text-base text-[#252525] placeholder:text-[#737373] focus:border-[#1d4ed8] focus:outline-2 focus:outline-offset-1 focus:outline-brand-600" aria-describedby="email-hint email-error" />
+      <p id="email-hint" class="text-xs text-[#737373]">Hanya untuk pengingat privat. Simpan juga tautan thread Anda setelah terkirim.</p>
+      <p id="email-error" class="hidden text-sm text-rose-700"></p>
     </div>
   </div>
 
-  <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">Kirim Pertanyaan</button>
+  <button type="submit" id="consultation-submit" class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#1d4ed8] px-5 py-3 text-base font-semibold text-white transition hover:bg-[#1e3a8a] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
+    <svg id="consultation-spinner" aria-hidden="true" class="hidden h-4 w-4 animate-spin" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-opacity="0.3" stroke-width="2"/><path d="M14.5 8a6.5 6.5 0 0 0-6.5-6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span id="consultation-submit-label">Kirim Pertanyaan</span>
+  </button>
+  <p class="text-xs leading-5 text-[#737373]">Dengan mengirim, Anda memahami pertanyaan dan jawaban tampil publik sebagai thread. Centang Anonim agar nama disamarkan; bila login, pertanyaan tetap tertaut ke akun Anda secara privat.</p>
 </form>
 
 <script type="module">
@@ -53,54 +73,154 @@ const anonymousToggle = document.getElementById('isAnonymous');
 const anonymousFields = document.getElementById('anonymous-fields');
 const actionUrl = form.dataset.actionUrl;
 const globalWindow = window;
+const statusBox = document.getElementById('consultation-status');
+const submitBtn = document.getElementById('consultation-submit');
+const submitLabel = document.getElementById('consultation-submit-label');
+const spinner = document.getElementById('consultation-spinner');
+const titleInput = document.getElementById('title');
+const contentInput = document.getElementById('content');
+const categoryInput = document.getElementById('category');
+const emailInput = document.getElementById('authorEmail');
+const nameInput = document.getElementById('authorName');
+const contentCount = document.getElementById('content-count');
+const titleCount = document.getElementById('title-count');
+const DRAFT_KEY = 'pojok-konsultasi-draft-v1';
+
+function showStatus(kind, html) {
+  statusBox.classList.remove('hidden', 'border-rose-200', 'bg-rose-50', 'text-rose-800', 'border-[#dbeafe]', 'bg-[#eff6ff]', 'text-[#1e3a8a]');
+  if (kind === 'error') statusBox.classList.add('border-rose-200', 'bg-rose-50', 'text-rose-800');
+  else statusBox.classList.add('border-[#dbeafe]', 'bg-[#eff6ff]', 'text-[#1e3a8a]');
+  statusBox.innerHTML = html;
+  statusBox.focus?.();
+}
+
+function setFieldError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!msg) el.classList.add('hidden');
+  else { el.textContent = msg; el.classList.remove('hidden'); }
+}
+
+function saveDraft() {
+  try {
+    globalWindow.localStorage?.setItem(DRAFT_KEY, JSON.stringify({
+      title: titleInput.value, content: contentInput.value, category: categoryInput.value,
+      authorName: nameInput?.value || '', authorEmail: emailInput?.value || '',
+      isAnonymous: anonymousToggle.checked
+    }));
+  } catch {}
+}
+
+function restoreDraft() {
+  try {
+    const raw = globalWindow.localStorage?.getItem(DRAFT_KEY);
+    if (!raw) { anonymousFields.classList.toggle('hidden', !anonymousToggle.checked); return; }
+    const d = JSON.parse(raw);
+    if (d.title) titleInput.value = d.title;
+    if (d.content) contentInput.value = d.content;
+    if (d.category) categoryInput.value = d.category;
+    if (nameInput && d.authorName) nameInput.value = d.authorName;
+    if (emailInput && d.authorEmail) emailInput.value = d.authorEmail;
+    if (typeof d.isAnonymous === 'boolean') anonymousToggle.checked = d.isAnonymous;
+    anonymousFields.classList.toggle('hidden', !anonymousToggle.checked);
+    updateCount();
+  } catch {}
+}
+
+function clearDraft() { try { globalWindow.localStorage?.removeItem(DRAFT_KEY); } catch {} }
+
+function updateCount() {
+  if (contentCount) contentCount.textContent = `${contentInput.value.length} / 2000`;
+  if (titleCount) titleCount.textContent = `${titleInput.value.length} / 120`;
+}
+
+function toast(msg, type) {
+  const showToast = globalWindow.showToast;
+  if (typeof showToast === 'function') { try { showToast(msg, type); } catch {} }
+}
+
+restoreDraft();
+updateCount();
 
 anonymousToggle.addEventListener('change', () => {
   anonymousFields.classList.toggle('hidden', !anonymousToggle.checked);
+  saveDraft();
+});
+[titleInput, contentInput, categoryInput, nameInput, emailInput].forEach((el) => {
+  el?.addEventListener('input', () => { saveDraft(); if (el === contentInput || el === titleInput) updateCount(); });
 });
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const formData = new FormData(form);
+  setFieldError('title-error', ''); setFieldError('content-error', ''); setFieldError('category-error', ''); setFieldError('email-error', '');
+
+  const title = titleInput.value.trim();
+  const content = contentInput.value.trim();
+  const category = categoryInput.value;
+  const email = emailInput.value.trim();
+  let valid = true;
+  if (title.length < 10) { setFieldError('title-error', 'Judul minimal 10 karakter agar mudah dipahami.'); valid = false; }
+  if (content.length < 20) { setFieldError('content-error', 'Ceritakan pertanyaan minimal 20 karakter.'); valid = false; }
+  if (!category) { setFieldError('category-error', 'Pilih salah satu kategori.'); valid = false; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldError('email-error', 'Format email belum tepat.'); valid = false; }
+  if (!valid) {
+    showStatus('error', '<strong>Periksa kembali formulir.</strong><br />Ada kolom yang perlu dilengkapi sebelum dikirim.');
+    const firstError = document.querySelector('#consultation-form [id$="-error"]:not(.hidden)');
+    const targetId = firstError?.id?.replace(/-error$/, '');
+    (targetId ? document.getElementById(targetId) : titleInput)?.focus?.();
+    return;
+  }
+
+  submitBtn.disabled = true;
+  spinner.classList.remove('hidden');
+  submitLabel.textContent = 'Mengirim…';
+
   const payload = {
-    title: formData.get('title'),
-    content: formData.get('content'),
-    category: formData.get('category'),
-    isAnonymous: formData.get('isAnonymous') === 'on',
-    authorName: formData.get('authorName'),
-    authorEmail: formData.get('authorEmail')
+    title,
+    content,
+    category,
+    isAnonymous: anonymousToggle.checked,
+    authorName: nameInput?.value?.trim() || '',
+    authorEmail: email
   };
 
   try {
     const response = await fetch(actionUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      const showToast = globalWindow.showToast;
-      if (showToast) {
-        showToast(error.error || 'Gagal mengirim pertanyaan', 'error');
-      }
+      let msg = 'Gagal mengirim pertanyaan. Coba lagi dalam beberapa saat.';
+      try { const err = await response.json(); if (err?.error) msg = err.error; } catch {}
+      showStatus('error', `<strong>Pertanyaan belum terkirim.</strong><br />${msg} Draf Anda tetap tersimpan.`);
+      toast(msg, 'error');
       return;
     }
 
-    const showToast = globalWindow.showToast;
-    if (showToast) {
-      showToast('Pertanyaan berhasil dikirim. Admin akan menjawab secepatnya.', 'success');
-    }
+    let newId = '';
+    try {
+      const created = await response.clone().json();
+      newId = String(created?.id || created?.data?.id || '');
+    } catch {}
+    clearDraft();
     form.reset();
-    anonymousFields.classList.add('hidden');
-    setTimeout(() => window.location.reload(), 2000);
+    anonymousToggle.checked = true;
+    anonymousFields.classList.remove('hidden');
+    updateCount();
+    const threadLink = newId ? `<br /><a href="/pojok-konsultasi/${encodeURIComponent(newId)}" class="font-semibold underline underline-offset-4">Buka thread Anda</a> — simpan tautannya untuk kembali lagi.` : '';
+    showStatus('success', `<strong>Pertanyaan terkirim. Jazakumullah khairan.</strong><br />Admin biasanya menjawab dalam 1–2 hari kerja.${threadLink} <a href="/pojok-konsultasi" class="font-semibold underline underline-offset-4">Lihat daftar pertanyaan</a>`);
+    toast('Pertanyaan berhasil dikirim.', 'success');
   } catch (error) {
     console.error(error);
-    const showToast = globalWindow.showToast;
-    if (showToast) {
-      showToast('Terjadi kesalahan saat mengirim pertanyaan', 'error');
-    }
+    saveDraft();
+    showStatus('error', '<strong>Jaringan bermasalah.</strong><br />Periksa koneksi Anda dan coba lagi. Draf Anda tetap tersimpan.');
+    toast('Terjadi kesalahan saat mengirim pertanyaan', 'error');
+  } finally {
+    submitBtn.disabled = false;
+    spinner.classList.add('hidden');
+    submitLabel.textContent = 'Kirim Pertanyaan';
   }
 });
 </script>
