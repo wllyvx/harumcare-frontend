@@ -60,11 +60,6 @@
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* subtle card background used for results */
-.result-card {
-  background: linear-gradient(180deg, rgba(240, 253, 244, 1), rgba(236, 252, 241, 1));
-}
-
 /* hint text under results for status explanation */
 .hint-text {
   display: block;
@@ -88,7 +83,7 @@
 }
 
 .tab-btn:focus {
-  outline: 3px solid rgba(37, 99, 235, 0.08);
+  outline: 3px solid rgba(29, 78, 216, 0.35);
   outline-offset: 2px;
 }
 
@@ -121,9 +116,9 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
-.tab-btn.bg-green-50 {
-  box-shadow: inset 0 -2px 0 rgba(16, 185, 129, 0.06);
-}
+/* Active tab state is driven by brand-50 / brand-700 utility classes
+   toggled in the page script (aria-selected). No separate green
+   treatment: indigo signals direction per the Serene Signal Rule. */
 
 /* fallback for label wrapping in case Tailwind utility not applied */
 .whitespace-normal {
@@ -131,22 +126,7 @@
   word-break: break-word;
 }
 
-/* stronger active state: higher opacity and clearer background */
-.tab-btn[aria-pressed="true"],
-.tab-btn.bg-green-50[aria-pressed="true"] {
-  background-color: rgba(16, 185, 129, 0.12) !important;
-  /* visible green tint */
-  border-color: rgba(16, 185, 129, 0.18) !important;
-  color: #065f46 !important;
-  /* darker green text for contrast */
-  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.12);
-  transform: translateY(-2px) scale(1.01);
-}
-
-/* ensure normal active background still looks decent for keyboard users */
-.tab-btn:focus[aria-pressed="true"] {
-  outline: 3px solid rgba(16, 185, 129, 0.18);
-}
+/* keyboard focus on the selected tab keeps the brand ring */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
