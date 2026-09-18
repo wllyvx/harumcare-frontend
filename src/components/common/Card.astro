@@ -8,6 +8,7 @@ interface Props {
   targetAmount: number;
   currentAmount: number;
   daysLeft: number;
+  isEnded?: boolean;
   donorCount: number;
   organizationName: string;
   organizationLogo: string;
@@ -22,6 +23,7 @@ const {
   targetAmount,
   currentAmount,
   daysLeft,
+  isEnded = false,
   donorCount,
   organizationName,
   organizationLogo,
@@ -55,34 +57,43 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/components/ui/card";
-import Button from "@/components/common/Button.astro";
 ---
 
-<a href={`/campaign/${id}`} class="block h-full">
+<article class="block h-full">
   <ShadCard
-    className="w-full h-full group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden p-0 gap-0 border-border rounded-[16px] shadow-sm"
+    className="w-full h-full group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 overflow-hidden p-0 gap-0 border-border rounded-[16px] shadow-sm"
   >
     <div class="relative shrink-0 aspect-video overflow-hidden">
-      <img
-        src={imageUrl}
-        alt={title}
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        loading="lazy"
-        onerror="this.src='/images/empty-image-placeholder.webp'"
-      />
+      <a href={`/campaign/${id}`} aria-label={`Lihat kampanye: ${title}`} class="block w-full h-full">
+        <img
+          src={imageUrl}
+          alt=""
+          aria-hidden="true"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+          onerror="this.src='/images/empty-image-placeholder.webp'"
+        />
+      </a>
       <span
         class="absolute top-4 left-4 bg-brand-600 text-white px-3 py-1 rounded-full text-xs font-medium"
       >
         {category}
       </span>
+      {isEnded && (
+        <span class="absolute top-4 right-4 bg-neutral-900/85 text-white px-3 py-1 rounded-full text-xs font-semibold">
+          Berakhir
+        </span>
+      )}
     </div>
 
     <CardContent className="p-5 flex flex-col grow">
       <div class="mb-4 grow">
         <h3
-          class="font-semibold text-[1.125rem] leading-snug mb-2 text-foreground group-hover:text-brand-700 transition-colors duration-200 line-clamp-2"
+          class="font-semibold text-[1.125rem] leading-snug mb-2 text-foreground transition-colors duration-200 line-clamp-2"
         >
-          {title}
+          <a href={`/campaign/${id}`} class="hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-sm">
+            {title}
+          </a>
         </h3>
         <p class="text-muted-foreground text-sm mb-4 line-clamp-3 leading-relaxed">
           {trimmedDescription}
@@ -112,15 +123,15 @@ import Button from "@/components/common/Button.astro";
       <div class="grid grid-cols-3 gap-2 mb-4 text-center shrink-0">
         <div class="bg-muted p-2.5 rounded-lg">
           <p class="text-xs text-muted-foreground">Terkumpul</p>
-          <p class="font-semibold text-foreground text-sm mt-0.5">{percentageFunded}%</p>
+          <p class="font-semibold text-foreground text-sm mt-0.5 tabular-nums">{percentageFunded}%</p>
         </div>
         <div class="bg-muted p-2.5 rounded-lg">
           <p class="text-xs text-muted-foreground">Donatur</p>
-          <p class="font-semibold text-foreground text-sm mt-0.5">{donorCount}</p>
+          <p class="font-semibold text-foreground text-sm mt-0.5 tabular-nums">{donorCount}</p>
         </div>
         <div class="bg-muted p-2.5 rounded-lg">
           <p class="text-xs text-muted-foreground">Sisa Hari</p>
-          <p class="font-semibold text-foreground text-sm mt-0.5">{daysLeft}</p>
+          <p class="font-semibold text-foreground text-sm mt-0.5 tabular-nums">{isEnded ? "0" : daysLeft}</p>
         </div>
       </div>
     </CardContent>
@@ -134,6 +145,7 @@ import Button from "@/components/common/Button.astro";
           alt=""
           aria-hidden="true"
           class="w-8 h-8 rounded-full mr-2 object-cover shrink-0"
+          loading="lazy"
           onerror="this.src='/images/icons/user-default.svg'"
         />
         <span class="text-sm text-muted-foreground truncate"
@@ -142,11 +154,21 @@ import Button from "@/components/common/Button.astro";
       </div>
 
       <div class="shrink-0 w-full mt-4">
-        <Button className="w-full bg-brand-700 hover:bg-brand-800 text-white rounded-button font-semibold shadow-sm">Donasi Sekarang</Button>
+        <a
+          href={isEnded ? undefined : `/campaign/${id}#donasi`}
+          aria-disabled={isEnded ? "true" : undefined}
+          class={`w-full inline-flex items-center justify-center min-h-11 px-4 py-2.5 rounded-button font-semibold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 ${
+            isEnded
+              ? "bg-muted text-muted-foreground cursor-not-allowed pointer-events-none"
+              : "bg-brand-700 hover:bg-brand-800 text-white shadow-sm"
+          }`}
+        >
+          {isEnded ? "Kampanye Berakhir" : "Donasi Sekarang"}
+        </a>
       </div>
     </CardFooter>
   </ShadCard>
-</a>
+</article>
 
 <style>
   .line-clamp-2 {

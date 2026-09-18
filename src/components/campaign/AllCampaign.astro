@@ -19,50 +19,66 @@ interface Props {
   campaigns: Campaign[];
   totalPages: number;
   currentPage: number;
+  total?: number;
   categories: string[];
   activeCategory: string;
   searchQuery: string;
+  loadOk?: boolean;
+  loadError?: string;
 }
 
 const {
   campaigns,
   totalPages,
   currentPage,
+  total = campaigns.length,
   categories,
   activeCategory,
   searchQuery,
+  loadOk = true,
+  loadError = "",
 } = Astro.props;
 
-// Hitung sisa hari untuk setiap campaign
+// Hitung sisa hari + status berakhir secara eksplisit.
+// daysLeft=0 ambigu (berakhir hari ini vs sudah berakhir) — sertakan isEnded.
 const today = new Date();
+today.setHours(0, 0, 0, 0);
 const campaignsWithDaysLeft = campaigns.map((campaign: Campaign) => {
-  const endDate = new Date(campaign.endDate);
-  const timeDiff = endDate.getTime() - today.getTime();
-  const daysLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
-  return { ...campaign, daysLeft: daysLeft >= 0 ? daysLeft : 0 };
+  const end = new Date(campaign.endDate);
+  const endDay = new Date(end);
+  endDay.setHours(0, 0, 0, 0);
+  const timeDiff = endDay.getTime() - today.getTime();
+  const rawLeft = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  const isEnded = endDay.getTime() < today.getTime();
+  return { ...campaign, daysLeft: isEnded ? 0 : Math.max(0, rawLeft), isEnded };
 });
 
-// Format kategori untuk tampilan
+// Format kategori untuk tampilan — satu-satunya definisi yang dipakai list + kartu.
 function formatCategory(category: string): string {
+  if (!category) return "Tidak Berkategori";
   return category
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
 
-// Fungsi untuk membuat URL dengan parameter yang ada
+// URL pagination: hilangkan page=1, pertahankan filter, jangkar ke daftar agar scroll tidak lompat ke atas.
 function buildUrl(params: Record<string, string>): string {
   const urlParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
+    if (key === "page" && (value === "1" || value === "")) return;
     if (value && value.trim() !== "") {
       urlParams.append(key, value.trim());
     }
   });
-  return `/campaign?${urlParams.toString()}`;
+  const qs = urlParams.toString();
+  return qs ? `/campaign?${qs}#daftar-kampanye` : `/campaign#daftar-kampanye`;
 }
+
+const hasFilter = Boolean(searchQuery?.trim() || activeCategory?.trim());
 ---
 
-<section class="campaign-section relative py-8 md:py-12 bg-gray-50">
+<section class="campaign-section relative py-8 md:py-12 bg-muted" id="daftar-kampanye">
   <div class="campaign-container max-w-7xl mx-auto px-4">
     <div class="text-center mb-8 md:mb-10">
       <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-3">Semua Kampanye</h1>
@@ -72,35 +88,26 @@ function buildUrl(params: Record<string, string>): string {
       </p>
     </div>
 
-    <div class="mb-8 rounded-2xl border border-border bg-white p-4 md:p-5 shadow-sm">
-      <form id="filter-form" class="flex flex-col md:flex-row gap-4 items-end">
-        <!-- Search Input -->
-        <div class="flex-1">
-          <label
-            for="search"
-            class="block text-sm font-medium text-gray-700 mb-1"
-            >Cari Kampanye</label
-          >
+    <div class="mb-6 rounded-2xl border border-border bg-white p-4 md:p-5 shadow-sm">
+      <form id="filter-form" class="flex flex-col md:flex-row gap-4 items-end" role="search" aria-label="Filter kampanye">
+        <div class="flex-1 w-full">
+          <label for="search" class="block text-sm font-medium text-foreground mb-1">Cari Kampanye</label>
           <input
-            type="text"
+            type="search"
             id="search"
             name="search"
             value={searchQuery}
             placeholder="Cari berdasarkan judul atau deskripsi..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            autocomplete="off"
+            class="w-full px-4 py-2.5 min-h-11 border border-input bg-white rounded-button text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600"
           />
         </div>
-
-        <!-- Category Filter -->
-        <div class="w-full md:w-48">
-          <label
-            for="category"
-            class="block text-sm font-medium text-gray-700 mb-1">Kategori</label
-          >
+        <div class="w-full md:w-56">
+          <label for="category" class="block text-sm font-medium text-foreground mb-1">Kategori</label>
           <select
             id="category"
             name="category"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full px-4 py-2.5 min-h-11 border border-input bg-white rounded-button text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600"
           >
             <option value="">Semua Kategori</option>
             {
@@ -112,21 +119,17 @@ function buildUrl(params: Record<string, string>): string {
             }
           </select>
         </div>
-
-        <!-- Submit Button -->
         <button
           type="submit"
-          class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          class="w-full md:w-auto px-6 py-2.5 min-h-11 bg-brand-700 text-white text-sm font-semibold rounded-button hover:bg-brand-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
         >
           Terapkan Filter
         </button>
-
-        <!-- Reset Button -->
         {
-          (searchQuery || activeCategory) && (
+          hasFilter && (
             <a
-              href="/campaign"
-              class="w-full md:w-auto px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200 text-center"
+              href="/campaign#daftar-kampanye"
+              class="w-full md:w-auto px-6 py-2.5 min-h-11 inline-flex items-center justify-center bg-white border border-input text-foreground text-sm font-medium rounded-button hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 text-center"
             >
               Reset Filter
             </a>
@@ -135,70 +138,108 @@ function buildUrl(params: Record<string, string>): string {
       </form>
     </div>
 
-    <!-- Campaign Cards -->
-    {
-      campaignsWithDaysLeft.length > 0 ? (
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 place-content-center">
-          {campaignsWithDaysLeft.map((campaign) => (
-            <Card
-              id={campaign.id}
-              title={campaign.title || "Untitled"}
-              description={campaign.description || "Tidak ada Deskripsi"}
-              imageUrl={campaign.imageUrl}
-              targetAmount={campaign.targetAmount}
-              currentAmount={campaign.currentAmount || 0}
-              daysLeft={campaign.daysLeft || 0}
-              donorCount={campaign.donorCount || 0}
-              organizationName={campaign.organizationName || "Anonymous"}
-              organizationLogo={campaign.organizationLogo}
-              category={
-                formatCategory(campaign.category) || "Tidak Berkategori"
-              }
-            />
-          ))}
-        </div>
-      ) : (
-        <div class="text-center py-12">
-          <p class="text-gray-500">
-            Tidak ada kampanye yang tersedia saat ini.
-          </p>
-        </div>
-      )
-    }
+    <p class="text-sm text-muted-foreground mb-6 text-center" role="status" aria-live="polite">
+      {
+        !loadOk
+          ? "Gagal memuat data kampanye."
+          : total > 0
+            ? <>Menampilkan <span class="font-semibold text-foreground tabular-nums">{campaignsWithDaysLeft.length}</span> dari <span class="font-semibold text-foreground tabular-nums">{total}</span> kampanye{hasFilter ? " sesuai filter" : ""}</>
+            : hasFilter
+              ? "Tidak ada hasil sesuai filter."
+              : "Belum ada kampanye."
+      }
+    </p>
 
-    <!-- Pagination -->
-    {
-      totalPages > 1 && (
-        <div class="flex justify-center mt-12 space-x-2">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-            (pageNum) => (
+    {!loadOk ? (
+      <div class="text-center py-12 px-6 rounded-2xl border border-red-200 bg-red-50 max-w-lg mx-auto" role="alert">
+        <div class="w-12 h-12 bg-white border border-red-200 rounded-xl flex items-center justify-center mx-auto mb-3">
+          <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="font-semibold text-foreground">Gagal memuat kampanye</p>
+        <p class="text-sm text-muted-foreground mt-1">{loadError || "Periksa koneksi internet Anda lalu coba lagi."}</p>
+        <button type="button" onclick="window.location.reload()" class="mt-4 inline-flex items-center justify-center px-5 py-2.5 min-h-11 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-button transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+          Coba Lagi
+        </button>
+      </div>
+    ) : campaignsWithDaysLeft.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 place-content-center">
+        {campaignsWithDaysLeft.map((campaign) => (
+          <Card
+            id={campaign.id}
+            title={campaign.title || "Tanpa Judul"}
+            description={campaign.description || "Deskripsi belum tersedia."}
+            imageUrl={campaign.imageUrl}
+            targetAmount={campaign.targetAmount}
+            currentAmount={campaign.currentAmount || 0}
+            daysLeft={campaign.daysLeft}
+            isEnded={campaign.isEnded}
+            donorCount={campaign.donorCount || 0}
+            organizationName={campaign.organizationName || "Anonim"}
+            organizationLogo={campaign.organizationLogo}
+            category={formatCategory(campaign.category)}
+          />
+        ))}
+      </div>
+    ) : hasFilter ? (
+      <div class="text-center py-12 px-6 rounded-2xl border border-dashed border-border bg-white max-w-lg mx-auto">
+        <p class="font-semibold text-foreground">Tidak ada kampanye yang cocok</p>
+        <p class="text-sm text-muted-foreground mt-1">Coba kata kunci lain atau ubah kategori filter Anda.</p>
+        <a href="/campaign#daftar-kampanye" class="mt-4 inline-flex items-center justify-center px-5 py-2.5 min-h-11 bg-white border border-input text-sm font-medium rounded-button hover:bg-muted transition-colors">
+          Reset Filter
+        </a>
+      </div>
+    ) : (
+      <div class="text-center py-12 px-6 rounded-2xl border border-dashed border-border bg-white max-w-lg mx-auto">
+        <p class="font-semibold text-foreground">Belum ada kampanye</p>
+        <p class="text-sm text-muted-foreground mt-1">Kampanye baru akan tampil di sini setelah diterbitkan.</p>
+      </div>
+    )}
+
+    {loadOk && totalPages > 1 && (
+      <nav class="flex justify-center items-center mt-12 gap-2 flex-wrap" aria-label="Navigasi halaman kampanye">
+        {currentPage > 1 && (
+          <a
+            href={buildUrl({ page: (currentPage - 1).toString(), search: searchQuery, category: activeCategory })}
+            rel="prev"
+            class="px-4 py-2.5 min-h-11 inline-flex items-center text-sm font-medium rounded-button border border-input bg-white hover:bg-muted transition-colors"
+          >
+            Sebelumnya
+          </a>
+        )}
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter((n) => n === 1 || n === totalPages || Math.abs(n - currentPage) <= 2)
+          .map((pageNum, idx, arr) => (
+            <>
+              {idx > 0 && pageNum - arr[idx - 1] > 1 && (
+                <span class="px-1 text-muted-foreground" aria-hidden="true">…</span>
+              )}
               <a
-                href={buildUrl({
-                  page: pageNum.toString(),
-                  search: searchQuery,
-                  category: activeCategory,
-                })}
-                class={`px-4 py-2 rounded-lg ${
+                href={buildUrl({ page: pageNum.toString(), search: searchQuery, category: activeCategory })}
+                aria-current={pageNum === currentPage ? "page" : undefined}
+                aria-label={`Halaman ${pageNum}`}
+                class={`px-4 py-2.5 min-h-11 inline-flex items-center text-sm font-medium rounded-button border transition-colors ${
                   pageNum === currentPage
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    ? "bg-brand-700 text-white border-brand-700"
+                    : "bg-white border-input hover:bg-muted"
                 }`}
               >
                 {pageNum}
               </a>
-            ),
-          )}
-        </div>
-      )
-    }
+            </>
+          ))}
+        {currentPage < totalPages && (
+          <a
+            href={buildUrl({ page: (currentPage + 1).toString(), search: searchQuery, category: activeCategory })}
+            rel="next"
+            class="px-4 py-2.5 min-h-11 inline-flex items-center text-sm font-medium rounded-button border border-input bg-white hover:bg-muted transition-colors"
+          >
+            Selanjutnya
+          </a>
+        )}
+      </nav>
+    )}
   </div>
 </section>
-
-<style>
-  .campaign-section {
-    background-color: #f9fafb;
-  }
-</style>
 
 <script>
   // Handle form submission

@@ -186,7 +186,8 @@ const googleClientId =
                 localStorage.setItem("token", result.token);
                 localStorage.setItem("role", result.role);
                 localStorage.setItem("userName", result.nama);
-                window.location.href = "/";
+                const next = new URLSearchParams(window.location.search).get("next");
+                window.location.href = next && next.startsWith("/") ? next : "/";
             }
         } catch (error) {
             console.error("Google Sign-In error:", error);
@@ -262,8 +263,9 @@ const googleClientId =
                 console.log("Login response:", result);
 
                 if (result && result.token) {
-                    window.location.href = "/";
-                    console.log("Login successful, redirecting to home");
+                    const next = new URLSearchParams(window.location.search).get("next");
+                    window.location.href = next && next.startsWith("/") ? next : "/";
+                    console.log("Login successful, redirecting");
                 } else {
                     alert(
                         "Login gagal. Silakan periksa username/email dan password Anda.",

@@ -32,21 +32,17 @@ const search = searchParams.get("search") || "";
 const category = searchParams.get("category") || "";
 
 // Fungsi fetch campaigns dengan pagination dan filter
+// ok=false berarti gagal jaringan/server — bedakan dari hasil kosong yang valid.
 async function fetchCampaigns(
   page = 1,
   limit = 12,
   search = "",
   category = "",
-): Promise<CampaignResponse> {
+): Promise<CampaignResponse & { ok: boolean; errorMessage: string }> {
   try {
-    // Buat query string untuk filter
     const params = new URLSearchParams();
-
-    // Tambahkan parameter wajib
     params.append("page", page.toString());
     params.append("limit", limit.toString());
-
-    // Tambahkan parameter filter jika ada
     if (search && search.trim() !== "") {
       params.append("search", search.trim());
     }
@@ -54,12 +50,10 @@ async function fetchCampaigns(
       params.append("category", category.trim());
     }
 
-    // Buat URL dengan query string
     const url = `${API_URL}/campaigns?${params.toString()}`;
-
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error("Failed to fetch campaigns");
+      throw new Error(`HTTP ${response.status}: gagal memuat kampanye`);
     }
     const data = await response.json();
 
@@ -68,6 +62,8 @@ async function fetchCampaigns(
       totalPages: data.totalPages || 1,
       currentPage: data.currentPage || 1,
       total: data.total || 0,
+      ok: true,
+      errorMessage: "",
     };
   } catch (error) {
     console.error("Error fetching campaigns:", error);
@@ -76,19 +72,37 @@ async function fetchCampaigns(
       totalPages: 1,
       currentPage: 1,
       total: 0,
+      ok: false,
+      errorMessage:
+        error instanceof Error ? error.message : "Gagal memuat kampanye",
     };
+  }
+}
+
+async function fetchCategories(): Promise<string[]> {
+  try {
+    const res = await fetch(`${API_URL}/campaigns/categories`);
+    if (!res.ok) throw new Error("categories endpoint unavailable");
+    const data = await res.json();
+    if (Array.isArray(data.categories)) {
+      return data.categories.filter(Boolean).sort((a: string, b: string) => a.localeCompare(b));
+    }
+    return [];
+  } catch {
+    return [];
   }
 }
 
 // Fetch data dengan parameter yang ada
 const campaignData = await fetchCampaigns(page, 12, search, category);
 
-// Dapatkan daftar kategori unik dari data campaign
-const categories = [
-  ...new Set(campaignData.campaigns.map((campaign) => campaign.category)),
-]
-  .filter(Boolean)
-  .sort();
+// Kategori dari endpoint khusus; fallback ke halaman saat ini bila endpoint belum tersedia.
+let categories = await fetchCategories();
+if (categories.length === 0) {
+  categories = [...new Set(campaignData.campaigns.map((c) => c.category))]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+}
 ---
 
 <PrimaryLayout>
@@ -96,9 +110,12 @@ const categories = [
     campaigns={campaignData.campaigns}
     totalPages={campaignData.totalPages}
     currentPage={campaignData.currentPage}
+    total={campaignData.total}
     categories={categories}
     activeCategory={category}
     searchQuery={search}
+    loadOk={campaignData.ok}
+    loadError={campaignData.errorMessage}
   />
 </PrimaryLayout>
 

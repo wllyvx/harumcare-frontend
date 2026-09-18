@@ -109,11 +109,12 @@ const metaDescription = campaign.description
 >
   <section class="w-full relative max-w-6xl mx-auto">
     <div
-      class="w-full h-[300px] md:h-[400px] lg:h-[380px] bg-gray-300 relative overflow-hidden"
+      class="w-full h-[300px] md:h-[400px] lg:h-[380px] bg-muted relative overflow-hidden"
     >
       <img
         src={campaign.imageUrl}
-        alt={campaign.title}
+        alt=""
+        aria-hidden="true"
         class="w-full h-full object-cover"
       />
       <div
@@ -121,7 +122,7 @@ const metaDescription = campaign.description
       >
         <div class="container mx-auto px-4 pb-8 md:pb-16">
           <span
-            class="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded-full mb-4"
+            class="inline-block px-3 py-1 bg-brand-700 text-white text-xs font-medium rounded-full mb-4"
           >
             {campaign.category}
           </span>
@@ -191,7 +192,7 @@ const metaDescription = campaign.description
             </div>
             <div class="ml-3">
               <h3 class="text-sm font-medium text-green-800">
-                Target Donasi Tercapai! 🎉
+                Target Donasi Tercapai
               </h3>
               <div class="mt-2 text-sm text-green-700">
                 <p>
@@ -213,36 +214,42 @@ const metaDescription = campaign.description
       <div class="lg:w-2/3 px-2">
         <div class="mb-6 flex flex-col gap-4">
           <div class="flex gap-2 md:gap-4">
-            <p class="text-gray-600">
-              Berakhir dalam <span class="font-semibold">{daysLeft} hari</span>
+            <p class="text-muted-foreground text-sm" role="status">
+              {isCampaignEnded ? (
+                <>Telah berakhir pada <span class="font-semibold text-foreground">{formatDate(campaign.endDate)}</span></>
+              ) : (
+                <>Berakhir dalam <span class="font-semibold text-foreground tabular-nums">{daysLeft} hari</span> <span class="text-muted-foreground">· {formatDate(campaign.endDate)}</span></>
+              )}
             </p>
           </div>
-          <div class="flex items-center gap-2 bg-gray-200 rounded py-4 px-2">
+          <div class="flex items-center gap-3 bg-muted rounded-button py-3 px-3 border border-border">
             <img
               src={campaign.organizationLogo
                 ? campaign.organizationLogo
                 : "/images/icons/user-default.svg"}
-              alt="Profil Organisasi"
-              class="h-10 w-auto"
+              alt=""
+              aria-hidden="true"
+              class="h-10 w-10 rounded-full object-cover shrink-0"
+              loading="lazy"
             />
-            <p class="text-gray-600">
-              Dibuat oleh <span class="font-semibold text-blue-600"
+            <p class="text-sm text-muted-foreground">
+              Dibuat oleh <span class="font-semibold text-brand-700"
                 >{campaign.organizationName}</span
               >
             </p>
           </div>
         </div>
         <h2 class="text-2xl font-bold mb-4">Deskripsi Kampanye</h2>
-        <p class="text-gray-600 mb-6 break-words overflow-wrap-anywhere">{campaign.description}</p>
+        <p class="text-muted-foreground mb-6 break-words overflow-wrap-anywhere leading-relaxed">{campaign.description}</p>
 
         <!-- Tab Section -->
         <div class="my-8">
           <!-- Tab Navigation -->
-          <div class="border-b border-gray-200 mb-6">
-            <nav class="flex space-x-8" role="tablist">
+          <div class="border-b border-border mb-6">
+            <nav class="flex space-x-8" role="tablist" aria-label="Konten kampanye">
               <button
                 id="tab-donation"
-                class="tab-button active py-4 px-1 border-b-2 border-blue-600 font-medium text-sm text-blue-600 transition-colors duration-200"
+                class="tab-button active py-4 px-1 border-b-2 border-brand-700 font-medium text-sm text-brand-700 transition-colors duration-200"
                 data-tab="donation"
                 role="tab"
                 aria-selected="true"
@@ -263,7 +270,7 @@ const metaDescription = campaign.description
               </button>
               <button
                 id="tab-news"
-                class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200"
+                class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-sm text-muted-foreground hover:text-foreground hover:border-border transition-colors duration-200"
                 data-tab="news"
                 role="tab"
                 aria-selected="false"
@@ -335,109 +342,109 @@ const metaDescription = campaign.description
       </div>
 
       <!-- Sticky Donation Card -->
-      <div class="lg:w-1/3 px-2">
+      <div class="lg:w-1/3 px-2" id="donasi">
         <div class="sticky top-20">
           <div
-            class="bg-white border border-gray-200 p-6 rounded-xl shadow-sm"
+            class="bg-white border border-border p-6 rounded-card shadow-sm"
           >
               <h2
-                class="text-2xl font-bold mb-4 text-blue-800 flex items-center"
+                class="text-xl font-bold mb-4 text-foreground flex items-center"
               >
-                <svg
-                  class="w-6 h-6 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                    clip-rule="evenodd"></path>
-                </svg>
+                <span class="w-9 h-9 rounded-full bg-highlight-50 border border-highlight-100 flex items-center justify-center mr-2.5 shrink-0" aria-hidden="true">
+                  <svg
+                    class="w-5 h-5 text-highlight-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                      clip-rule="evenodd"></path>
+                  </svg>
+                </span>
                 Bantu Sekarang
               </h2>
 
-              <!-- Progress Section -->
-              <div class="mb-6 bg-white p-4 rounded-lg shadow-sm">
-                <div class="flex justify-between text-sm mb-2">
-                  <span class="font-semibold text-blue-600"
+              <!-- Progress Section — satu sinyal utama: amber untuk momentum -->
+              <div class="mb-6">
+                <div class="flex justify-between items-baseline text-sm mb-2 gap-2">
+                  <span class="font-bold text-foreground tabular-nums break-all"
                     >{formatCurrency(campaign.currentAmount)}</span
                   >
-                  <span class="text-gray-500"
+                  <span class="text-muted-foreground text-xs shrink-0"
                     >dari {formatCurrency(campaign.targetAmount)}</span
                   >
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                <div
+                  class="w-full bg-muted rounded-full h-3 mb-3 overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={percentageFunded}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-label={`Terkumpul ${percentageFunded} persen`}
+                >
                   <div
-                    class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500"
+                    class="bg-gradient-to-r from-highlight-500 to-highlight-600 h-3 rounded-full transition-all duration-500"
                     style={`width: ${percentageFunded}%`}
                   >
                   </div>
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-center">
-                  <div class="bg-blue-50 p-2 rounded-lg">
-                    <p class="text-xs text-blue-600 font-medium">Terkumpul</p>
-                    <p class="font-bold text-blue-800">{percentageFunded}%</p>
+                  <div class="bg-highlight-50 border border-highlight-100 p-2.5 rounded-lg">
+                    <p class="text-xs text-highlight-600 font-medium">Terkumpul</p>
+                    <p class="font-bold text-foreground tabular-nums">{percentageFunded}%</p>
                   </div>
-                  <div class="bg-green-50 p-2 rounded-lg">
-                    <p class="text-xs text-green-600 font-medium">Donatur</p>
-                    <p class="font-bold text-green-800">
+                  <div class="bg-muted p-2.5 rounded-lg">
+                    <p class="text-xs text-muted-foreground font-medium">Donatur</p>
+                    <p class="font-bold text-foreground tabular-nums">
                       {campaign.donorCount || 0}
                     </p>
                   </div>
-                  <div class="bg-orange-50 p-2 rounded-lg">
-                    <p class="text-xs text-orange-600 font-medium">Sisa Hari</p>
-                    <p class="font-bold text-orange-800">{daysLeft}</p>
+                  <div class="bg-muted p-2.5 rounded-lg">
+                    <p class="text-xs text-muted-foreground font-medium">Sisa Hari</p>
+                    <p class="font-bold text-foreground tabular-nums">{isCampaignEnded ? "0" : daysLeft}</p>
                   </div>
                 </div>
               </div>
 
-              <!-- Quick Amount Buttons -->
-              <div class="mb-6">
-                <p class="text-sm font-semibold text-gray-700 mb-3">
-                  Pilih Jumlah Donasi:
+              <!-- Quick Amount Buttons — satu keputusan: 3 nominal + Nominal lain -->
+              <div class="mb-5">
+                <p class="text-sm font-semibold text-foreground mb-3" id="amount-label">
+                  Pilih Jumlah Donasi
                 </p>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-2 gap-2" role="group" aria-labelledby="amount-label">
                   <button
                     type="button"
-                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
-                    data-amount="25000">Rp 25K</button
+                    class="amount-btn bg-white border border-input hover:border-brand-600 hover:bg-brand-50 py-2.5 px-3 rounded-button text-sm font-semibold transition-all duration-200 min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                    data-amount="50000">Rp 50 ribu</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
-                    data-amount="50000">Rp 50K</button
+                    class="amount-btn bg-white border border-input hover:border-brand-600 hover:bg-brand-50 py-2.5 px-3 rounded-button text-sm font-semibold transition-all duration-200 min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                    data-amount="100000">Rp 100 ribu</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
-                    data-amount="100000">Rp 100K</button
+                    class="amount-btn bg-white border border-input hover:border-brand-600 hover:bg-brand-50 py-2.5 px-3 rounded-button text-sm font-semibold transition-all duration-200 min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                    data-amount="250000">Rp 250 ribu</button
                   >
                   <button
                     type="button"
-                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
-                    data-amount="250000">Rp 250K</button
-                  >
-                  <button
-                    type="button"
-                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
-                    data-amount="500000">Rp 500K</button
-                  >
-                  <button
-                    type="button"
-                    class="amount-btn bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 py-2 px-3 rounded-lg text-sm font-medium transition-all duration-200"
-                    data-amount="1000000">Rp 1M</button
+                    id="custom-amount-btn"
+                    class="bg-white border border-dashed border-input hover:border-brand-600 hover:bg-brand-50 py-2.5 px-3 rounded-button text-sm font-medium text-muted-foreground hover:text-foreground transition-all duration-200 min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                    >Nominal lain</button
                   >
                 </div>
               </div>
 
-              <!-- Progressive Disclosure Toggle -->
+              <!-- Progressive Disclosure Toggle — tertutup saat load, satu keputusan -->
               <div class="mb-4">
                 <button
                   type="button"
                   id="toggle-form-btn"
                   aria-expanded="false"
                   aria-controls="donate-form"
-                  class="w-full py-3 px-4 bg-white border-2 border-blue-300 text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-200 flex items-center justify-center"
+                  class="w-full py-3 px-4 min-h-12 bg-brand-700 text-white rounded-button font-semibold hover:bg-brand-800 transition-all duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
                 >
                   <span id="toggle-text">Lanjutkan Donasi</span>
                   <svg
@@ -446,6 +453,7 @@ const metaDescription = campaign.description
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
@@ -456,7 +464,7 @@ const metaDescription = campaign.description
                 </button>
               </div>
 
-              <!-- Donation Form — single instance: IDs must stay unique for the submit listener -->
+              <!-- Donation Form — nama + pesan di dalam form, bukan di luar keputusan -->
               <form
                 id="donate-form"
                 class="space-y-4 hidden"
@@ -468,13 +476,13 @@ const metaDescription = campaign.description
                   id="donate-error"
                   role="alert"
                   aria-live="polite"
-                  class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700"
+                  class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-button text-sm text-red-700"
                 >
                 </div>
                 {
                   !isCampaignActive && (
-                    <div class="mb-4 p-3 bg-gray-100 rounded-md">
-                      <p class="text-sm text-gray-600 text-center">
+                    <div class="mb-4 p-3 bg-muted border border-border rounded-button">
+                      <p class="text-sm text-muted-foreground text-center">
                         {isCampaignEnded
                           ? "Kampanye ini telah berakhir dan tidak dapat menerima donasi lagi."
                           : "Target donasi telah tercapai. Terima kasih atas dukungan semua donatur!"}
@@ -485,9 +493,35 @@ const metaDescription = campaign.description
 
                 <div>
                   <label
+                    for="donation-amount"
+                    class="block text-sm font-semibold text-foreground mb-2"
+                    >Jumlah Donasi</label
+                  >
+                  <div class="relative">
+                    <span
+                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground font-medium"
+                      >Rp</span
+                    >
+                    <input
+                      type="text"
+                      id="donation-amount"
+                      name="donation-amount"
+                      inputmode="numeric"
+                      autocomplete="transaction-amount"
+                      aria-describedby="donate-error amount-hint"
+                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-button border border-input bg-white shadow-sm focus:border-brand-600 focus:ring-2 focus:ring-brand-600/30 disabled:bg-muted disabled:cursor-not-allowed transition-all duration-200 tabular-nums"
+                      placeholder="100.000"
+                      required
+                      disabled={!isCampaignActive}
+                    />
+                  </div>
+                  <p id="amount-hint" class="mt-1.5 text-xs text-muted-foreground" aria-live="polite">Minimum donasi Rp 1.000.</p>
+                </div>
+                <div>
+                  <label
                     for="donor-name"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Nama Donatur</label
+                    class="block text-sm font-semibold text-foreground mb-2"
+                    >Nama Donatur <span class="font-normal text-muted-foreground">(opsional)</span></label
                   >
                   <input
                     type="text"
@@ -495,7 +529,7 @@ const metaDescription = campaign.description
                     name="donor-name"
                     maxlength="100"
                     autocomplete="name"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
+                    class="mt-1 py-3 px-4 block w-full rounded-button border border-input bg-white shadow-sm focus:border-brand-600 focus:ring-2 focus:ring-brand-600/30 disabled:bg-muted disabled:cursor-not-allowed transition-all duration-200"
                     placeholder="Kosongkan jika ingin anonim"
                     disabled={!isCampaignActive}
                   />
@@ -506,70 +540,45 @@ const metaDescription = campaign.description
                     <input
                       type="checkbox"
                       id="use-profile-name"
-                      class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 h-4 w-4"
+                      class="rounded border-input text-brand-700 h-4 w-4 focus:ring-brand-600"
                     />
-                    <span class="text-sm text-gray-600"
+                    <span class="text-sm text-muted-foreground"
                       >Gunakan nama dari profil saya</span
                     >
                   </label>
                 </div>
                 <div>
                   <label
-                    for="donation-amount"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Jumlah Donasi</label
-                  >
-                  <div class="relative">
-                    <span
-                      class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium"
-                      >Rp</span
-                    >
-                    <input
-                      type="text"
-                      id="donation-amount"
-                      name="donation-amount"
-                      inputmode="numeric"
-                      autocomplete="transaction-amount"
-                      aria-describedby="donate-error"
-                      class="mt-1 py-3 pl-10 pr-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200"
-                      placeholder="1.000.000"
-                      required
-                      disabled={!isCampaignActive}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
                     for="donation-message"
-                    class="block text-sm font-semibold text-gray-700 mb-2"
-                    >Pesan Donasi</label
+                    class="block text-sm font-semibold text-foreground mb-2"
+                    >Pesan Dukungan <span class="font-normal text-muted-foreground">(opsional)</span></label
                   >
                   <textarea
                     id="donation-message"
                     name="donation-message"
                     rows="3"
                     maxlength="500"
-                    class="mt-1 py-3 px-4 block w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-all duration-200 resize-none"
-                    placeholder="Tuliskan pesan dukungan atau doa untuk kampanye ini (opsional)"
+                    class="mt-1 py-3 px-4 block w-full rounded-button border border-input bg-white shadow-sm focus:border-brand-600 focus:ring-2 focus:ring-brand-600/30 disabled:bg-muted disabled:cursor-not-allowed transition-all duration-200 resize-none"
+                    placeholder="Tuliskan doa atau dukungan untuk kampanye ini"
                     disabled={!isCampaignActive}></textarea>
-                  <div class="mt-1 text-xs text-gray-500 text-right">
+                  <div class="mt-1 text-xs text-muted-foreground text-right tabular-nums">
                     <span id="message-counter">0</span>/500 karakter
                   </div>
                 </div>
                 <button
                   type="submit"
                   id="donate-submit"
-                  class={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 ${
+                  class={`w-full py-4 px-6 min-h-12 rounded-button font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 ${
                     isCampaignActive
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      ? "bg-brand-700 text-white hover:bg-brand-800 shadow-md hover:shadow-lg"
+                      : "bg-muted text-muted-foreground cursor-not-allowed"
                   }`}
                   disabled={!isCampaignActive}
                 >
                   {
                     isCampaignActive
-                      ? "💝 Lanjut ke Pembayaran"
-                      : "❌ Kampanye Tidak Aktif"
+                      ? "Lanjut ke Pembayaran"
+                      : "Kampanye Tidak Aktif"
                   }
                 </button>
               </form>
@@ -585,6 +594,28 @@ const metaDescription = campaign.description
       return Math.floor(100 + Math.random() * 900); // Kode unik 3 digit (100-999)
     };
 
+    function authRecoveryInline(message: string, campaignId: string) {
+      const errorBox = document.getElementById("donate-error");
+      const returnUrl = `/campaign/${campaignId}#donasi`;
+      const loginUrl = `/auth/login?next=${encodeURIComponent(returnUrl)}`;
+      if (errorBox) {
+        errorBox.innerHTML = "";
+        const span = document.createElement("span");
+        span.textContent = message + " ";
+        const link = document.createElement("a");
+        link.href = loginUrl;
+        link.className = "font-semibold underline underline-offset-2";
+        link.textContent = "Masuk untuk melanjutkan";
+        errorBox.appendChild(span);
+        errorBox.appendChild(link);
+        errorBox.classList.remove("hidden");
+        errorBox.focus?.();
+      }
+      setTimeout(() => {
+        window.location.href = loginUrl;
+      }, 1800);
+    }
+
     async function initiatePayment(
       amount: number,
       campaignId: string,
@@ -593,8 +624,7 @@ const metaDescription = campaign.description
     ) {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("Silakan login untuk berdonasi.");
-        window.location.href = "/auth/login";
+        authRecoveryInline("Silakan masuk untuk berdonasi.", campaignId);
         return null;
       }
 
@@ -603,15 +633,13 @@ const metaDescription = campaign.description
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
         const currentTime = Math.floor(Date.now() / 1000);
         if (tokenPayload.exp < currentTime) {
-          alert("Sesi Anda telah berakhir. Silakan login kembali.");
           localStorage.removeItem("token");
-          window.location.href = "/auth/login";
+          authRecoveryInline("Sesi Anda telah berakhir. Silakan masuk kembali.", campaignId);
           return null;
         }
       } catch (e) {
-        alert("Token tidak valid. Silakan login kembali.");
         localStorage.removeItem("token");
-        window.location.href = "/auth/login";
+        authRecoveryInline("Token tidak valid. Silakan masuk kembali.", campaignId);
         return null;
       }
 
@@ -646,35 +674,28 @@ const metaDescription = campaign.description
             errorMessage = `HTTP ${response.status}: ${response.statusText}`;
           }
 
-          if (response.status === 403) {
-            errorMessage =
-              "Akses ditolak. Token mungkin tidak valid atau telah berakhir. Silakan login kembali.";
+          if (response.status === 403 || response.status === 401) {
             localStorage.removeItem("token");
-            setTimeout(() => {
-              window.location.href = "/auth/login";
-            }, 2000);
-          } else if (response.status === 401) {
-            errorMessage =
-              "Anda tidak memiliki akses. Silakan login terlebih dahulu.";
-            localStorage.removeItem("token");
-            setTimeout(() => {
-              window.location.href = "/auth/login";
-            }, 2000);
+            authRecoveryInline(errorMessage, campaignId);
+            return null;
           }
 
           throw new Error(errorMessage);
         }
 
         const result = await response.json();
-        window.location.href = `/payment/${result.donation.transactionId}`; // Alihkan ke halaman pembayaran dengan transactionId
+        window.location.href = `/payment/${result.donation.transactionId}`;
         return result;
       } catch (error: unknown) {
-        if (error instanceof Error) {
-          console.error("Error initiating payment:", error.message);
-          alert(`Error initiating payment: ${error.message}`);
-        } else {
-          console.error("An unknown error occurred during payment initiation");
-          alert("An unknown error occurred during payment initiation");
+        const errorBox = document.getElementById("donate-error");
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Terjadi kesalahan saat memulai pembayaran.";
+        console.error("Error initiating payment:", message);
+        if (errorBox) {
+          errorBox.textContent = message;
+          errorBox.classList.remove("hidden");
         }
         return null;
       }
@@ -899,55 +920,64 @@ const metaDescription = campaign.description
       }
     }
 
-    // Quick Amount Buttons functionality
+    function openDonateForm(focusAmount = false) {
+      const donateForm = document.getElementById("donate-form");
+      const toggleBtn = document.getElementById("toggle-form-btn");
+      const toggleText = document.querySelector("#toggle-text");
+      const toggleIcon = document.querySelector("#toggle-icon");
+      if (donateForm && donateForm.classList.contains("hidden")) {
+        donateForm.classList.remove("hidden");
+        if (toggleText) toggleText.textContent = "Sembunyikan Form";
+        if (toggleBtn) {
+          toggleBtn.setAttribute("aria-expanded", "true");
+          (toggleBtn as HTMLButtonElement).classList.remove("bg-brand-700", "text-white");
+          (toggleBtn as HTMLButtonElement).classList.add("bg-white", "text-brand-700", "border-2", "border-brand-600");
+        }
+        if (toggleIcon && toggleIcon instanceof HTMLElement)
+          toggleIcon.style.transform = "rotate(180deg)";
+      }
+      if (focusAmount) {
+        document.getElementById("donation-amount")?.focus();
+      }
+    }
+
+    // Quick Amount Buttons functionality — 3 nominal + Nominal lain
     function setupQuickAmountButtons() {
       const amountButtons = document.querySelectorAll(".amount-btn");
+      const customBtn = document.getElementById("custom-amount-btn");
       const amountInput = document.getElementById(
         "donation-amount",
       ) as HTMLInputElement | null;
 
+      const paintActive = (active: Element | null) => {
+        amountButtons.forEach((btn) => {
+          btn.classList.remove("border-brand-600", "bg-brand-50", "text-brand-700");
+        });
+        customBtn?.classList.remove("border-brand-600", "bg-brand-50", "text-foreground");
+        if (active) {
+          active.classList.add("border-brand-600", "bg-brand-50");
+        }
+      };
+
       amountButtons.forEach((button) => {
         button.addEventListener("click", () => {
-          // Remove active class from all buttons
-          amountButtons.forEach((btn) => {
-            btn.classList.remove(
-              "border-blue-500",
-              "bg-blue-100",
-              "text-blue-700",
-            );
-            btn.classList.add("border-gray-200", "bg-white");
-          });
-
-          // Add active class to clicked button
-          button.classList.remove("border-gray-200", "bg-white");
-          button.classList.add(
-            "border-blue-500",
-            "bg-blue-100",
-            "text-blue-700",
-          );
-
-          // Set amount input value with formatting
+          paintActive(button);
           const amount = button.getAttribute("data-amount");
           if (amountInput && amount) {
-            const formattedAmount = parseInt(amount).toLocaleString("id-ID");
-            amountInput.value = formattedAmount;
-            amountInput.focus();
+            amountInput.value = parseInt(amount).toLocaleString("id-ID");
           }
-
-          // Show form if hidden
-          const donateForm = document.getElementById("donate-form");
-          const toggleBtn = document.getElementById("toggle-form-btn");
-          const toggleText = document.querySelector("#toggle-text");
-          const toggleIcon = document.querySelector("#toggle-icon");
-
-          if (donateForm && donateForm.classList.contains("hidden")) {
-            donateForm.classList.remove("hidden");
-            if (toggleText) toggleText.textContent = "Sembunyikan Form";
-            if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "true");
-            if (toggleIcon && toggleIcon instanceof HTMLElement)
-              toggleIcon.style.transform = "rotate(180deg)";
-          }
+          openDonateForm();
+          amountInput?.focus();
         });
+      });
+
+      customBtn?.addEventListener("click", () => {
+        paintActive(customBtn);
+        openDonateForm(true);
+        if (amountInput) {
+          amountInput.value = "";
+          amountInput.focus();
+        }
       });
     }
 
@@ -1020,9 +1050,12 @@ const metaDescription = campaign.description
                 nameInput.value = "";
                 nameInput.placeholder = originalPlaceholder;
                 nameInput.readOnly = false;
-                alert(
-                  "Gagal mengambil data profil. Silakan isi nama secara manual.",
-                );
+                const errorBox = document.getElementById("donate-error");
+                if (errorBox) {
+                  errorBox.textContent =
+                    "Gagal mengambil data profil. Silakan isi nama secara manual.";
+                  errorBox.classList.remove("hidden");
+                }
               }
             } catch (error) {
               console.error("Error fetching profile:", error);
@@ -1078,8 +1111,8 @@ const metaDescription = campaign.description
 
           // Remove active state from all tabs and panels
           tabButtons.forEach((btn) => {
-            btn.classList.remove("active", "border-blue-600", "text-blue-600");
-            btn.classList.add("border-transparent", "text-gray-500");
+            btn.classList.remove("active", "border-brand-700", "text-brand-700");
+            btn.classList.add("border-transparent", "text-muted-foreground");
             btn.setAttribute("aria-selected", "false");
           });
 
@@ -1089,8 +1122,8 @@ const metaDescription = campaign.description
           });
 
           // Add active state to clicked tab
-          button.classList.add("active", "border-blue-600", "text-blue-600");
-          button.classList.remove("border-transparent", "text-gray-500");
+          button.classList.add("active", "border-brand-700", "text-brand-700");
+          button.classList.remove("border-transparent", "text-muted-foreground");
           button.setAttribute("aria-selected", "true");
 
           // Show corresponding panel
@@ -1195,14 +1228,20 @@ const metaDescription = campaign.description
         amountInput.addEventListener("blur", (e) => {
           const target = e.target as HTMLInputElement;
           const parsedValue = parseFormattedNumber(target.value);
+          const hint = document.getElementById("amount-hint");
 
           // Only set default if field is empty or user hasn't typed anything
           if (!isUserTyping && (parsedValue === 0 || target.value === "")) {
             target.value = "1.000";
+            if (hint) hint.textContent = "Minimum donasi Rp 1.000.";
           } else if (parsedValue > 0 && parsedValue < 1000) {
             target.value = "1.000";
+            if (hint)
+              hint.textContent =
+                "Nominal di bawah Rp 1.000 dibulatkan ke Rp 1.000 (minimum donasi).";
           } else if (parsedValue >= 1000) {
             target.value = parsedValue.toLocaleString("id-ID");
+            if (hint) hint.textContent = "Minimum donasi Rp 1.000.";
           }
 
           isUserTyping = false;
@@ -1244,8 +1283,7 @@ const metaDescription = campaign.description
           if (errorBox) {
             errorBox.textContent = message;
             errorBox.classList.remove("hidden");
-          } else {
-            alert(message);
+            errorBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
           }
         };
         const clearFormError = () => {
