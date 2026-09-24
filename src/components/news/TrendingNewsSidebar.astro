@@ -8,8 +8,22 @@ interface News {
     createdAt: string;
 }
 
-// Fetch trending news
+// Fetch trending news — gagal-cepat 5 dtk seperti next-reads di [slug]
 let trendingNews: News[] = [];
+const formatSidebarDate = (v: unknown) => {
+    if (typeof v !== "string" || !v) return "";
+    try {
+        const d = new Date(v);
+        if (Number.isNaN(d.getTime())) return "";
+        return d.toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        });
+    } catch {
+        return "";
+    }
+};
 try {
     const trendingParams = new URLSearchParams({
         page: "1",
@@ -19,25 +33,41 @@ try {
 
     const API_URL =
         import.meta.env.PUBLIC_API_URL || "http://localhost:3000/api";
-    const trendingResponse = await fetch(`${API_URL}/news?${trendingParams}`);
-    if (trendingResponse.ok) {
-        const trendingData = await trendingResponse.json();
-        trendingNews = trendingData.news || [];
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    try {
+        const trendingResponse = await fetch(`${API_URL}/news?${trendingParams}`, {
+            signal: controller.signal,
+        });
+        if (trendingResponse.ok) {
+            const trendingData = await trendingResponse.json().catch(() => null);
+            const raw: unknown = trendingData?.news;
+            trendingNews = Array.isArray(raw)
+                ? raw.filter(
+                      (n): n is News =>
+                          !!n &&
+                          typeof (n as News).slug === "string" &&
+                          typeof (n as News).title === "string",
+                  )
+                : [];
+        }
+    } finally {
+        clearTimeout(timer);
     }
 } catch (error) {
     console.error("Error fetching trending news:", error);
 }
 ---
 
-<div class="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
-    <h4 class="text-lg font-bold text-blue-700 mb-3">Berita Terpopuler</h4>
-    <div class="space-y-3">
+<div class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+    <h2 class="text-base font-bold tracking-tight text-brand-800 mb-4">Berita Terpopuler</h2>
+    <div class="space-y-1">
         {
             trendingNews.length > 0 ? (
                 trendingNews.map((n) => (
                     <a
                         href={`/news/${n.slug}`}
-                        class="flex items-start gap-3 p-2 rounded-lg hover:bg-blue-50 transition-colors group"
+                        class="flex items-start gap-3 p-2 rounded-lg hover:bg-brand-50 transition-colors group"
                     >
                         <div class="w-16 h-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-100">
                             <img
@@ -45,13 +75,15 @@ try {
                                     n.image ||
                                     "/images/empty-image-placeholder.webp"
                                 }
-                                alt={n.title}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 onerror="this.src='/images/empty-image-placeholder.webp'"
                             />
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
+                            <p class="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug group-hover:text-brand-700 transition-colors">
                                 {n.title}
                             </p>
                             <p class="text-xs text-gray-500 mt-1 flex items-center gap-1">
@@ -68,14 +100,7 @@ try {
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                                     />
                                 </svg>
-                                {new Date(n.createdAt).toLocaleDateString(
-                                    "id-ID",
-                                    {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                    },
-                                )}
+                                {formatSidebarDate(n.createdAt) || "Tanggal tidak tersedia"}
                             </p>
                         </div>
                     </a>

@@ -10,6 +10,11 @@ export interface User {
   updatedAt: string;
 }
 
+export interface CampaignRef {
+  title: string;
+  imageUrl: string;
+}
+
 export interface News {
   id: string;
   title: string;
@@ -22,7 +27,11 @@ export interface News {
   };
   category: string;
   createdAt: string;
+  updatedAt?: string;
   viewCount: number;
+  campaignId?: string | null;
+  campaign?: CampaignRef | null;
+  relatedCampaign?: CampaignRef | null;
 }
 
 export interface Campaign {

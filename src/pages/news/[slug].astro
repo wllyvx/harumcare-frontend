@@ -10,58 +10,134 @@ export const prerender = false;
 // Ambil slug dari URL params
 const { slug } = Astro.params;
 
-// Fetch article data berdasarkan slug
-let news: News | null = null;
-let error = null;
+// Slug: validasi bentuk + batas panjang sebelum fetch (tolak path traversal / injeksi)
+const rawSlug = typeof slug === "string" ? slug.trim() : "";
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+const isSlugShapeValid =
+  rawSlug.length > 0 && rawSlug.length <= 120 && SLUG_RE.test(rawSlug);
+const safeSlug = isSlugShapeValid ? encodeURIComponent(rawSlug) : "";
 
-if (slug) {
+// Fetch article data berdasarkan slug — bedakan 404 vs galat transien
+let news: News | null = null;
+let errorKind: "not-found" | "transient" | null = null;
+
+if (!isSlugShapeValid) {
+  errorKind = "not-found";
+} else {
   try {
-    news = await NewsService.getBySlug(slug);
-    if (!news) {
-       error = "Berita tidak ditemukan";
+    news = await NewsService.getBySlug(safeSlug);
+    if (!news || typeof news !== "object" || !news.title || !news.slug) {
+      errorKind = "not-found";
+      news = null;
     }
   } catch (err) {
     console.error("Error fetching news:", err);
-    error = "Terjadi kesalahan saat memuat berita";
+    const msg = err instanceof Error ? err.message : String(err);
+    errorKind = /404|not found|tidak ditemukan/i.test(msg)
+      ? "not-found"
+      : "transient";
+    news = null;
   }
 }
 
-// Jika tidak ada slug atau terjadi error, redirect ke 404
-if (!slug || error || !news) {
+// Hilang / bentuk buruk → 404. Galat transien → render state pulih, bukan redirect buta.
+if (!isSlugShapeValid || (errorKind === "not-found" && !news)) {
   return Astro.redirect("/404");
 }
 
-// Format date
+// Format date — tanggal saja, tanpa jam (lebih alami untuk berita). Tahan Invalid Date.
 const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("id-ID", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  try {
+    if (!dateString || typeof dateString !== "string") return "";
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
+};
+const isValidDate = (v: unknown) => {
+  if (typeof v !== "string" || !v) return false;
+  const t = new Date(v).getTime();
+  return !Number.isNaN(t);
 };
 
-const getCategoryLabel = (category: string) => {
+// Jumlah dibaca — format id-ID, tahan NaN / negatif / raksasa
+const formatViews = (v: unknown) => {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n) || n < 0) return "0";
+  try {
+    return new Intl.NumberFormat("id-ID").format(Math.floor(n));
+  } catch {
+    return String(Math.floor(n));
+  }
+};
+
+const getCategoryLabel = (category: unknown) => {
   const categories = {
     umum: "Umum",
     kegiatan: "Kegiatan",
     pengumuman: "Pengumuman",
-  };
-  return categories[category as keyof typeof categories] || category;
+  } as const;
+  if (typeof category !== "string") return "Berita";
+  const key = category.trim().toLowerCase();
+  if (!key) return "Berita";
+  if (key in categories) return categories[key as keyof typeof categories];
+  // Manusiawi: "siaran_pers-desa" → "Siaran pers desa", batasi badge 40 karakter
+  const human = key
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const titled = human.charAt(0).toUpperCase() + human.slice(1);
+  return titled.length > 40 ? titled.slice(0, 37).trimEnd() + "…" : titled;
 };
 
-// Helper to strip HTML and get description
-const getDescription = (content: string) => {
-  if (!content) return "";
+// Helper to strip HTML + markdown dan dapatkan deskripsi — tahan null / non-string
+const getDescription = (content: unknown) => {
+  if (typeof content !== "string" || !content) return "";
   const plainText = content
-    .replace(/<[^>]*>?/gm, "")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]*>?/gm, " ")
+    .replace(/[#>*_`~|-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   return plainText.length > 160
-    ? plainText.substring(0, 157) + "..."
+    ? plainText.substring(0, 157).trimEnd() + "..."
     : plainText;
+};
+
+// Sanitasi ringan pasca-marked (tanpa dep baru): buang executable vectors.
+// marked tidak menyanitasi — penulis tepercaya pun bisa kecolongan paste berbahaya.
+const sanitizeArticleHtml = (html: string) => {
+  if (!html || typeof html !== "string") return "";
+  return html
+    .replace(/<script[\s\S]*?<\/script\s*>/gi, "")
+    .replace(/<style[\s\S]*?<\/style\s*>/gi, "")
+    .replace(/<\s*(iframe|object|embed|form|input|button|meta|link)\b[^>]*>[\s\S]*?(<\/\s*\1\s*>)?/gi, "")
+    .replace(/\s+on[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/\s*(href|src|xlink:href)\s*=\s*("([^"]*)"|'([^']*)')/gi, (_m, attr, _q, d1, d2) => {
+      const val = (d1 ?? d2 ?? "").trim();
+      if (/^\s*(javascript|data:text\/html|vbscript)\s*:/i.test(val)) return ` ${attr}="#"`;
+      return ` ${attr}="${val.replace(/"/g, "&quot;")}"`;
+    });
+};
+
+// Estimasi waktu baca — 200 kata/menit untuk bahasa Indonesia, minimal 1 menit.
+const estimateReadingMinutes = (content: unknown) => {
+  if (typeof content !== "string" || !content) return "";
+  const words = content
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]*>?/gm, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+  if (!words) return "";
+  return `${Math.max(1, Math.ceil(words / 200))} mnt baca`;
 };
 
 const encodeMarkdownImageUrl = (url: string) => {
@@ -73,184 +149,407 @@ const encodeMarkdownImageUrl = (url: string) => {
   }
 };
 
-const metaDescription = getDescription(news.content);
+// Kampanye terkait: server-side only. Backend hanya mengirim CampaignRef
+// { title, imageUrl } + campaignId FK — jadi render tautan tenang, bukan
+// progress bar yang datanya tidak ada. Tanpa fetch ganda, tanpa innerHTML.
+const relatedCampaign =
+  news?.relatedCampaign ?? news?.campaign ?? null;
+const campaignId =
+  typeof news?.campaignId === "string" && news.campaignId.trim()
+    ? news.campaignId.trim().slice(0, 80)
+    : null;
+const campaignHref =
+  campaignId && /^[a-z0-9-]+$/i.test(campaignId)
+    ? `/campaign/${encodeURIComponent(campaignId)}`
+    : null;
+const hasCampaignLink = Boolean(
+  campaignHref &&
+    relatedCampaign &&
+    typeof relatedCampaign.title === "string" &&
+    relatedCampaign.title.trim(),
+);
+
+// Share + next-read (end-cap)
+const pageUrl = Astro.url.href;
+const shareText = news ? `${news.title} — HarumCare` : "HarumCare";
+const waShareHref = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${pageUrl}`)}`;
+const xShareHref = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`;
+
+// Baca selanjutnya: ambil 5 terbaru, kecualikan artikel ini, tampilkan 2
+// agar grid 2 kolom tetap seimbang.
+// Timeout 5 dtk agar sidebar gagal-cepat, validasi bentuk tiap item.
+interface NextRead {
+  title: string;
+  slug: string;
+  image: string;
+  createdAt: string;
+}
+let nextReads: NextRead[] = [];
+if (news) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  try {
+    const API_URL =
+      import.meta.env.PUBLIC_API_URL || "http://localhost:3000/api";
+    const res = await fetch(
+      `${API_URL}/news?page=1&limit=5&status=published`,
+      { signal: controller.signal },
+    );
+    if (res.ok) {
+      const data = await res.json().catch(() => null);
+      const raw: unknown[] = Array.isArray(data?.news)
+        ? data.news
+        : Array.isArray(data?.items)
+          ? data.items
+          : [];
+      nextReads = raw
+        .filter(
+          (n): n is NextRead =>
+            !!n &&
+            typeof (n as NextRead).slug === "string" &&
+            (n as NextRead).slug.length > 0 &&
+            typeof (n as NextRead).title === "string" &&
+            (n as NextRead).title.trim().length > 0,
+        )
+        .filter((n) => n.slug !== news!.slug)
+        .slice(0, 2);
+    }
+  } catch (err) {
+    console.error("Error fetching next reads:", err);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+const metaDescription = news
+  ? getDescription(news.content) || "Baca berita terbaru dari HarumCare."
+  : "Berita HarumCare — gagal memuat sementara.";
+const authorName =
+  news &&
+  typeof news.author?.nama === "string" &&
+  news.author.nama.trim()
+    ? news.author.nama.trim().slice(0, 80)
+    : "Tim HarumCare";
+const createdLabel = news ? formatDate(news.createdAt) : "";
+const updatedLabel =
+  news?.updatedAt &&
+  news.updatedAt !== news.createdAt &&
+  isValidDate(news.updatedAt)
+    ? formatDate(news.updatedAt)
+    : "";
+const viewsLabel = formatViews(news?.viewCount);
+const readingLabel = news ? estimateReadingMinutes(news.content) : "";
+const articleHtml = news
+  ? sanitizeArticleHtml(
+      String(
+        marked.parse(
+          (typeof news.content === "string" ? news.content : "").replace(
+            /!\[(.*?)\]\((.*?)\)/g,
+            (_match, alt, url) => {
+              return `![${alt}](${encodeMarkdownImageUrl(url)})`;
+            },
+          ),
+        ),
+      ),
+    )
+  : "";
+const hasArticleBody = articleHtml.trim().length > 0;
 ---
 
 <PrimaryLayout
-  title={`${news.title} - Harum Care Indonesia`}
+  title={news ? `${news.title} - Harum Care Indonesia` : "Gagal memuat berita - Harum Care Indonesia"}
   description={metaDescription}
-  image={news.image}
+  image={news?.image || "/images/empty-image-placeholder.webp"}
   type="article"
-  publishDate={news.createdAt}
-  author={news.author?.nama}
+  publishDate={news?.createdAt}
+  author={news?.author?.nama}
 >
-  <main class="min-h-screen bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  {(!news || errorKind === "transient") ? (
+    <div class="min-h-screen bg-white">
+      <div class="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-8">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Berita gagal dimuat</h1>
+          <p class="text-sm text-gray-600 mb-6">
+            Koneksi bermasalah atau server sibuk. Coba muat ulang — artikel tidak hilang.
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={Astro.url.pathname}
+              class="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 transition-colors"
+            >
+              Coba lagi
+            </a>
+            <a
+              href="/news"
+              class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 hover:border-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
+            >
+              Kembali ke Berita
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
+  <div class="min-h-screen bg-white">
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12 items-start">
         <!-- Main Content -->
-        <div class="lg:col-span-2">
-          <article>
+        <div class="lg:col-span-2 min-w-0">
+          <a href="#article-body" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-700 focus:ring-2 focus:ring-brand-600">Lewati ke isi artikel</a>
+          <article class="max-w-[46rem]">
             <!-- Breadcrumb -->
-            <nav class="mb-8">
-              <ol class="flex items-center space-x-2 text-sm text-gray-600">
-                <li><a href="/" class="hover:text-blue-600">Beranda</a></li>
-                <li><span class="mx-2">/</span></li>
-                <li><a href="/news" class="hover:text-blue-600">Berita</a></li>
-                <li><span class="mx-2">/</span></li>
-                <li class="text-gray-900 line-clamp-1">{news.title}</li>
+            <nav aria-label="Breadcrumb" class="mb-6 min-w-0">
+              <ol class="flex items-center gap-2 text-sm leading-6 tracking-[0.005em] text-gray-500 min-w-0">
+                <li class="shrink-0"><a href="/" class="hover:text-brand-700 hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-sm">Beranda</a></li>
+                <li aria-hidden="true" class="text-gray-300 shrink-0">/</li>
+                <li class="shrink-0"><a href="/news" class="hover:text-brand-700 hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-sm">Berita</a></li>
+                <li aria-hidden="true" class="text-gray-300 shrink-0">/</li>
+                <li class="text-gray-900 truncate min-w-0 max-w-[32ch] sm:max-w-[48ch]" aria-current="page" title={news.title}>{news.title}</li>
               </ol>
             </nav>
 
             <!-- Article Header -->
-            <header class="mb-8">
+            <header class="mb-6 md:mb-8 min-w-0">
               <div class="mb-4">
                 <span
-                  class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+                  class="inline-block max-w-full truncate align-middle bg-brand-50 text-brand-800 border border-brand-100 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-[0.08em] leading-5"
                 >
                   {getCategoryLabel(news.category)}
                 </span>
               </div>
 
               <h1
-                class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight"
+                class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-[1.15] tracking-[-0.015em] text-balance break-words [overflow-wrap:anywhere]"
               >
                 {news.title}
               </h1>
 
               <div
-                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-gray-600"
+                class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm leading-6 tracking-[0.005em] text-gray-500"
               >
-                <div class="flex items-center gap-4">
-                  <div class="flex items-center gap-2">
-                    <img
-                      src="/images/icons/user-default.svg"
-                      alt="Author"
-                      class="w-6 h-6 rounded-full"
-                    />
-                    <span>{news.author?.nama || "Anonymous"}</span>
-                  </div>
-                  <span>•</span>
-                  <time datetime={news.createdAt}>
-                    {formatDate(news.createdAt)}
+                <div class="flex items-center gap-2 min-w-0">
+                  <img
+                    src="/images/icons/user-default.svg"
+                    alt=""
+                    aria-hidden="true"
+                    class="w-6 h-6 rounded-full shrink-0"
+                  />
+                  <span class="text-gray-700 truncate max-w-[24ch]">{authorName}</span>
+                </div>
+                <span aria-hidden="true" class="text-gray-300">•</span>
+                {createdLabel ? (
+                  <time datetime={news.createdAt} class="tabular-nums">
+                    {createdLabel}
                   </time>
-                </div>
-
-                <div class="flex items-center gap-4">
-                  <span class="flex items-center gap-1">
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      ></path>
-                    </svg>
-                    {news.viewCount} dilihat
-                  </span>
-                </div>
+                ) : (
+                  <span>Tanggal tidak tersedia</span>
+                )}
+                {updatedLabel ? (
+                  <>
+                    <span aria-hidden="true" class="text-gray-300">•</span>
+                    <span class="tabular-nums">Diperbarui {updatedLabel}</span>
+                  </>
+                ) : null}
+                {readingLabel ? (
+                  <>
+                    <span aria-hidden="true" class="text-gray-300">•</span>
+                    <span class="tabular-nums">{readingLabel}</span>
+                  </>
+                ) : null}
+                <span aria-hidden="true" class="text-gray-300">•</span>
+                <span class="inline-flex items-center gap-1 tabular-nums" aria-label={`${viewsLabel} kali dibaca`}>
+                  <svg
+                    aria-hidden="true"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    ></path>
+                  </svg>
+                  {viewsLabel} dibaca
+                </span>
               </div>
             </header>
 
             <!-- Featured Image -->
             {
               news.image && (
-                <div class="mb-8">
+                <figure class="mb-8 md:mb-10 min-w-0">
                   <img
                     src={news.image}
-                    alt={news.title}
-                    class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-                    onerror="this.src='/images/empty-image-placeholder.webp'"
+                    alt=""
+                    class="w-full aspect-video object-cover rounded-xl bg-gray-100 ring-1 ring-gray-100"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                    width="1200"
+                    height="675"
+                    onerror="this.onerror=null;this.src='/images/empty-image-placeholder.webp'"
                   />
-                </div>
+                </figure>
               )
             }
 
-            <!-- Article Content -->
-            <div class="prose prose-lg max-w-none mb-12">
-              <div
-                class="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-gray-100"
-              >
-                <div
-                  class="whitespace-pre-wrap text-gray-700 leading-relaxed"
-                  set:html={marked.parse(
-                    news.content.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
-                      return `![${alt}](${encodeMarkdownImageUrl(url)})`;
-                    })
-                  )}
-                />
-              </div>
+            <!-- Article Content — prosa bebas, bukan kartu formulir -->
+            <div id="article-body" lang="id" class="prose prose-lg max-w-none mb-10 md:mb-12 min-w-0 [overflow-wrap:anywhere]">
+              {hasArticleBody ? (
+                <div set:html={articleHtml} />
+              ) : (
+                <p class="text-gray-500">Konten artikel belum tersedia.</p>
+              )}
             </div>
 
-            <!-- Related Campaign Section -->
-            <div id="related-campaign" class="mt-8">
-              <h3 class="text-xl font-bold mb-4">Kampanye Terkait</h3>
-              <div
-                id="campaign-info"
-                class="bg-white p-6 rounded-lg shadow-sm border border-gray-100"
-              >
-                <p class="text-gray-500 text-center py-4">
-                  Memuat informasi kampanye...
-                </p>
-              </div>
-            </div>
-
-            <!-- Article Footer -->
-            <footer class="mt-12 pt-8 border-t border-gray-200">
-              <div
-                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-gray-600"
-              >
-                <div>
-                  <p>Terakhir diperbarui: {formatDate(news.updatedAt)}</p>
-                </div>
-
-                <div class="flex gap-4">
-                  <a
-                    href="/news"
-                    class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    <svg
-                      class="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+            <!-- Related Campaign — server-render, tenang, terikat cerita -->
+            {hasCampaignLink && relatedCampaign && campaignHref && (
+              <section aria-label="Kampanye terkait" class="mb-10 rounded-xl border border-brand-100 bg-brand-50 p-5 md:p-6 min-w-0">
+                <div class="flex flex-col sm:flex-row gap-5 min-w-0">
+                  <div class="sm:w-40 shrink-0 overflow-hidden rounded-lg border border-brand-100 bg-white">
+                      <img
+                        src={relatedCampaign.imageUrl || "/images/empty-image-placeholder.webp"}
+                        alt=""
+                        class="w-full h-28 sm:h-full sm:min-h-[7rem] object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onerror="this.onerror=null;this.src='/images/empty-image-placeholder.webp'"
+                    />
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-semibold uppercase tracking-[0.08em] leading-5 text-brand-800 mb-1.5">Cerita ini terhubung dengan</p>
+                    <h2 class="text-lg font-bold tracking-tight text-balance text-gray-900 leading-snug mb-2 break-words [overflow-wrap:anywhere]">
+                      <a href={campaignHref} class="hover:text-brand-700 hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-sm">
+                        {relatedCampaign.title}
+                      </a>
+                    </h2>
+                    <a
+                      href={campaignHref}
+                      class="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 transition-colors"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Kembali ke Berita
-                  </a>
+                      Lihat Kampanye
+                      <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
+              </section>
+            )}
+
+            <!-- End-cap: bagikan + baca selanjutnya -->
+            <footer class="mt-12 border-t border-gray-100 pt-8 md:pt-10">
+              <div class="flex flex-wrap items-center gap-3 mb-8 md:mb-10" aria-label="Bagikan artikel">
+                <span class="text-xs font-bold uppercase tracking-[0.08em] leading-5 text-gray-900 mr-1">Bagikan cerita ini</span>
+                <a
+                  href={waShareHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
+                >
+                  WhatsApp
+                </a>
+                <a
+                  href={xShareHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
+                >
+                  X
+                </a>
+                <button
+                  type="button"
+                  data-copy-link={pageUrl}
+                  aria-label="Salin tautan artikel"
+                  class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:border-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors cursor-pointer"
+                >
+                  Salin tautan
+                </button>
+                <span data-copy-feedback class="hidden text-sm text-brand-700" role="status" aria-live="polite">Tautan tersalin</span>
+                <span data-copy-feedback-fail class="hidden text-sm text-gray-600" role="status" aria-live="polite">Salin manual: blokir browser, salin dari address bar</span>
+              </div>
+
+              {nextReads.length > 0 && (
+                <section aria-label="Baca selanjutnya" class="mb-8">
+                  <h2 class="text-xl font-bold tracking-tight text-balance text-gray-900 mb-4">Baca selanjutnya</h2>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    {nextReads.map((n) => (
+                      <a
+                        href={`/news/${n.slug}`}
+                        class="group flex items-start gap-3 rounded-xl border border-gray-100 p-3 hover:border-brand-100 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 transition-colors"
+                      >
+                        <div class="w-16 h-16 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                          <img
+                            src={n.image || "/images/empty-image-placeholder.webp"}
+                            alt=""
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            decoding="async"
+                            onerror="this.onerror=null;this.src='/images/empty-image-placeholder.webp'"
+                          />
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold tracking-tight text-balance text-gray-900 line-clamp-2 leading-snug break-words group-hover:text-brand-700">
+                            {n.title}
+                          </p>
+                          <p class="text-xs tabular-nums tracking-[0.005em] text-gray-500 mt-1">
+                            {formatDate(n.createdAt) || "Tanggal tidak tersedia"}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <div
+                class="flex flex-col md:flex-row md:items-center md:justify-start gap-3 text-sm text-gray-500"
+              >
+                <a
+                  href="/news"
+                  class="inline-flex items-center gap-2 text-brand-700 hover:text-brand-800 font-medium hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 rounded-sm"
+                >
+                  <svg
+                    aria-hidden="true"
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                  </svg>
+                  Kembali ke Berita
+                </a>
               </div>
             </footer>
           </article>
         </div>
 
         <!-- Sidebar -->
-        <aside class="space-y-8">
+        <aside class="space-y-6 lg:sticky lg:top-24 self-start">
           <TrendingNewsSidebar />
 
           <!-- CTA or About -->
-          <div class="bg-blue-600 rounded-lg p-6 text-white shadow-md">
-            <h4 class="text-lg font-bold mb-2">Bantu Sesama</h4>
-            <p class="text-blue-100 text-sm mb-4">
+          <div class="bg-brand-700 rounded-xl p-6 text-white shadow-sm">
+            <h2 class="text-lg font-bold tracking-tight text-balance mb-2">Bantu Sesama</h2>
+            <p class="text-brand-100 text-sm leading-relaxed tracking-[0.005em] mb-4">
               Sedikit bantuan Anda sangat berarti bagi mereka yang membutuhkan.
             </p>
             <a
               href="/campaign"
-              class="inline-block bg-white text-blue-600 px-4 py-2 rounded-md text-sm font-bold hover:bg-blue-50 transition-colors"
+              class="inline-flex w-full items-center justify-center bg-white text-brand-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-700 transition-colors"
             >
               Donasi Sekarang
             </a>
@@ -258,16 +557,30 @@ const metaDescription = getDescription(news.content);
         </aside>
       </div>
     </div>
-  </main>
+  </div>
+  )}
 </PrimaryLayout>
 
 <style>
   .prose {
-    color: inherit;
+    color: #374151;
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    letter-spacing: 0.002em;
   }
 
   .prose p {
     margin-bottom: 1.5rem;
+    text-wrap: pretty;
+  }
+
+  .prose p + p {
+    margin-top: 0;
+  }
+
+  .prose strong {
+    color: #111827;
+    font-weight: 600;
   }
 
   .prose h1,
@@ -276,20 +589,31 @@ const metaDescription = getDescription(news.content);
   .prose h4,
   .prose h5,
   .prose h6 {
-    color: #1f2937;
-    font-weight: 600;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    color: #111827;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    scroll-margin-top: 6rem;
   }
 
+  /* Demoted: page H1 already owns 30–36px/700. An H1 pasted from CMS
+     must not outrank the article title. */
   .prose h1 {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
   }
   .prose h2 {
     font-size: 1.5rem;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
   }
   .prose h3 {
     font-size: 1.25rem;
+    letter-spacing: -0.005em;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
   }
 
   .prose ul,
@@ -302,120 +626,201 @@ const metaDescription = getDescription(news.content);
     margin-bottom: 0.5rem;
   }
 
+  .prose li::marker {
+    color: var(--color-brand-700);
+  }
+
+  .prose img {
+    border-radius: 0.75rem;
+    margin: 2rem auto;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Hardening: URL panjang / CJK / emoji / tabel / kode dari CMS tidak boleh jebol layout */
+  .prose p,
+  .prose li,
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .prose pre {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: #f9fafb;
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .prose code {
+    overflow-wrap: anywhere;
+  }
+
+  .prose table {
+    display: block;
+    max-width: 100%;
+    width: max-content;
+    min-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .prose th,
+  .prose td {
+    border: 1px solid #e5e7eb;
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose iframe,
+  .prose video {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 0.75rem;
+  }
+
+  /* Lembut, bukan side-tab: kutipan pastoral tanpa border aksen */
   .prose blockquote {
-    border-left: 4px solid #3b82f6;
-    padding-left: 1rem;
-    margin: 1.5rem 0;
+    background: var(--color-brand-50);
+    border: 1px solid var(--color-brand-100);
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
     font-style: italic;
-    color: #6b7280;
+    letter-spacing: 0.005em;
+    line-height: 1.7;
+    text-wrap: pretty;
+    color: var(--color-brand-900);
+  }
+
+  .prose blockquote p:last-child {
+    margin-bottom: 0;
   }
 
   .prose a {
-    color: #3b82f6;
+    color: var(--color-brand-700);
     text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .prose a:hover {
-    color: #2563eb;
+    color: var(--color-brand-800);
+  }
+
+  .prose a:focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .prose ::selection {
+    background: var(--color-brand-100);
+    color: var(--color-brand-900);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .group img {
+      transition: none;
+      transform: none;
+    }
   }
 </style>
 
 <script>
-  import { NewsService } from "../../services/newsService";
-
-  // Load related campaign for news
-  async function loadRelatedCampaign() {
-    try {
-      const newsSlug = window.location.pathname.split("/").pop();
-      if (!newsSlug) return;
-
-      const newsData: any = await NewsService.getBySlug(newsSlug);
-      const campaignInfo = document.getElementById("campaign-info");
-
-      if (campaignInfo && newsData.relatedCampaign) {
-        const campaign = newsData.relatedCampaign;
-        const endDate = new Date(campaign.endDate);
-        const today = new Date();
-        const daysLeft = Math.max(
-          0,
-          Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 3600 * 24)),
-        );
-        const percentageFunded = Math.min(
-          Math.round((campaign.currentAmount / campaign.targetAmount) * 100),
-          100,
-        );
-
-        campaignInfo.innerHTML = `
-          <div class="flex flex-col md:flex-row gap-6">
-            <div class="md:w-1/3">
-              <img 
-                src="${campaign.imageUrl || "/images/empty-image-placeholder.webp"}" 
-                alt="${campaign.title}"
-                class="w-full h-48 object-cover rounded-lg"
-              />
-            </div>
-            <div class="md:w-2/3">
-              <h4 class="text-lg font-semibold text-gray-800 mb-2">
-                <a href="/campaign/${campaign.id}" class="hover:text-blue-600 transition-colors">
-                  ${campaign.title}
-                </a>
-              </h4>
-              <p class="text-gray-600 mb-4">
-                ${campaign.description ? campaign.description.substring(0, 150) + "..." : "Tidak ada deskripsi"}
-              </p>
-              
-              <div class="space-y-3">
-                <div>
-                  <div class="flex justify-between text-sm mb-1">
-                    <span class="font-medium">Progress Donasi</span>
-                    <span class="text-blue-600">${percentageFunded}%</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                      style="width: ${percentageFunded}%"
-                    ></div>
-                  </div>
-                  <div class="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Rp ${campaign.currentAmount?.toLocaleString("id-ID") || 0}</span>
-                    <span>Rp ${campaign.targetAmount?.toLocaleString("id-ID") || 0}</span>
-                  </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 text-center">
-                  <div class="bg-gray-50 p-3 rounded">
-                    <p class="text-xs text-gray-500">Sisa Hari</p>
-                    <p class="font-semibold text-gray-800">${daysLeft}</p>
-                  </div>
-                  <div class="bg-gray-50 p-3 rounded">
-                    <p class="text-xs text-gray-500">Donatur</p>
-                    <p class="font-semibold text-gray-800">${campaign.donorCount || 0}</p>
-                  </div>
-                </div>
-                
-                <a href="/campaign/${campaign.id}" 
-                  class="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors text-center w-full md:w-auto"
-                >
-                  Lihat Kampanye
-                </a>
-              </div>
-            </div>
-          </div>
-        `;
-      } else if (campaignInfo) {
-        campaignInfo.innerHTML =
-          '<p class="text-gray-500 text-center py-4">Berita ini tidak terkait dengan kampanye tertentu.</p>';
+  // Salin tautan — kecil, aman (textContent only, tanpa innerHTML).
+  // Tahan klik ganda cepat + fallback textarea bila Clipboard API ditolak.
+  function initCopyLink() {
+    const btn = document.querySelector("[data-copy-link]");
+    const feedback = document.querySelector("[data-copy-feedback]");
+    const feedbackFail = document.querySelector("[data-copy-feedback-fail]");
+    if (!(btn instanceof HTMLButtonElement)) return;
+    let busy = false;
+    let hideTimer = 0;
+    const show = (el: Element | null) => {
+      if (!(el instanceof HTMLElement)) return;
+      el.classList.remove("hidden");
+      window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(
+        () => el.classList.add("hidden"),
+        2000,
+      );
+    };
+    const hide = (el: Element | null) => {
+      if (el instanceof HTMLElement) el.classList.add("hidden");
+    };
+    btn.addEventListener("click", async () => {
+      if (busy) return;
+      busy = true;
+      btn.setAttribute("aria-disabled", "true");
+      (btn as HTMLButtonElement).disabled = true;
+      const url = btn.getAttribute("data-copy-link") || window.location.href;
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(url);
+        copied = true;
+      } catch {
+        try {
+          const ta = document.createElement("textarea");
+          ta.value = url;
+          ta.setAttribute("readonly", "");
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          copied = document.execCommand("copy");
+          ta.remove();
+        } catch {
+          copied = false;
+        }
+      } finally {
+        busy = false;
+        btn.removeAttribute("aria-disabled");
+        (btn as HTMLButtonElement).disabled = false;
       }
-    } catch (error) {
-      console.error("Error loading related campaign:", error);
-      const campaignInfo = document.getElementById("campaign-info");
-      if (campaignInfo) {
-        campaignInfo.innerHTML =
-          '<p class="text-gray-500 text-center py-4">Gagal memuat informasi kampanye terkait.</p>';
+      if (copied) {
+        hide(feedbackFail);
+        show(feedback);
+      } else {
+        hide(feedback);
+        show(feedbackFail);
       }
-    }
+    });
   }
 
-  // Load related campaign when page loads
-  window.addEventListener("load", loadRelatedCampaign);
+  // Gambar rusak di mana pun (konten CMS, kampanye, baca-selanjutnya) → placeholder, sekali saja.
+  function initImgFallback() {
+    document.addEventListener(
+      "error",
+      (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLImageElement)) return;
+        if (t.dataset.fbk === "1") return;
+        t.dataset.fbk = "1";
+        t.src = "/images/empty-image-placeholder.webp";
+      },
+      true,
+    );
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      initCopyLink();
+      initImgFallback();
+    });
+  } else {
+    initCopyLink();
+    initImgFallback();
+  }
 </script>
