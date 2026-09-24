@@ -1,10 +1,30 @@
 ---
 const { news = [] } = Astro.props;
-const heroImage = news?.[0]?.image || "/images/slide1.jpg";
+const FALLBACK = "/images/slide1.jpg";
+const slides = [0, 1, 2].map((i) => news?.[i]?.image || FALLBACK);
+const isStatic = new Set(slides).size <= 1;
 ---
 
-<section class="relative w-full h-[56vh] min-h-[420px] md:h-[58vh] md:min-h-[480px] overflow-hidden bg-foreground isolate">
-  <img src={heroImage} alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager" fetchpriority="high" aria-hidden="true" onerror="this.style.display='none'" />
+<section data-hero class="relative w-full h-[56vh] min-h-[420px] md:h-[58vh] md:min-h-[480px] overflow-hidden bg-foreground isolate">
+  {isStatic ? (
+    <img src={slides[0]} alt="" class="absolute inset-0 w-full h-full object-cover" loading="eager" fetchpriority="high" aria-hidden="true" onerror={`this.onerror=null;this.src='${FALLBACK}'`} />
+  ) : (
+    <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div data-hero-track class="flex h-full w-full transition-transform duration-700 ease-in-out">
+        {slides.map((src, i) => (
+          <img
+            src={src}
+            alt=""
+            aria-hidden="true"
+            class="h-full w-full shrink-0 grow-0 basis-full object-cover"
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchpriority={i === 0 ? "high" : "auto"}
+            onerror={`this.onerror=null;this.src='${FALLBACK}'`}
+          />
+        ))}
+      </div>
+    </div>
+  )}
   <div class="absolute inset-0 bg-foreground/55" aria-hidden="true"></div>
   <div class="absolute inset-0 bg-gradient-to-t from-foreground/30 via-transparent to-transparent" aria-hidden="true"></div>
   <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 py-12">
@@ -25,4 +45,80 @@ const heroImage = news?.[0]?.image || "/images/slide1.jpg";
       </div>
     </div>
   </div>
+  {!isStatic && (
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      {slides.map((_, i) => (
+        <button
+          type="button"
+          data-hero-dot={i}
+          aria-label={`Ke slide ${i + 1}`}
+          class="h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-foreground/60"
+        />
+      ))}
+    </div>
+  )}
 </section>
+
+{!isStatic && (
+<script>
+  (() => {
+    const section = document.querySelector("[data-hero]");
+    const track = section?.querySelector("[data-hero-track]");
+    const dots = section ? Array.from(section.querySelectorAll("[data-hero-dot]")) : [];
+    if (!section || !track || dots.length <= 1) return;
+
+    const total = dots.length;
+    const INTERVAL = 2000;
+    let index = 0;
+    let timer = null;
+
+    const ACTIVE = ["w-6", "bg-white"];
+    const INACTIVE = ["w-2", "bg-white/50", "hover:bg-white/80"];
+
+    function paint() {
+      track.style.transform = `translateX(-${index * 100}%)`;
+      dots.forEach((dot, i) => {
+        const active = i === index;
+        dot.classList.remove(...ACTIVE, ...INACTIVE);
+        dot.classList.add(...(active ? ACTIVE : INACTIVE));
+        if (active) {
+          dot.setAttribute("aria-current", "true");
+        } else {
+          dot.removeAttribute("aria-current");
+        }
+      });
+    }
+
+    function goTo(i) {
+      index = (i + total) % total;
+      paint();
+    }
+
+    function stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function start() {
+      stop();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      timer = window.setInterval(() => goTo(index + 1), INTERVAL);
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener("click", () => {
+        goTo(i);
+        start();
+      });
+    });
+
+    section.addEventListener("mouseenter", stop);
+    section.addEventListener("mouseleave", start);
+
+    paint();
+    start();
+  })();
+</script>
+)}
