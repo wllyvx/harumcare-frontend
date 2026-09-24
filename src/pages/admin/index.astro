@@ -1,159 +1,220 @@
 ---
 import AdminLayout from "../../layouts/AdminLayout.astro";
-
-// Type definitions
-interface User {
-  nama: string;
-  email: string;
-  role: string;
-}
-
-interface CampaignStats {
-  totalCampaigns: number;
-  totalDonations: number;
-}
-
-interface Donation {
-  _id: string;
-  amount: number;
-  paymentStatus: 'completed' | 'pending' | 'failed';
-  createdAt: string;
-  completedAt?: string;
-}
-
-interface DonationStats {
-  completedCount: number;
-  pendingCount: number;
-  failedCount: number;
-  totalAmount: number;
-}
-
-// Fetch dashboard data
-const API_URL = import.meta.env.PUBLIC_API_URL;
-
-const fetchDashboardData = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-
-    const [usersRes, campaignsRes, donationsRes] = await Promise.all([
-      fetch(`${API_URL}/users`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      }),
-      fetch(`${API_URL}/campaigns/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      }),
-      fetch(`${API_URL}/donations`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-    ]);
-
-    const [users, campaignStats, donationsData] = await Promise.all([
-      usersRes.json(),
-      campaignsRes.json(),
-      donationsRes.json()
-    ]);
-
-    // Calculate donation stats
-    const donations: Donation[] = donationsData.donations || [];
-    const completed = donations.filter((d: Donation) => d.paymentStatus === 'completed');
-    const totalAmount = completed.reduce((sum: number, d: Donation) => sum + d.amount, 0);
-
-    return {
-      totalUsers: users.length,
-      totalCampaigns: campaignStats.totalCampaigns,
-      totalDonations: totalAmount
-    };
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-    return null;
-  }
-};
-
-let dashboardData = null;
 ---
 
 <AdminLayout title="Dashboard">
-  <!-- Welcome Section -->
-  <div class="mb-8">
-    <h2 class="text-3xl font-bold text-gray-900 mb-2">Selamat Datang, Admin!</h2>
-    <p class="text-gray-600">Kelola platform donasi Harum Care Indonesia dari dashboard ini.</p>
+  <!-- Welcome / stewardship header -->
+  <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 id="dashboard-heading" class="font-work-sans text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+        Ringkasan stewardship hari ini
+      </h2>
+      <p class="mt-1 text-sm text-gray-600">
+        <span id="dashboard-date">Memuat tanggal…</span>
+        <span aria-hidden="true" class="mx-1.5 text-gray-300">•</span>
+        <span id="lastUpdated" aria-live="polite">Belum diperbarui</span>
+      </p>
+    </div>
+    <!-- Quick actions -->
+    <div class="flex flex-wrap gap-2">
+      <a
+        href="/admin/campaign/create-campaign"
+        class="inline-flex min-h-11 items-center gap-1.5 rounded-button bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+      >
+        <span aria-hidden="true">+</span> Buat Kampanye
+      </a>
+      <a
+        href="/admin/donation"
+        class="inline-flex min-h-11 items-center rounded-button border border-border bg-white px-4 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+      >
+        Verifikasi donasi
+      </a>
+      <a
+        href="/admin/users"
+        class="inline-flex min-h-11 items-center rounded-button border border-border bg-white px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+      >
+        Kelola pengguna
+      </a>
+    </div>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Total Users -->
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-            </svg>
-          </div>
-        </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">Total Users</p>
-          <p class="text-2xl font-semibold text-gray-900" id="totalUsers">-</p>
-          <a href="/admin/users" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            Lihat semua users →
+  <!-- Error card (hidden until failure) -->
+  <div
+    id="dashboardError"
+    class="mb-6 hidden rounded-card border border-red-200 bg-red-50 p-5"
+    role="alert"
+  >
+    <div class="flex items-start gap-3">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100" aria-hidden="true">
+        <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+        </svg>
+      </div>
+      <div class="min-w-0 flex-1">
+        <h3 class="font-work-sans text-sm font-semibold text-red-900">Gagal memuat dashboard</h3>
+        <p id="dashboardErrorMsg" class="mt-1 text-sm text-red-700">
+          Terjadi kesalahan saat mengambil data. Data mungkin basi.
+        </p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button
+            id="retryDashboard"
+            type="button"
+            class="inline-flex min-h-11 items-center rounded-button bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          >
+            Coba lagi
+          </button>
+          <a
+            href="/admin/donation"
+            class="inline-flex min-h-11 items-center rounded-button border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          >
+            Buka kelola donasi
           </a>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Total Campaigns -->
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-            </svg>
+  <!-- Stats -->
+  <section aria-labelledby="stats-heading">
+    <h3 id="stats-heading" class="sr-only">Statistik utama</h3>
+    <dl class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Total Pengguna -->
+      <div class="rounded-card border border-gray-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-shadow duration-250 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+        <div class="flex items-start gap-4">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-100 bg-brand-50" aria-hidden="true">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+              </svg>
+            </span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <dt class="text-sm font-medium text-gray-600">Total Pengguna</dt>
+            <dd
+              id="totalUsers"
+              class="font-work-sans mt-1 text-2xl font-semibold tracking-tight text-gray-900"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <span class="block h-8 w-24 animate-pulse rounded-md bg-gray-100" aria-hidden="true"></span>
+              <span class="sr-only">Memuat…</span>
+            </dd>
+            <a href="/admin/users" class="mt-1 inline-flex min-h-9 items-center gap-1 text-sm font-medium text-brand-700 underline-offset-4 hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 rounded-sm">
+              Lihat semua pengguna <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">Total Campaigns</p>
-          <p class="text-2xl font-semibold text-gray-900" id="totalCampaigns">-</p>
-          <a href="/admin/campaign" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            Lihat semua campaign →
-          </a>
-        </div>
       </div>
-    </div>
 
-    <!-- Total Donations -->
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
-            </svg>
+      <!-- Total Kampanye -->
+      <div class="rounded-card border border-gray-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-shadow duration-250 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+        <div class="flex items-start gap-4">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-brand-100 bg-brand-50" aria-hidden="true">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-700">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <dt class="text-sm font-medium text-gray-600">Total Kampanye</dt>
+            <dd
+              id="totalCampaigns"
+              class="font-work-sans mt-1 text-2xl font-semibold tracking-tight text-gray-900"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <span class="block h-8 w-20 animate-pulse rounded-md bg-gray-100" aria-hidden="true"></span>
+              <span class="sr-only">Memuat…</span>
+            </dd>
+            <p id="activeCampaigns" class="mt-0.5 text-xs text-gray-500" aria-live="polite">— kampanye aktif</p>
+            <a href="/admin/campaign" class="mt-1 inline-flex min-h-9 items-center gap-1 text-sm font-medium text-brand-700 underline-offset-4 hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 rounded-sm">
+              Lihat semua kampanye <span aria-hidden="true">→</span>
+            </a>
           </div>
         </div>
-        <div class="ml-4">
-          <p class="text-sm font-medium text-gray-600">Total Donasi</p>
-          <p class="text-2xl font-semibold text-gray-900" id="totalDonations">-</p>
-          <a href="/admin/donation" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            Lihat semua donasi →
-          </a>
+      </div>
+
+      <!-- Total Donasi -->
+      <div class="rounded-card border border-gray-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-shadow duration-250 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+        <div class="flex items-start gap-4">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-highlight-100 bg-highlight-50" aria-hidden="true">
+            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-highlight-600">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 1118 0z"></path>
+              </svg>
+            </span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <dt class="text-sm font-medium text-gray-600">Total Donasi cair <span class="text-gray-400">(completed)</span></dt>
+            <dd
+              id="totalDonations"
+              class="font-work-sans mt-1 truncate text-2xl font-semibold tracking-tight text-gray-900"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <span class="block h-8 w-36 animate-pulse rounded-md bg-gray-100" aria-hidden="true"></span>
+              <span class="sr-only">Memuat…</span>
+            </dd>
+            <p id="donationSplit" class="mt-0.5 text-xs text-gray-500" aria-live="polite">— menunggu · — gagal</p>
+            <a href="/admin/donation" class="mt-1 inline-flex min-h-9 items-center gap-1 text-sm font-medium text-brand-700 underline-offset-4 hover:text-brand-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 rounded-sm">
+              Lihat semua donasi <span aria-hidden="true">→</span>
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+    </dl>
+  </section>
+
+  <!-- Ops second row -->
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <!-- 7-day trend -->
+    <section aria-labelledby="trend-heading" class="rounded-card border border-gray-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      <div class="flex items-baseline justify-between gap-3">
+        <h3 id="trend-heading" class="font-work-sans text-sm font-semibold text-gray-900">Donasi 7 hari terakhir</h3>
+        <span class="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700">Cair only</span>
+      </div>
+      <p class="font-work-sans mt-2 text-xl font-bold tracking-tight text-gray-900" id="weekTotal" aria-live="polite">Memuat…</p>
+      <p class="mt-1 text-xs text-gray-500" id="weekCount" aria-live="polite">— transaksi dalam 7 hari</p>
+      <div class="mt-3 flex h-2 w-full overflow-hidden rounded-full bg-gray-100" aria-hidden="true">
+        <div id="weekBar" class="h-full w-0 rounded-full bg-brand-600 transition-all duration-700"></div>
+      </div>
+      <p class="mt-2 text-xs text-gray-500">Rasio terhadap total donasi cair. Membantu melihat momentum pekan ini.</p>
+    </section>
+
+    <!-- Needs attention -->
+    <section aria-labelledby="attention-heading" class="rounded-card border border-gray-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+      <h3 id="attention-heading" class="font-work-sans text-sm font-semibold text-gray-900">Perlu perhatian</h3>
+      <ul id="attentionList" class="mt-3 space-y-2 text-sm" aria-live="polite">
+        <li class="flex items-center gap-2 text-gray-500">
+          <span class="h-4 w-16 animate-pulse rounded bg-gray-100" aria-hidden="true"></span>
+          Memuat antrean verifikasi…
+        </li>
+      </ul>
+      <p class="mt-3 text-xs text-gray-500">Prioritas: verifikasi pending dulu, lalu cek donasi gagal dan kampanye ≥80% tercapai.</p>
+    </section>
   </div>
 </AdminLayout>
 
 <script>
   interface Donation {
-    _id: string;
+    _id?: string;
+    id?: string;
     amount: number;
     paymentStatus: 'completed' | 'pending' | 'failed';
     createdAt: string;
     completedAt?: string;
   }
 
+  interface CampaignItem {
+    id?: string;
+    currentAmount?: number;
+    targetAmount?: number;
+    endDate?: string;
+  }
+
   const formatCurrency = (amount: number): string => {
+    if (!Number.isFinite(amount)) return 'Rp 0';
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
@@ -162,54 +223,172 @@ let dashboardData = null;
     }).format(amount);
   };
 
+  const setText = (id: string, value: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.removeAttribute('aria-busy');
+    el.textContent = value;
+  };
+
+  const showErrorCard = (msg: string) => {
+    const card = document.getElementById('dashboardError');
+    const msgEl = document.getElementById('dashboardErrorMsg');
+    if (msgEl) msgEl.textContent = msg;
+    card?.classList.remove('hidden');
+  };
+
+  const hideErrorCard = () => {
+    document.getElementById('dashboardError')?.classList.add('hidden');
+  };
+
   const updateDashboard = async () => {
+    hideErrorCard();
     try {
       const API_URL = import.meta.env.PUBLIC_API_URL;
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         window.location.href = '/auth/login';
         return;
       }
 
-      const [usersRes, campaignsRes, donationsRes] = await Promise.all([
-        fetch(`${API_URL}/users`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/campaigns/stats`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${API_URL}/donations`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
+      const headers = { 'Authorization': `Bearer ${token}` };
+      const [usersRes, statsRes, donationsRes, campaignsRes] = await Promise.all([
+        fetch(`${API_URL}/users`, { headers }),
+        fetch(`${API_URL}/campaigns/stats`, { headers }),
+        fetch(`${API_URL}/donations`, { headers }),
+        fetch(`${API_URL}/campaigns`, { headers }).catch(() => null),
       ]);
 
-      const [users, campaignStats, donationsData] = await Promise.all([
-        usersRes.json(),
-        campaignsRes.json(),
-        donationsRes.json()
-      ]);
-
-      // Calculate total amount from completed donations
-      const donations: Donation[] = donationsData.donations || [];
-      const completed = donations.filter((d: Donation) => d.paymentStatus === 'completed');
-      const totalAmount = completed.reduce((sum: number, d: Donation) => sum + d.amount, 0);
-
-      // Update stats
-      const totalUsersElement = document.getElementById('totalUsers');
-      const totalCampaignsElement = document.getElementById('totalCampaigns');
-      const totalDonationsElement = document.getElementById('totalDonations');
-      
-      if (totalUsersElement && totalCampaignsElement && totalDonationsElement) {
-        totalUsersElement.textContent = users.length.toString();
-        totalCampaignsElement.textContent = campaignStats.totalCampaigns.toString();
-        totalDonationsElement.textContent = formatCurrency(totalAmount);
+      if (usersRes.status === 401 || statsRes.status === 401 || donationsRes.status === 401) {
+        window.location.href = '/auth/login';
+        return;
       }
+
+      if (!usersRes.ok || !statsRes.ok || !donationsRes.ok) {
+        throw new Error(`Gagal mengambil data (users ${usersRes.status}, stats ${statsRes.status}, donations ${donationsRes.status}).`);
+      }
+
+      const [usersRaw, statsRaw, donationsRaw] = await Promise.all([
+        usersRes.json(),
+        statsRes.json(),
+        donationsRes.json(),
+      ]);
+
+      // --- Shape validation with safe fallbacks ---
+      const usersArray: unknown[] = Array.isArray(usersRaw)
+        ? usersRaw
+        : Array.isArray((usersRaw as any)?.users)
+          ? (usersRaw as any).users
+          : [];
+      const totalUsers = usersArray.length;
+
+      const totalCampaignsRaw = (statsRaw as any)?.totalCampaigns ?? (statsRaw as any)?.total ?? 0;
+      const totalCampaigns = Number.isFinite(Number(totalCampaignsRaw)) ? Number(totalCampaignsRaw) : 0;
+
+      const donationsList: Donation[] = Array.isArray((donationsRaw as any)?.donations)
+        ? (donationsRaw as any).donations
+        : Array.isArray(donationsRaw) ? donationsRaw : [];
+
+      const completed = donationsList.filter((d) => d?.paymentStatus === 'completed');
+      const pending = donationsList.filter((d) => d?.paymentStatus === 'pending');
+      const failed = donationsList.filter((d) => d?.paymentStatus === 'failed');
+      const totalAmount = completed.reduce((sum, d) => sum + (Number.isFinite(Number(d?.amount)) ? Number(d.amount) : 0), 0);
+
+      // --- 7-day trend (completed only) ---
+      const now = Date.now();
+      const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+      const weekTx = completed.filter((d) => {
+        const t = new Date(d.completedAt || d.createdAt).getTime();
+        return Number.isFinite(t) && t >= weekAgo && t <= now;
+      });
+      const weekTotal = weekTx.reduce((s, d) => s + (Number.isFinite(Number(d.amount)) ? Number(d.amount) : 0), 0);
+
+      // --- Campaign attention (best-effort from /campaigns list) ---
+      let activeCount: number | null = null;
+      let almostDone = 0;
+      try {
+        if (campaignsRes && campaignsRes.ok) {
+          const cRaw = await campaignsRes.json();
+          const list: CampaignItem[] = Array.isArray((cRaw as any)?.campaigns) ? (cRaw as any).campaigns : [];
+          if (list.length > 0) {
+            const nowDate = new Date();
+            activeCount = list.filter((c) => c?.endDate ? new Date(c.endDate) >= nowDate : true).length;
+            almostDone = list.filter((c) => {
+              const cur = Number(c?.currentAmount ?? 0);
+              const tgt = Number(c?.targetAmount ?? 0);
+              if (!Number.isFinite(cur) || !Number.isFinite(tgt) || tgt <= 0) return false;
+              const pct = cur / tgt;
+              return pct >= 0.8 && pct < 1;
+            }).length;
+          }
+        }
+      } catch {
+        // non-blocking: attention strip falls back to donation-only
+      }
+
+      // --- Render ---
+      setText('totalUsers', totalUsers.toString());
+      setText('totalCampaigns', totalCampaigns.toString());
+      setText('totalDonations', formatCurrency(totalAmount));
+      setText('donationSplit', `${pending.length} menunggu · ${failed.length} gagal`);
+      setText('activeCampaigns', activeCount !== null ? `${activeCount} kampanye aktif` : `${totalCampaigns} kampanye terdaftar`);
+      setText('weekTotal', formatCurrency(weekTotal));
+      setText('weekCount', `${weekTx.length} transaksi dalam 7 hari`);
+
+      const weekBar = document.getElementById('weekBar');
+      if (weekBar && totalAmount > 0) {
+        const pct = Math.min(100, Math.max(0, (weekTotal / totalAmount) * 100));
+        weekBar.style.width = `${pct.toFixed(1)}%`;
+      } else if (weekBar) {
+        weekBar.style.width = '0%';
+      }
+
+      const attention = document.getElementById('attentionList');
+      if (attention) {
+        const items: string[] = [];
+        if (pending.length > 0) {
+          items.push(`<li class="flex items-center justify-between gap-3 rounded-button border border-highlight-100 bg-highlight-50 px-3 py-2.5"><span class="font-medium text-gray-900">${pending.length} donasi menunggu verifikasi</span><a href="/admin/donation" class="shrink-0 text-sm font-semibold text-brand-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 rounded-sm">Verifikasi →</a></li>`);
+        }
+        if (failed.length > 0) {
+          items.push(`<li class="flex items-center justify-between gap-3 rounded-button border border-gray-200 bg-gray-50 px-3 py-2.5"><span class="font-medium text-gray-900">${failed.length} donasi gagal</span><a href="/admin/donation" class="shrink-0 text-sm font-semibold text-brand-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 rounded-sm">Tinjau →</a></li>`);
+        }
+        if (almostDone > 0) {
+          items.push(`<li class="flex items-center justify-between gap-3 rounded-button border border-brand-100 bg-brand-50 px-3 py-2.5"><span class="font-medium text-gray-900">${almostDone} kampanye hampir tercapai (≥80%)</span><a href="/admin/campaign" class="shrink-0 text-sm font-semibold text-brand-700 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 rounded-sm">Lihat →</a></li>`);
+        }
+        attention.innerHTML = items.length > 0
+          ? items.join('')
+          : `<li class="rounded-button border border-green-200 bg-green-50 px-3 py-2.5 font-medium text-green-800">Tidak ada antrean mendesak. Semua donasi terverifikasi.</li>`;
+      }
+
+      const stamp = new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      setText('lastUpdated', `Diperbarui ${stamp}`);
     } catch (error) {
       console.error('Error updating dashboard:', error);
+      showErrorCard(error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data donasi.');
+      // Never leave aria-busy skeletons hanging on failure
+      for (const id of ['totalUsers', 'totalCampaigns', 'totalDonations']) {
+        const el = document.getElementById(id);
+        if (el && el.getAttribute('aria-busy') === 'true') {
+          el.removeAttribute('aria-busy');
+          el.textContent = '—';
+        }
+      }
+      setText('donationSplit', 'data tidak tersedia');
+      setText('activeCampaigns', 'data tidak tersedia');
+      setText('weekTotal', '—');
+      setText('weekCount', 'data tidak tersedia');
     }
   };
 
-  // Update dashboard when page loads
-  document.addEventListener('DOMContentLoaded', updateDashboard);
+  document.addEventListener('DOMContentLoaded', () => {
+    const dateEl = document.getElementById('dashboard-date');
+    if (dateEl) {
+      dateEl.textContent = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+    }
+    updateDashboard();
+    document.getElementById('retryDashboard')?.addEventListener('click', updateDashboard);
+  });
 </script>
